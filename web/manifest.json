@@ -1,6 +1,6 @@
 {
-    "name": "school_day",
-    "short_name": "school_day",
+    "name": "School Day",
+    "short_name": "School Day",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
