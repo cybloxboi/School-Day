@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "648610348518",
+    "project_id": "school-day-a1e87",
+    "storage_bucket": "school-day-a1e87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648610348518:android:a2a05922c07c312e89aa27",
+        "android_client_info": {
+          "package_name": "io.cyblox.school_day"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqEEQOEvieCOoUQzVCmoOIX6WWKsfSDLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

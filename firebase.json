@@ -1,0 +1,42 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "school-day-a1e87",
+          "appId": "1:648610348518:android:a2a05922c07c312e89aa27",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "school-day-a1e87",
+          "appId": "1:648610348518:ios:5807e7f352eb30ec89aa27",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "school-day-a1e87",
+          "configurations": {
+            "android": "1:648610348518:android:a2a05922c07c312e89aa27",
+            "ios": "1:648610348518:ios:5807e7f352eb30ec89aa27",
+            "web": "1:648610348518:web:01826415520f83b889aa27"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "asia-east1"
+    }
+  }
+}
