@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:school_day/screens/login_page.dart';
-import 'package:school_day/styles/text.dart';
+import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +20,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.pink,
@@ -25,9 +29,12 @@ class MainApp extends StatelessWidget {
         textTheme: textTheme,
       ),
       debugShowCheckedModeBanner: false,
-      home: const Scaffold(
-        backgroundColor: Color.fromARGB(80, 255, 209, 220),
-        body: LoginPage(),
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: backgroundColor,
+        ),
+        backgroundColor: backgroundColor,
+        body: const LoginPage(),
       ),
     );
   }

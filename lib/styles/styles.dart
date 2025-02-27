@@ -13,3 +13,5 @@ final TextTheme textTheme = TextTheme(
     fontSize: 15,
   ),
 );
+
+const Color backgroundColor = Color.fromARGB(255, 252, 230, 236);
