@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:school_day/screens/login_page.dart';
 import 'package:school_day/screens/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
@@ -14,8 +16,15 @@ Future<void> main() async {
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  bool isLogout = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +35,14 @@ class MainApp extends StatelessWidget {
           seedColor: Colors.pink,
           brightness: Brightness.light,
         ),
-        textTheme: textTheme,
+        textTheme: GoogleFonts.ibmPlexSansThaiTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: backgroundColor,
-        body: TimetablePage(),
+        body: isLogout ? const LoginPage() : const TimetablePage(),
       ),
     );
   }

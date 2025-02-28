@@ -17,79 +17,23 @@ class _TimetablePageState extends State<TimetablePage> {
   Map<int, List<Timetable>> data = {
     0: [
       Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(9, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'คณิตศาสตร์',
+        'คณิตศาสตร์sdkjasjdklasdkjajsdklasdklajdlsakjdak',
         'ภู',
         'ห้อง 526',
         Time(8, 30),
         Time(10, 10),
       ),
       Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'ออกแบบ',
-        'อารีรัตน์',
+        'ออกแบบksdaksjdlkjsakjdkjsakdkjajdlka',
+        'อารีรัตน์dkasdkajskdjksajkdjsajkjdklas',
         'ห้อง 221',
         Time(10, 10),
         Time(11, 0),
       ),
       Timetable(
         'ชีววิทยา',
-        'บุญธิดา',
-        'ห้อง 526',
-        Time(12, 40),
-        Time(14, 20),
-      ),
-      Timetable(
-        'คณิตศาสตร์',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'ออกแบบ',
-        'อารีรัตน์',
-        'ห้อง 221',
-        Time(10, 10),
-        Time(11, 0),
-      ),
-      Timetable(
-        'ชีววิทยา',
-        'บุญธิดา',
-        'ห้อง 526',
+        'บุญธิดาksdkljasjdlkasdjksad',
+        'lddasjdajsldjklasjdjklasjdkaskljdjaskldjkjaskkdlsj',
         Time(12, 40),
         Time(14, 20),
       ),
@@ -100,6 +44,7 @@ class _TimetablePageState extends State<TimetablePage> {
     4: [],
     5: [],
     6: [],
+    7: [],
   };
 
   final List<String> daysInAWeek = [
@@ -183,18 +128,26 @@ class _TimetablePageState extends State<TimetablePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              PopScope(
-                canPop: false,
-                child: Expanded(
-                  child: Builder(builder: (context) {
-                    if (data[dateIndex]!.isEmpty) {
-                      return const Text('หมด');
-                    }
+              Expanded(
+                child: Builder(builder: (context) {
+                  if (data[dateIndex]!.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'ไม่มีตารางเรียน :>',
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                          style: textTheme.headlineLarge,
+                        ),
+                      ),
+                    );
+                  }
 
-                    return timeTableList(data[dateIndex]!, context);
-                  }),
-                ),
+                  return timeTableList(data[dateIndex]!, context);
+                }),
               ),
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -215,7 +168,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
     if (MediaQuery.of(context).size.width >= 650) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: ListView.builder(
           itemCount: entries.length,
           scrollDirection: Axis.horizontal,
@@ -279,7 +232,7 @@ class _TimetablePageState extends State<TimetablePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ListView.builder(
         itemCount: entries.length,
         itemBuilder: (context, index) {
@@ -335,26 +288,16 @@ class _TimetablePageState extends State<TimetablePage> {
           children: [
             Row(
               children: [
-                Text(
-                  details.title,
-                  style: textTheme.bodyMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    details.title,
+                    style: textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    softWrap: true,
                   ),
                 ),
-                const Expanded(child: SizedBox()),
-                Text(
-                  details.startTime.toString(),
-                  style: textTheme.bodySmall,
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                ),
-                Text(
-                  details.endTime.toString(),
-                  style: textTheme.bodySmall,
-                ),
-                const SizedBox(width: 16),
+                const Spacer(),
                 const Icon(
                   Icons.schedule_rounded,
                   size: 16,
@@ -367,24 +310,47 @@ class _TimetablePageState extends State<TimetablePage> {
               ],
             ),
             Row(
+              children: [
+                Text(
+                  details.startTime.toString(),
+                  style: textTheme.bodySmall,
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                ),
+                Text(
+                  details.endTime.toString(),
+                  style: textTheme.bodySmall,
+                ),
+              ],
+            ),
+            Row(
               spacing: 8,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 const Icon(
                   Icons.person_rounded,
                   color: primaryColor,
                 ),
-                Text(
-                  'คุณครู${details.professor}',
-                  style: textTheme.bodySmall,
+                Expanded(
+                  child: Text(
+                    'คุณครู${details.professor}',
+                    style: textTheme.bodySmall,
+                    softWrap: true,
+                  ),
                 ),
-                const Expanded(child: SizedBox()),
+                const Spacer(),
                 const Icon(
                   Icons.location_city_rounded,
                   color: primaryColor,
                 ),
-                Text(
-                  details.location,
-                  style: textTheme.bodySmall,
+                Expanded(
+                  child: Text(
+                    details.location,
+                    style: textTheme.bodySmall,
+                    softWrap: true,
+                  ),
                 ),
               ],
             ),
