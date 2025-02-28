@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:school_day/screens/login_page.dart';
+import 'package:school_day/screens/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
 
@@ -30,11 +30,8 @@ class MainApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: backgroundColor,
-        ),
         backgroundColor: backgroundColor,
-        body: const LoginPage(),
+        body: TimetablePage(),
       ),
     );
   }
