@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => const TimetablePage()),
         );
-
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('ล็อคอินสำเร็จ! >3')),
         );

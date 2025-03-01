@@ -134,6 +134,11 @@ class _TimetablePageState extends State<TimetablePage> {
                     Map<int, List<Timetable>> data =
                         snapshot.data ?? {for (var i = 0; i < 7; i++) i: []};
 
+                    data.forEach((key, value) {
+                      value.sort((a, b) =>
+                          a.startTime.hour.compareTo(b.startTime.hour));
+                    });
+
                     return Builder(builder: (context) {
                       if (data[dateIndex]!.isEmpty) {
                         return Center(
@@ -154,7 +159,6 @@ class _TimetablePageState extends State<TimetablePage> {
                   },
                 ),
               ),
-              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -217,13 +221,15 @@ class _TimetablePageState extends State<TimetablePage> {
                       const Divider(),
                       Expanded(
                         child: SingleChildScrollView(
-                          child: Column(
-                            spacing: 8,
-                            children: List.generate(
-                              entries[index].value.length,
-                              (cardIndex) {
-                                return card(entries[index].value[cardIndex]);
-                              },
+                          child: SafeArea(
+                            child: Column(
+                              spacing: 8,
+                              children: List.generate(
+                                entries[index].value.length,
+                                (cardIndex) {
+                                  return card(entries[index].value[cardIndex]);
+                                },
+                              ),
                             ),
                           ),
                         ),
