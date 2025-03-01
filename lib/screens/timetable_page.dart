@@ -166,7 +166,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
     final entries = timetableMap.entries.toList();
 
-    if (MediaQuery.of(context).size.width >= 650) {
+    if (MediaQuery.of(context).size.width >= 800) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: ListView.builder(
@@ -174,7 +174,7 @@ class _TimetablePageState extends State<TimetablePage> {
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             return ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 450),
+              constraints: const BoxConstraints(maxWidth: 500),
               child: TimelineTile(
                 axis: TimelineAxis.horizontal,
                 isFirst: index == 0,
