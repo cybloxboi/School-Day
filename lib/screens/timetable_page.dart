@@ -376,6 +376,7 @@ class _TimetablePageState extends State<TimetablePage> {
   Widget day(String dayName, int date, int index) {
     return Card(
       color: dateIndex == index ? primaryColor : Colors.white,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
       child: InkWell(
         onTap: () {
           setState(() {
