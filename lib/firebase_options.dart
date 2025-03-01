@@ -73,5 +73,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'school-day-a1e87.firebasestorage.app',
     iosBundleId: 'io.cyblox.schoolDay',
   );
-
 }

@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/is_vaild_email.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -19,11 +21,55 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool hasUpperCase(String password) => password.contains(RegExp(r'[A-Z]'));
+
   bool hasLowerCase(String password) => password.contains(RegExp(r'[a-z]'));
+
   bool hasNumber(String password) => password.contains(RegExp(r'[0-9]'));
+
   bool hasMinLength(String password) => password.length >= 6;
 
-  Future signUp() async {}
+  Future signUp(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: LoadingAnimationWidget.fourRotatingDots(
+          color: primaryColor,
+          size: 80,
+        ),
+      ),
+    );
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _password.trim(),
+      );
+
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('สร้างแอคเคาท์สำเร็จ! ૮ ˶ᵔ ᵕ ᵔ˶ ა')),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+
+      String errorMessage;
+
+      if (e.code == 'email-already-in-use') {
+        errorMessage = 'อีเมลนี้สมัครไปแล้วนะ ลองล็อคอินดูน้า';
+      } else {
+        errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
 
   bool isPasswordValid(String password) {
     return hasUpperCase(password) &&
@@ -127,6 +173,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'โปรดระบุรหัสผ่าน';
+                              } else if (!isPasswordValid(value)) {
+                                return 'รหัสผ่านยังไม่ปลอดภัยนะ';
                               }
 
                               return null;
@@ -207,7 +255,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 8),
                         FilledButton(
                           onPressed: () {
-                            _formKey.currentState!.validate();
+                            if (_formKey.currentState!.validate()) {
+                              signUp(context);
+                            }
                           },
                           child: Text(
                             'สมัคร',

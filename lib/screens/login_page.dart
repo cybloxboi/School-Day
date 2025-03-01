@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/is_vaild_email.dart';
 import 'package:school_day/screens/sign_up_page.dart';
-import 'package:school_day/screens/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,7 +18,49 @@ class _LoginPageState extends State<LoginPage> {
 
   final _formKey = GlobalKey<FormState>();
 
-  Future signIn() async {}
+  Future logIn(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: LoadingAnimationWidget.fourRotatingDots(
+          color: primaryColor,
+          size: 80,
+        ),
+      ),
+    );
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ล็อคอินสำเร็จ! ૮ ˶ᵔ ᵕ ᵔ˶ ა')),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+
+      String errorMessage;
+
+      if (e.code == 'user-not-found') {
+        errorMessage = 'ไม่พบผู้ใช้งานนี้ โปรดสมัครแอคเคาท์ด้วยน้า';
+      } else if (e.code == 'wrong-password') {
+        errorMessage = 'รหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
+      } else {
+        errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -99,7 +142,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       FilledButton(
                         onPressed: () {
-                          _formKey.currentState!.validate();
+                          if (_formKey.currentState!.validate()) {
+                            logIn(context);
+                          }
                         },
                         child: Text(
                           'ล็อคอิน',
@@ -130,17 +175,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ],
-                      ),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TimetablePage(),
-                            ),
-                          );
-                        },
-                        child: const Text('ไปหน้าตารางเรียน'),
                       ),
                     ],
                   ),
