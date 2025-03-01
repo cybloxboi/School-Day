@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/components/is_vaild_email.dart';
+import 'package:school_day/components/is_valid_email.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -41,16 +42,21 @@ class _SignUpPageState extends State<SignUpPage> {
     );
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential? userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _password.trim(),
       );
+
+      await createUserDocument(userCredential);
+
+      FirebaseAuth.instance.signOut();
 
       if (!context.mounted) return;
 
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('สร้างแอคเคาท์สำเร็จ! ૮ ˶ᵔ ᵕ ᵔ˶ ა')),
+        const SnackBar(content: Text('สร้างแอคเคาท์สำเร็จ! :3')),
       );
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) return;
@@ -68,6 +74,32 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
+    }
+  }
+
+  Future<void> createUserDocument(UserCredential? userCredential) async {
+    DocumentReference userDoc = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userCredential?.user!.email);
+    List<String> days = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ];
+
+    try {
+      await userDoc.set(
+          {'email': userCredential?.user!.email, 'createdAt': Timestamp.now()});
+
+      for (String day in days) {
+        await userDoc.collection('Timetables').doc(day).set({'lessons': []});
+      }
+    } catch (e) {
+      return;
     }
   }
 
@@ -232,21 +264,21 @@ class _SignUpPageState extends State<SignUpPage> {
                                     children: [
                                       PasswordRuleCheck(
                                         text: 'มีอย่างน้อย 6 ตัวอักษร',
-                                        isVaild: hasMinLength(_password),
+                                        isValid: hasMinLength(_password),
                                       ),
                                       PasswordRuleCheck(
                                         text:
                                             'มีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร',
-                                        isVaild: hasUpperCase(_password),
+                                        isValid: hasUpperCase(_password),
                                       ),
                                       PasswordRuleCheck(
                                         text:
                                             'มีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัวอักษร',
-                                        isVaild: hasLowerCase(_password),
+                                        isValid: hasLowerCase(_password),
                                       ),
                                       PasswordRuleCheck(
                                         text: 'มีตัวเลขอย่างน้อย 1 ตัวอักษร',
-                                        isVaild: hasNumber(_password),
+                                        isValid: hasNumber(_password),
                                       ),
                                     ],
                                   ),
@@ -285,11 +317,11 @@ class PasswordRuleCheck extends StatelessWidget {
   const PasswordRuleCheck({
     super.key,
     required this.text,
-    required this.isVaild,
+    required this.isValid,
   });
 
   final String text;
-  final bool isVaild;
+  final bool isValid;
 
   @override
   Widget build(BuildContext context) {
@@ -303,9 +335,9 @@ class PasswordRuleCheck extends StatelessWidget {
             child: child,
           ),
           child: Icon(
-            isVaild ? Icons.check_circle : Icons.check_circle_outline_rounded,
-            key: ValueKey(isVaild),
-            color: isVaild ? primaryColor : Colors.grey,
+            isValid ? Icons.check_circle : Icons.check_circle_outline_rounded,
+            key: ValueKey(isValid),
+            color: isValid ? primaryColor : Colors.grey,
             size: 20,
           ),
         ),

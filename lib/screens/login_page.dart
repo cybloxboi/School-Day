@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/components/is_vaild_email.dart';
+import 'package:school_day/components/is_valid_email.dart';
 import 'package:school_day/screens/sign_up_page.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -36,27 +36,28 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text.trim(),
       );
 
-      if (!context.mounted) return;
-
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ล็อคอินสำเร็จ! ૮ ˶ᵔ ᵕ ᵔ˶ ა')),
-      );
-    } on FirebaseAuthException catch (e) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-
-      String errorMessage;
-
-      if (e.code == 'invalid-credential') {
-        errorMessage = 'อีเมล หรือรหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
-      } else {
-        errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ล็อคอินสำเร็จ! >3')),
+        );
       }
+    } on FirebaseAuthException catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
+        String errorMessage;
+
+        if (e.code == 'invalid-credential') {
+          errorMessage = 'อีเมล หรือรหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
+        } else {
+          errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
     }
   }
 

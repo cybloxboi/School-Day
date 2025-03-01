@@ -14,4 +14,24 @@ class Timetable {
     this.startTime,
     this.endTime,
   );
+
+  factory Timetable.fromJson(Map<String, dynamic> json) {
+    return Timetable(
+      json['title'],
+      json['professor'],
+      json['location'],
+      Time.fromJson(json['startTime']),
+      Time.fromJson(json['endTime']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'professor': professor,
+      'location': location,
+      'startTime': startTime.toJson(),
+      'endTime': endTime.toJson(),
+    };
+  }
 }

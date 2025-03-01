@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
+import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -14,38 +16,7 @@ class TimetablePage extends StatefulWidget {
 
 class _TimetablePageState extends State<TimetablePage> {
   int dateIndex = DateTime.now().weekday - 1;
-
-  Map<int, List<Timetable>> data = {
-    0: [
-      Timetable(
-        'คณิตศาสตร์sdkjasjdklasdkjajsdklasdklajdlsakjdak',
-        'ภู',
-        'ห้อง 526',
-        Time(8, 30),
-        Time(10, 10),
-      ),
-      Timetable(
-        'ออกแบบksdaksjdlkjsakjdkjsakdkjajdlka',
-        'อารีรัตน์dkasdkajskdjksajkdjsajkjdklas',
-        'ห้อง 221',
-        Time(10, 10),
-        Time(11, 0),
-      ),
-      Timetable(
-        'ชีววิทยา',
-        'บุญธิดาksdkljasjdlkasdjksad',
-        'lddasjdajsldjklasjdjklasjdkaskljdjaskldjkjaskkdlsj',
-        Time(12, 40),
-        Time(14, 20),
-      ),
-    ],
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-    5: [],
-    6: [],
-  };
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   final List<String> daysInAWeek = [
     'จ.',
@@ -69,10 +40,6 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    data.forEach((key, value) {
-      value.sort((a, b) => a.startTime.hour.compareTo(b.startTime.hour));
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -139,23 +106,43 @@ class _TimetablePageState extends State<TimetablePage> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: Builder(builder: (context) {
-                  if (data[dateIndex]!.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          'ไม่มีตารางเรียน :>',
-                          softWrap: true,
-                          textAlign: TextAlign.center,
-                          style: textTheme.headlineLarge,
+                child: FutureBuilder(
+                  future: fetchTimetable(currentUser!.email!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: LoadingAnimationWidget.fourRotatingDots(
+                          color: primaryColor,
+                          size: 80,
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
 
-                  return timeTableList(data[dateIndex]!, context);
-                }),
+                    Map<int, List<Timetable>> data =
+                        snapshot.data ?? {for (var i = 0; i < 7; i++) i: []};
+
+                    return Builder(builder: (context) {
+                      if (data[dateIndex]!.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              'ไม่มีตารางเรียน :>',
+                              softWrap: true,
+                              textAlign: TextAlign.center,
+                              style: textTheme.headlineLarge,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return timeTableList(data[dateIndex]!, context);
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: 80),
             ],
@@ -345,7 +332,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 ),
                 Expanded(
                   child: Text(
-                    'คุณครู${details.professor}',
+                    details.professor,
                     style: textTheme.bodySmall,
                     softWrap: true,
                   ),

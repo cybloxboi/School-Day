@@ -6,6 +6,17 @@ class Time {
 
   int toMinutes() => hour * 60 + minute;
 
+  factory Time.fromJson(Map<String, dynamic> json) {
+    return Time(json['hour'] as int, json['minute'] as int);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'hour': hour,
+      'minute': minute,
+    };
+  }
+
   Duration difference(Time other) {
     return Duration(minutes: (toMinutes() - other.toMinutes()).abs());
   }
