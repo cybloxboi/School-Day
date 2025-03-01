@@ -281,6 +281,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     ),
                     const Divider(),
                     for (var i in entries[index].value) card(i),
+                    if (index == entries.length - 1) SizedBox(height: MediaQuery.of(context).size.height * 0.08),
                   ],
                 ),
               ),
