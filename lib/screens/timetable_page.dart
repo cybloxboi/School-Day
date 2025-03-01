@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
+import 'package:school_day/screens/login_page.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -28,8 +29,17 @@ class _TimetablePageState extends State<TimetablePage> {
     'อา.',
   ];
 
-  void logOut() {
-    FirebaseAuth.instance.signOut();
+  Future logOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+
+    if (!context.mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginPage(),
+      ),
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -50,7 +60,7 @@ class _TimetablePageState extends State<TimetablePage> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-              onPressed: logOut,
+              onPressed: () => logOut(context),
               icon: const Icon(Icons.logout_rounded),
               label: Text(
                 'ล็อคเอาท์',

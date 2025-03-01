@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/is_valid_email.dart';
 import 'package:school_day/screens/sign_up_page.dart';
+import 'package:school_day/screens/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class LoginPage extends StatefulWidget {
@@ -38,6 +39,12 @@ class _LoginPageState extends State<LoginPage> {
 
       if (context.mounted) {
         Navigator.pop(context);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const TimetablePage()),
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('ล็อคอินสำเร็จ! >3')),
         );
