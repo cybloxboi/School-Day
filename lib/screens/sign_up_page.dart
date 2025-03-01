@@ -138,6 +138,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           constraints: const BoxConstraints(maxWidth: 600),
                           child: TextFormField(
                             controller: _emailController,
+                            autofillHints: const [AutofillHints.email],
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: 'อีเมล',
@@ -159,6 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 600),
                           child: TextFormField(
+                            autofillHints: const [AutofillHints.newPassword],
                             controller: _passwordController,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
@@ -184,6 +186,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 600),
                           child: TextFormField(
+                            autofillHints: const [AutofillHints.newPassword],
                             controller: _confirmPasswordController,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),

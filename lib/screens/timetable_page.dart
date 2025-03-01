@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
@@ -44,7 +45,6 @@ class _TimetablePageState extends State<TimetablePage> {
     4: [],
     5: [],
     6: [],
-    7: [],
   };
 
   final List<String> daysInAWeek = [
@@ -56,6 +56,16 @@ class _TimetablePageState extends State<TimetablePage> {
     'ส.',
     'อา.',
   ];
+
+  void logOut() {
+    FirebaseAuth.instance.signOut();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ล็อคเอาท์สำเร็จ'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +83,10 @@ class _TimetablePageState extends State<TimetablePage> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.checklist_rounded),
+              onPressed: logOut,
+              icon: const Icon(Icons.logout_rounded),
               label: Text(
-                'เลือก',
+                'ล็อคเอาท์',
                 style: textTheme.bodySmall!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

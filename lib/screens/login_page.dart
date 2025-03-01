@@ -48,10 +48,8 @@ class _LoginPageState extends State<LoginPage> {
 
       String errorMessage;
 
-      if (e.code == 'user-not-found') {
-        errorMessage = 'ไม่พบผู้ใช้งานนี้ โปรดสมัครแอคเคาท์ด้วยน้า';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'รหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
+      if (e.code == 'invalid-credential') {
+        errorMessage = 'อีเมล หรือรหัสผ่านไม่ถูกต้อง โปรดลองใหม่อีกครั้ง';
       } else {
         errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
       }
@@ -71,115 +69,122 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 16,
-              children: [
-                Text(
-                  'ยินดีต้อนรับ',
-                  style: textTheme.headlineLarge,
-                ),
-                Text(
-                  'โปรดกรอกข้อมูลเข้าสู่ระบบ',
-                  style: textTheme.bodyMedium,
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 16,
-                    children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        child: TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'อีเมล',
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "โปรดระบุอีเมล";
-                            } else if (!isValidEmail(value)) {
-                              return "อีเมลไม่ถูกต้องน้า";
-                            }
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 16,
+                children: [
+                  Text(
+                    'ยินดีต้อนรับ',
+                    style: textTheme.headlineLarge,
+                  ),
+                  Text(
+                    'โปรดกรอกข้อมูลเข้าสู่ระบบ',
+                    style: textTheme.bodyMedium,
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 16,
+                      children: [
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: TextFormField(
+                            controller: _emailController,
+                            autofillHints: const [AutofillHints.email],
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'อีเมล',
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "โปรดระบุอีเมล";
+                              } else if (!isValidEmail(value)) {
+                                return "อีเมลไม่ถูกต้องน้า";
+                              }
 
-                            return null;
-                          },
-                        ),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 600),
-                        child: TextFormField(
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'รหัสผ่าน',
+                              return null;
+                            },
                           ),
-                          keyboardType: TextInputType.visiblePassword,
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          obscureText: true,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "โปรดระบุรหัสผ่าน";
-                            }
+                        ),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: TextFormField(
+                            controller: _passwordController,
+                            autofillHints: const [AutofillHints.password],
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'รหัสผ่าน',
+                            ),
+                            keyboardType: TextInputType.visiblePassword,
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            obscureText: true,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "โปรดระบุรหัสผ่าน";
+                              }
 
-                            return null;
+                              return null;
+                            },
+                          ),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              logIn(context);
+                            }
                           },
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            logIn(context);
-                          }
-                        },
-                        child: Text(
-                          'ล็อคอิน',
-                          style: textTheme.bodySmall,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 24,
-                        children: [
-                          Text(
-                            'ยังไม่มีสมาชิกหรอ?',
+                          child: Text(
+                            'ล็อคอิน',
                             style: textTheme.bodySmall,
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SignUpPage(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              'สมัครเลย!',
-                              style: textTheme.bodySmall!
-                                  .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 24,
+                          children: [
+                            Text(
+                              'ยังไม่มีสมาชิกหรอ?',
+                              style: textTheme.bodySmall,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const SignUpPage(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'สมัครเลย!',
+                                style: textTheme.bodySmall!
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
