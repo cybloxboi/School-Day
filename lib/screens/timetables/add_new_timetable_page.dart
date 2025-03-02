@@ -41,21 +41,22 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
   late final List<String> dayValues;
   late final List<String> dayKeys;
 
-  int selectedDayIndex = DateTime.now().weekday - 1;
+  late int selectedDayIndex;
 
   @override
   void initState() {
     dayValues = days.values.toList();
     dayKeys = days.keys.toList();
 
-    if (widget.timetable != null && widget.dateIndex != null) {
+    if (widget.timetable != null) {
       _subjectController.text = widget.timetable!.title;
       _locationController.text = widget.timetable!.location;
       _professorController.text = widget.timetable!.professor;
       _startTime = widget.timetable!.startTime;
       _endTime = widget.timetable!.endTime;
-      selectedDayIndex = widget.dateIndex!;
     }
+
+    selectedDayIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
 
     super.initState();
   }

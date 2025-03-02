@@ -86,7 +86,7 @@ class _TimetablePageState extends State<TimetablePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AddNewTimetablePage(),
+              builder: (context) => AddNewTimetablePage(dateIndex: dateIndex),
             ),
           );
         },
