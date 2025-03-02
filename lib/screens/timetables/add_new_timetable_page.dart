@@ -149,19 +149,35 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                     ),
                   );
 
-                  bool success = await addTimetableEntry(
-                    userEmail,
-                    day,
-                    _subjectController.text.trim(),
-                    _startTime,
-                    _endTime,
-                    _locationController.text.trim(),
-                    _professorController.text.trim(),
-                    const Uuid().v1(),
-                  );
+                  bool success;
+
+                  if (widget.timetable != null) {
+                    success = await updateTimetableEntry(
+                      userEmail,
+                      day,
+                      _subjectController.text.trim(),
+                      _startTime,
+                      _endTime,
+                      _locationController.text.trim(),
+                      _professorController.text.trim(),
+                      widget.timetable!.id,
+                    );
+                  } else {
+                    success = await addTimetableEntry(
+                      userEmail,
+                      day,
+                      _subjectController.text.trim(),
+                      _startTime,
+                      _endTime,
+                      _locationController.text.trim(),
+                      _professorController.text.trim(),
+                      const Uuid().v1(),
+                    );
+                  }
 
                   if (!context.mounted) return;
 
+                  Navigator.pop(context);
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
@@ -174,15 +190,21 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
 
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('เพิ่มตารางเรียนเรียบร้อยคับ!'),
+                      SnackBar(
+                        content: Text(
+                          widget.timetable == null
+                              ? 'เพิ่มตารางเรียนเรียบร้อยคับ!'
+                              : 'แก้ไขตารางเรียนเรียบร้อย',
+                        ),
                       ),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'ดูเหมือนจะมีปัญหาการเพิ่มตารางเรียนนะ :(',
+                          widget.timetable == null
+                              ? 'ดูเหมือนจะมีปัญหาการเพิ่มตารางเรียนนะ :('
+                              : 'ดูเหมือนจะมีปัญหาการแก้ไขตารางเรียนนะ :(',
                         ),
                       ),
                     );
