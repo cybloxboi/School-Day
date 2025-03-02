@@ -39,8 +39,16 @@ int _dayNameToIndex(String dayName) {
   return dayMap[dayName.toLowerCase()] ?? 0;
 }
 
-Future<bool> addTimetableEntry(String userEmail, String day, String title,
-    Time startTime, Time endTime, String location, String professor) async {
+Future<bool> addTimetableEntry(
+  String userEmail,
+  String day,
+  String title,
+  Time startTime,
+  Time endTime,
+  String location,
+  String professor,
+  String id,
+) async {
   DocumentReference timetableDoc = FirebaseFirestore.instance
       .collection('Users')
       .doc(userEmail)
@@ -53,6 +61,7 @@ Future<bool> addTimetableEntry(String userEmail, String day, String title,
     'endTime': endTime.toJson(),
     'location': location,
     'professor': professor,
+    'id': id,
   };
 
   try {
@@ -96,15 +105,16 @@ Future<List<Map<String, dynamic>>> getTimetable(
   }
 }
 
-Future<void> updateTimetableEntry(
-    String userEmail,
-    String day,
-    int lessonIndex,
-    String title,
-    Time startTime,
-    Time endTime,
-    String location,
-    String professor) async {
+Future<bool> updateTimetableEntry(
+  String userEmail,
+  String day,
+  String title,
+  Time startTime,
+  Time endTime,
+  String location,
+  String professor,
+  String id,
+) async {
   try {
     DocumentReference timetableDoc = FirebaseFirestore.instance
         .collection('Users')
@@ -115,39 +125,35 @@ Future<void> updateTimetableEntry(
     DocumentSnapshot documentSnapshot = await timetableDoc.get();
 
     if (documentSnapshot.exists) {
-      List lessons = documentSnapshot['Lessons'] ?? [];
+      List<dynamic> lessons = documentSnapshot['lessons'] ?? [];
+      int lessonIndex = lessons.indexWhere((lesson) => lesson['id'] == id);
 
-      if (lessonIndex < lessons.length) {
+      if (lessonIndex != -1) {
         lessons[lessonIndex] = {
           'title': title,
           'startTime': startTime.toJson(),
           'endTime': endTime.toJson(),
           'location': location,
           'professor': professor,
+          'id': id,
         };
 
         await timetableDoc.update({'lessons': lessons});
+
+        return true;
+      } else {
+        return false;
       }
-    } else {
-      await timetableDoc.set({
-        'Lessons': [
-          {
-            'title': title,
-            'startTime': startTime.toJson(),
-            'endTime': endTime.toJson(),
-            'location': location,
-            'professor': professor,
-          }
-        ]
-      });
     }
+
+    return false;
   } catch (e) {
-    return;
+    return false;
   }
 }
 
-Future<void> deleteTimetableEntry(
-    String userEmail, String day, int lessonIndex) async {
+Future<bool> deleteTimetableEntry(
+    String userEmail, String day, String id) async {
   try {
     DocumentReference timetableDoc = FirebaseFirestore.instance
         .collection('Users')
@@ -158,15 +164,23 @@ Future<void> deleteTimetableEntry(
     DocumentSnapshot documentSnapshot = await timetableDoc.get();
 
     if (documentSnapshot.exists) {
-      List lessons = documentSnapshot['Lessons'] ?? [];
+      List<dynamic> lessons = documentSnapshot['lessons'] ?? [];
+      var lessonToRemove = lessons.firstWhere((lesson) => lesson['id'] == id,
+          orElse: () => null);
 
-      if (lessonIndex < lessons.length) {
-        lessons.removeAt(lessonIndex);
+      if (lessonToRemove != null) {
+        await timetableDoc.update({
+          'lessons': FieldValue.arrayRemove([lessonToRemove])
+        });
 
-        await timetableDoc.update({'lessons': lessons});
+        return true;
       }
+
+      return false;
     }
+
+    return false;
   } catch (e) {
-    return;
+    return false;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:school_day/data/time.dart';
+import 'package:uuid/uuid.dart';
 
 class Timetable {
   String title;
@@ -6,22 +7,27 @@ class Timetable {
   Time endTime;
   String location;
   String professor;
+  String id;
 
-  Timetable(
-    this.title,
-    this.professor,
-    this.location,
-    this.startTime,
-    this.endTime,
-  );
+  static const Uuid _uuid = Uuid();
+
+  Timetable({
+    required this.title,
+    required this.professor,
+    required this.location,
+    required this.startTime,
+    required this.endTime,
+    String? id,
+  }) : id = id ?? _uuid.v4();
 
   factory Timetable.fromJson(Map<String, dynamic> json) {
     return Timetable(
-      json['title'],
-      json['professor'],
-      json['location'],
-      Time.fromJson(json['startTime']),
-      Time.fromJson(json['endTime']),
+      title: json['title'],
+      professor: json['professor'],
+      location: json['location'],
+      startTime: Time.fromJson(json['startTime']),
+      endTime: Time.fromJson(json['endTime']),
+      id: json['id'],
     );
   }
 
@@ -32,6 +38,7 @@ class Timetable {
       'location': location,
       'startTime': startTime.toJson(),
       'endTime': endTime.toJson(),
+      'id': id,
     };
   }
 }

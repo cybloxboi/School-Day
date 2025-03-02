@@ -2,12 +2,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/data/time.dart';
+import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
+import 'package:uuid/uuid.dart';
 
 class AddNewTimetablePage extends StatefulWidget {
-  const AddNewTimetablePage({super.key});
+  const AddNewTimetablePage({super.key, this.timetable, this.dateIndex});
+
+  final Timetable? timetable;
+  final int? dateIndex;
 
   @override
   State<AddNewTimetablePage> createState() => _AddNewTimetablePageState();
@@ -42,6 +47,16 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
   void initState() {
     dayValues = days.values.toList();
     dayKeys = days.keys.toList();
+
+    if (widget.timetable != null && widget.dateIndex != null) {
+      _subjectController.text = widget.timetable!.title;
+      _locationController.text = widget.timetable!.location;
+      _professorController.text = widget.timetable!.professor;
+      _startTime = widget.timetable!.startTime;
+      _endTime = widget.timetable!.endTime;
+      selectedDayIndex = widget.dateIndex!;
+    }
+
     super.initState();
   }
 
@@ -60,17 +75,45 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const TimetablePage(),
-              ),
-              (Route<dynamic> route) => false,
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      widget.timetable == null
+                          ? 'ต้องการยกเลิกสร้างตารางเรียนนี้ใช่ไหม :<'
+                          : 'ต้องการยกเลิกการเปลี่ยนแปลงตารางเรียนนี้ใช่ไหม :<',
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TimetablePage(),
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
+                      child: const Text('ยกเลิก'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('แก้ไขต่อ'),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
         title: Text(
-          'เพิ่มตารางเรียนใหม่',
+          widget.timetable == null ? 'เพิ่มตารางเรียนใหม่' : 'แก้ไขตารางเรียน',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -113,6 +156,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                     _endTime,
                     _locationController.text.trim(),
                     _professorController.text.trim(),
+                    const Uuid().v1(),
                   );
 
                   if (!context.mounted) return;
@@ -120,7 +164,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TimetablePage(),
+                      builder: (context) => TimetablePage(
+                        dateIndex: selectedDayIndex,
+                      ),
                     ),
                     (Route<dynamic> route) => false,
                   );
@@ -343,6 +389,87 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                       ),
                     ],
                   ),
+                  if (widget.timetable != null)
+                    FilledButton.icon(
+                      onPressed: () async {
+                        bool? confirmDelete = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              content: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text('คุณต้องการลบตารางเรียนใช่ไหม :<'),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, false);
+                                  },
+                                  child: const Text('ยกเลิก'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, true);
+                                  },
+                                  child: const Text('ลบ'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmDelete != true || !context.mounted) return;
+
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => Center(
+                            child: LoadingAnimationWidget.fourRotatingDots(
+                              color: primaryColor,
+                              size: 80,
+                            ),
+                          ),
+                        );
+
+                        bool success = await deleteTimetableEntry(
+                          _currentUser!.email!,
+                          dayKeys[selectedDayIndex],
+                          widget.timetable!.id,
+                        );
+
+                        if (!context.mounted) return;
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TimetablePage(
+                              dateIndex: selectedDayIndex,
+                            ),
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('ลบตารางเรียนเรียบร้อย!'),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'ดูเหมือนจะมีปัญหาการลบตารางเรียนนะ :(',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.delete_forever_rounded),
+                      label: const Text(
+                        'ลบตารางเรียน',
+                      ),
+                    ),
                 ],
               ),
             ),

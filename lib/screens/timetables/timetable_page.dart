@@ -10,14 +10,16 @@ import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class TimetablePage extends StatefulWidget {
-  const TimetablePage({super.key});
+  const TimetablePage({super.key, this.dateIndex});
+
+  final int? dateIndex;
 
   @override
   State<TimetablePage> createState() => _TimetablePageState();
 }
 
 class _TimetablePageState extends State<TimetablePage> {
-  int dateIndex = DateTime.now().weekday - 1;
+  late int dateIndex;
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
   final List<String> daysInAWeek = [
@@ -47,6 +49,12 @@ class _TimetablePageState extends State<TimetablePage> {
         content: Text('ล็อคเอาท์สำเร็จ'),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
+    super.initState();
   }
 
   @override
@@ -269,7 +277,8 @@ class _TimetablePageState extends State<TimetablePage> {
                                   entries[index].value.length,
                                   (cardIndex) {
                                     return card(
-                                        entries[index].value[cardIndex]);
+                                      entries[index].value[cardIndex],
+                                    );
                                   },
                                 ),
                               ),
@@ -336,81 +345,95 @@ class _TimetablePageState extends State<TimetablePage> {
 
   Widget card(Timetable details) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          spacing: 8,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    details.title,
-                    style: textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddNewTimetablePage(
+                timetable: details,
+                dateIndex: dateIndex,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 8,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      details.title,
+                      style: textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      softWrap: true,
                     ),
-                    softWrap: true,
                   ),
-                ),
-                const Spacer(),
-                const Icon(
-                  Icons.schedule_rounded,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                classDuration(
-                  details.startTime,
-                  details.endTime,
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Text(
-                  details.startTime.toString(),
-                  style: textTheme.bodySmall,
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                ),
-                Text(
-                  details.endTime.toString(),
-                  style: textTheme.bodySmall,
-                ),
-              ],
-            ),
-            Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Icon(
-                  Icons.person_rounded,
-                  color: primaryColor,
-                ),
-                Expanded(
-                  child: Text(
-                    details.professor,
+                  const Spacer(),
+                  const Icon(
+                    Icons.schedule_rounded,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  classDuration(
+                    details.startTime,
+                    details.endTime,
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    details.startTime.toString(),
                     style: textTheme.bodySmall,
-                    softWrap: true,
                   ),
-                ),
-                const Spacer(),
-                const Icon(
-                  Icons.location_city_rounded,
-                  color: primaryColor,
-                ),
-                Expanded(
-                  child: Text(
-                    details.location,
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                  ),
+                  Text(
+                    details.endTime.toString(),
                     style: textTheme.bodySmall,
-                    softWrap: true,
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              Row(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Icon(
+                    Icons.person_rounded,
+                    color: primaryColor,
+                  ),
+                  Expanded(
+                    child: Text(
+                      details.professor,
+                      style: textTheme.bodySmall,
+                      softWrap: true,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.location_city_rounded,
+                    color: primaryColor,
+                  ),
+                  Expanded(
+                    child: Text(
+                      details.location,
+                      style: textTheme.bodySmall,
+                      softWrap: true,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
