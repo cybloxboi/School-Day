@@ -1,0 +1,2 @@
+/Users/tutor/SchoolDay/school_day/android/app/.cxx/Debug/3iw1v373/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/tutor/SchoolDay/school_day/android/app/.cxx/Debug/3iw1v373/armeabi-v7a/CMakeFiles/rebuild_cache.dir

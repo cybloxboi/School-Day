@@ -39,7 +39,7 @@ int _dayNameToIndex(String dayName) {
   return dayMap[dayName.toLowerCase()] ?? 0;
 }
 
-Future<void> addTimetableEntry(String userEmail, String day, String title,
+Future<bool> addTimetableEntry(String userEmail, String day, String title,
     Time startTime, Time endTime, String location, String professor) async {
   DocumentReference timetableDoc = FirebaseFirestore.instance
       .collection('Users')
@@ -60,15 +60,17 @@ Future<void> addTimetableEntry(String userEmail, String day, String title,
 
     if (!documentSnapshot.exists) {
       await timetableDoc.set({
-        'Lessons': [newLesson],
+        'lessons': [newLesson],
       });
     } else {
       await timetableDoc.update({
-        'Lessons': FieldValue.arrayUnion([newLesson]),
+        'lessons': FieldValue.arrayUnion([newLesson]),
       });
     }
+
+    return true;
   } catch (e) {
-    return;
+    return false;
   }
 }
 

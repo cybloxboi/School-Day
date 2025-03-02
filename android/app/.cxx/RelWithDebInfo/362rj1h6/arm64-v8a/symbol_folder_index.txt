@@ -1,0 +1,1 @@
+/Users/tutor/SchoolDay/school_day/build/app/intermediates/cxx/RelWithDebInfo/362rj1h6/obj/arm64-v8a
