@@ -20,7 +20,7 @@ class TimetablePage extends StatefulWidget {
 
 class _TimetablePageState extends State<TimetablePage> {
   late int dateIndex;
-  final User? currentUser = FirebaseAuth.instance.currentUser;
+  late final User currentUser;
 
   final List<String> daysInAWeek = [
     'จ.',
@@ -54,6 +54,7 @@ class _TimetablePageState extends State<TimetablePage> {
   @override
   void initState() {
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
+    currentUser = FirebaseAuth.instance.currentUser!;
     super.initState();
   }
 
@@ -113,17 +114,17 @@ class _TimetablePageState extends State<TimetablePage> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Wrap(
-                  spacing: 16,
-                  runSpacing: 8,
-                  children: List.generate(
-                    daysInAWeek.length,
-                    (int index) {
-                      return Expanded(
-                        child: day(daysInAWeek[index],
-                            getCurrentWeekDays()[index].day, index, context),
-                      );
-                    },
+                child: Center(
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: List.generate(
+                      daysInAWeek.length,
+                      (int index) {
+                        return day(daysInAWeek[index],
+                            getCurrentWeekDays()[index].day, index, context);
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -158,7 +159,7 @@ class _TimetablePageState extends State<TimetablePage> {
                       }
 
                       return FutureBuilder(
-                        future: fetchTimetable(currentUser!.email!),
+                        future: fetchTimetable(currentUser.email!),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -441,9 +442,9 @@ class _TimetablePageState extends State<TimetablePage> {
 
   Widget day(String dayName, int date, int index, BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.1,
-        maxWidth: MediaQuery.of(context).size.width * 0.3,
+      constraints: const BoxConstraints(
+        minWidth: 60,
+        maxWidth: 300,
       ),
       child: Card(
         color: dateIndex == index ? primaryColor : Colors.white,
@@ -455,7 +456,7 @@ class _TimetablePageState extends State<TimetablePage> {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Column(
               spacing: 4,
               children: [

@@ -107,7 +107,8 @@ Future<List<Map<String, dynamic>>> getTimetable(
 
 Future<bool> updateTimetableEntry(
   String userEmail,
-  String day,
+  String oldDay,
+  String newDay,
   String title,
   Time startTime,
   Time endTime,
@@ -116,20 +117,26 @@ Future<bool> updateTimetableEntry(
   String id,
 ) async {
   try {
-    DocumentReference timetableDoc = FirebaseFirestore.instance
+    DocumentReference oldDayDoc = FirebaseFirestore.instance
         .collection('Users')
         .doc(userEmail)
         .collection('Timetables')
-        .doc(day);
+        .doc(oldDay);
 
-    DocumentSnapshot documentSnapshot = await timetableDoc.get();
+    DocumentReference newDayDoc = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .doc(newDay);
 
-    if (documentSnapshot.exists) {
-      List<dynamic> lessons = documentSnapshot['lessons'] ?? [];
-      int lessonIndex = lessons.indexWhere((lesson) => lesson['id'] == id);
+    DocumentSnapshot oldDaySnapshot = await oldDayDoc.get();
+
+    if (oldDaySnapshot.exists) {
+      List<dynamic> oldLessons = oldDaySnapshot['lessons'] ?? [];
+      int lessonIndex = oldLessons.indexWhere((lesson) => lesson['id'] == id);
 
       if (lessonIndex != -1) {
-        lessons[lessonIndex] = {
+        Map<String, dynamic> updatedLesson = {
           'title': title,
           'startTime': startTime.toJson(),
           'endTime': endTime.toJson(),
@@ -138,11 +145,27 @@ Future<bool> updateTimetableEntry(
           'id': id,
         };
 
-        await timetableDoc.update({'lessons': lessons});
+        if (oldDay != newDay) {
+          oldLessons.removeAt(lessonIndex);
+          await oldDayDoc.update({'lessons': oldLessons});
+
+          DocumentSnapshot newDaySnapshot = await newDayDoc.get();
+
+          if (newDaySnapshot.exists) {
+            List<dynamic> newLessons = newDaySnapshot['lessons'] ?? [];
+            newLessons.add(updatedLesson);
+            await newDayDoc.update({'lessons': newLessons});
+          } else {
+            await newDayDoc.set({
+              'lessons': [updatedLesson],
+            });
+          }
+        } else {
+          oldLessons[lessonIndex] = updatedLesson;
+          await oldDayDoc.update({'lessons': oldLessons});
+        }
 
         return true;
-      } else {
-        return false;
       }
     }
 

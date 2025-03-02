@@ -42,9 +42,11 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const TimetablePage()),
+          MaterialPageRoute(
+            builder: (context) => const TimetablePage(),
+          ),
         );
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('ล็อคอินสำเร็จ! >3')),
         );

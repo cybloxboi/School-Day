@@ -94,7 +94,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TimetablePage(),
+                            builder: (context) => TimetablePage(
+                              dateIndex: widget.dateIndex,
+                            ),
                           ),
                           (Route<dynamic> route) => false,
                         );
@@ -154,6 +156,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                   if (widget.timetable != null) {
                     success = await updateTimetableEntry(
                       userEmail,
+                      dayKeys[widget.dateIndex!],
                       day,
                       _subjectController.text.trim(),
                       _startTime,
