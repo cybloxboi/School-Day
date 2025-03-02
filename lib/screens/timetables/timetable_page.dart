@@ -471,7 +471,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Text classDuration(Time startTime, Time endTime) {
-    Duration difference = startTime.difference(endTime);
+    Duration difference = startTime.timeDifference(endTime);
     String text = '';
 
     if (difference.inHours >= 1) {

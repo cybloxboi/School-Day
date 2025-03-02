@@ -79,6 +79,18 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
             child: FilledButton.icon(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
+                  if (_startTime.hour == _endTime.hour &&
+                      _startTime.minute == _endTime.minute) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'เวลาเริ่มเรียน กับเวลาเลิกเรียนตรงกันไม่ได้นะคับ :(',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
                   String userEmail = _currentUser!.email!;
                   String day = dayKeys[selectedDayIndex];
 

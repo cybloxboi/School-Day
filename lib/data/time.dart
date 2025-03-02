@@ -17,8 +17,15 @@ class Time {
     };
   }
 
-  Duration difference(Time other) {
-    return Duration(minutes: (toMinutes() - other.toMinutes()).abs());
+  Duration timeDifference(Time other) {
+    DateTime dateTime1 = DateTime(2025, 3, 2, hour, minute);
+    DateTime dateTime2 = DateTime(2025, 3, 2, other.hour, other.minute);
+
+    if (dateTime2.isBefore(dateTime1)) {
+      dateTime2 = dateTime2.add(const Duration(days: 1));
+    }
+
+    return dateTime2.difference(dateTime1);
   }
 
   @override
