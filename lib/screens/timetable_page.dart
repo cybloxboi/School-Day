@@ -97,18 +97,13 @@ class _TimetablePageState extends State<TimetablePage> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  spacing: 8,
+                child: Wrap(
                   children: List.generate(
                     daysInAWeek.length,
                     (int index) {
                       return Expanded(
-                        child: day(
-                          daysInAWeek[index],
-                          getCurrentWeekDays()[index].day,
-                          index,
-                        ),
+                        child: day(daysInAWeek[index],
+                            getCurrentWeekDays()[index].day, index, context),
                       );
                     },
                   ),
@@ -116,48 +111,66 @@ class _TimetablePageState extends State<TimetablePage> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: FutureBuilder(
-                  future: fetchTimetable(currentUser!.email!),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: LoadingAnimationWidget.fourRotatingDots(
-                          color: primaryColor,
-                          size: 80,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  if (constraints.maxHeight < 200) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      );
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
+                      ),
+                    );
+                  }
 
-                    Map<int, List<Timetable>> data =
-                        snapshot.data ?? {for (var i = 0; i < 7; i++) i: []};
-
-                    data.forEach((key, value) {
-                      value.sort((a, b) =>
-                          a.startTime.hour.compareTo(b.startTime.hour));
-                    });
-
-                    return Builder(builder: (context) {
-                      if (data[dateIndex]!.isEmpty) {
+                  return FutureBuilder(
+                    future: fetchTimetable(currentUser!.email!),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              'ไม่มีตารางเรียน :>',
-                              softWrap: true,
-                              textAlign: TextAlign.center,
-                              style: textTheme.headlineLarge,
-                            ),
+                          child: LoadingAnimationWidget.fourRotatingDots(
+                            color: primaryColor,
+                            size: 80,
                           ),
                         );
                       }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
 
-                      return timeTableList(data[dateIndex]!, context);
-                    });
-                  },
-                ),
+                      Map<int, List<Timetable>> data =
+                          snapshot.data ?? {for (var i = 0; i < 7; i++) i: []};
+
+                      data.forEach((key, value) {
+                        value.sort((a, b) =>
+                            a.startTime.hour.compareTo(b.startTime.hour));
+                      });
+
+                      return Builder(builder: (context) {
+                        if (data[dateIndex]!.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(
+                                'ไม่มีตารางเรียน :>',
+                                softWrap: true,
+                                textAlign: TextAlign.center,
+                                style: textTheme.headlineLarge,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return timeTableList(data[dateIndex]!, context);
+                      });
+                    },
+                  );
+                }),
               ),
             ],
           ),
@@ -281,7 +294,9 @@ class _TimetablePageState extends State<TimetablePage> {
                     ),
                     const Divider(),
                     for (var i in entries[index].value) card(i),
-                    if (index == entries.length - 1) SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+                    if (index == entries.length - 1)
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.08),
                   ],
                 ),
               ),
@@ -374,34 +389,40 @@ class _TimetablePageState extends State<TimetablePage> {
     );
   }
 
-  Widget day(String dayName, int date, int index) {
-    return Card(
-      color: dateIndex == index ? primaryColor : Colors.white,
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            dateIndex = index;
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            spacing: 4,
-            children: [
-              Text(
-                dayName,
-                style: textTheme.bodySmall!.copyWith(
-                  fontWeight: FontWeight.bold,
+  Widget day(String dayName, int date, int index, BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: MediaQuery.of(context).size.width * 0.1,
+        maxWidth: MediaQuery.of(context).size.width * 0.3,
+      ),
+      child: Card(
+        color: dateIndex == index ? primaryColor : Colors.white,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              dateIndex = index;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              spacing: 4,
+              children: [
+                Text(
+                  dayName,
+                  style: textTheme.bodySmall!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                date.toString(),
-                style: textTheme.bodySmall,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                Text(
+                  date.toString(),
+                  style: textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
