@@ -137,15 +137,13 @@ class _TimetablePageState extends State<TimetablePage> {
                 child: ShaderMask(
                   shaderCallback: (Rect bounds) {
                     return const LinearGradient(
-                      begin: Alignment.topCenter,
+                      begin: Alignment.center,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
-                        Colors.black,
                         Colors.black,
                         Colors.transparent,
                       ],
-                      stops: [0.0, 0.07, 0.93, 1.0],
+                      stops: [0.9, 1.0],
                     ).createShader(bounds);
                   },
                   blendMode: BlendMode.dstIn,
@@ -166,7 +164,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           ),
                         );
                       }
-
+              
                       return FutureBuilder(
                         future: fetchTimetable(currentUser.email!),
                         builder: (context, snapshot) {
@@ -183,15 +181,15 @@ class _TimetablePageState extends State<TimetablePage> {
                             return Center(
                                 child: Text('Error: ${snapshot.error}'));
                           }
-
+              
                           Map<int, List<Timetable>> data = snapshot.data ??
                               {for (var i = 0; i < 7; i++) i: []};
-
+              
                           data.forEach((key, value) {
                             value.sort((a, b) =>
                                 a.startTime.hour.compareTo(b.startTime.hour));
                           });
-
+              
                           return Builder(builder: (context) {
                             if (data[dateIndex]!.isEmpty) {
                               return Center(
@@ -206,7 +204,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 ),
                               );
                             }
-
+              
                             return timeTableList(data[dateIndex]!, context);
                           });
                         },
