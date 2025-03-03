@@ -66,6 +66,7 @@ class _TimetablePageState extends State<TimetablePage> {
           'ตารางเรียน',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
+        centerTitle: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -114,17 +115,20 @@ class _TimetablePageState extends State<TimetablePage> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Center(
-                  child: Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: List.generate(
-                      daysInAWeek.length,
-                      (int index) {
-                        return day(daysInAWeek[index],
-                            getCurrentWeekDays()[index].day, index, context);
-                      },
-                    ),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: List.generate(
+                    daysInAWeek.length,
+                    (int index) {
+                      return day(
+                        daysInAWeek[index],
+                        getCurrentWeekDays()[index].day,
+                        index,
+                        context,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -135,8 +139,13 @@ class _TimetablePageState extends State<TimetablePage> {
                     return const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.black, Colors.transparent],
-                      stops: [0.9, 1.0],
+                      colors: [
+                        Colors.transparent,
+                        Colors.black,
+                        Colors.black,
+                        Colors.transparent,
+                      ],
+                      stops: [0.0, 0.07, 0.93, 1.0],
                     ).createShader(bounds);
                   },
                   blendMode: BlendMode.dstIn,

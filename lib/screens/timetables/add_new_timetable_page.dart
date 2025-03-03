@@ -115,6 +115,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
             );
           },
         ),
+        centerTitle: false,
         title: Text(
           widget.timetable == null ? 'เพิ่มตารางเรียนใหม่' : 'แก้ไขตารางเรียน',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
