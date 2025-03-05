@@ -49,7 +49,7 @@ Future<bool> addTimetableEntry(
   String professor,
   String id,
   bool isNotify,
-  Time? notifyTime,
+  Time notifyTime,
 ) async {
   DocumentReference timetableDoc = FirebaseFirestore.instance
       .collection('Users')
@@ -65,7 +65,7 @@ Future<bool> addTimetableEntry(
     'professor': professor,
     'id': id,
     'isNotify': isNotify,
-    'notifyTime': notifyTime,
+    'notifyTime': notifyTime.toJson(),
   };
 
   try {
@@ -87,28 +87,6 @@ Future<bool> addTimetableEntry(
   }
 }
 
-Future<List<Map<String, dynamic>>> getTimetable(
-    String userEmail, String day) async {
-  try {
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userEmail)
-        .collection('Timetables')
-        .doc(day)
-        .get();
-
-    if (doc.exists && doc.data() != null && doc['lessons'] != null) {
-      List<Map<String, dynamic>> lessons =
-          List<Map<String, dynamic>>.from(doc['lessons']);
-      return lessons;
-    } else {
-      return [];
-    }
-  } catch (e) {
-    return [];
-  }
-}
-
 Future<bool> updateTimetableEntry(
   String userEmail,
   String oldDay,
@@ -120,7 +98,7 @@ Future<bool> updateTimetableEntry(
   String professor,
   String id,
   bool isNotify,
-  Time? notifyTime,
+  Time notifyTime,
 ) async {
   try {
     DocumentReference oldDayDoc = FirebaseFirestore.instance
@@ -150,7 +128,7 @@ Future<bool> updateTimetableEntry(
           'professor': professor,
           'id': id,
           'isNotify': isNotify,
-          'notifyTime': notifyTime,
+          'notifyTime': notifyTime.toJson(),
         };
 
         if (oldDay != newDay) {
@@ -196,8 +174,10 @@ Future<bool> deleteTimetableEntry(
 
     if (documentSnapshot.exists) {
       List<dynamic> lessons = documentSnapshot['lessons'] ?? [];
-      var lessonToRemove = lessons.firstWhere((lesson) => lesson['id'] == id,
-          orElse: () => null);
+      var lessonToRemove = lessons.firstWhere(
+        (lesson) => lesson['id'] == id,
+        orElse: () => null,
+      );
 
       if (lessonToRemove != null) {
         await timetableDoc.update({

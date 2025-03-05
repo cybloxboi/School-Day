@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -49,6 +49,8 @@ class NotificationService {
   Future<void> scheduleWeeklyTimetableNotifications(
     Map<int, List<Timetable>> timetableList,
   ) async {
+    if (kIsWeb) return;
+
     await notificationsPlugin.cancelAll();
 
     for (var day = 0; day < 7; day++) {
@@ -63,8 +65,7 @@ class NotificationService {
     required Timetable timetable,
     required int dateIndex,
   }) async {
-    if (await Permission.notification.isDenied ||
-        await Permission.scheduleExactAlarm.isDenied) {
+    if (!timetable.isNotify) {
       return;
     }
 
@@ -77,6 +78,13 @@ class NotificationService {
       now.day,
       timetable.startTime.hour,
       timetable.startTime.minute,
+    );
+
+    scheduledDate = scheduledDate.subtract(
+      Duration(
+        hours: timetable.notifyTime.hour,
+        minutes: timetable.notifyTime.minute,
+      ),
     );
 
     int daysUntilNext = ((dateIndex + 1) - now.weekday) % 7;

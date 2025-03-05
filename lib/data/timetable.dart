@@ -9,7 +9,7 @@ class Timetable {
   String professor;
   String id;
   bool isNotify;
-  Time? notifyTime;
+  Time notifyTime;
 
   static const Uuid _uuid = Uuid();
 
@@ -21,7 +21,7 @@ class Timetable {
     required this.endTime,
     String? id,
     required this.isNotify,
-    this.notifyTime,
+    required this.notifyTime,
   }) : id = id ?? _uuid.v4();
 
   factory Timetable.fromJson(Map<String, dynamic> json) {
@@ -29,11 +29,16 @@ class Timetable {
       title: json['title'] ?? 'ไม่รู้จัก',
       professor: json['professor'] ?? 'ไม่รู้จัก',
       location: json['location'] ?? 'ไม่รู้จัก',
-      startTime: Time.fromJson(json['startTime'] ?? Time(0, 0)),
-      endTime: Time.fromJson(json['endTime'] ?? Time(1, 0)),
+      startTime: json['startTime'] != null
+          ? Time.fromJson(json['startTime'])
+          : Time(0, 0),
+      endTime:
+          json['endTime'] != null ? Time.fromJson(json['endTime']) : Time(1, 0),
       id: json['id'] ?? _uuid.v4(),
       isNotify: json['isNotify'] ?? false,
-      notifyTime: json['notifyTime'],
+      notifyTime: json['notifyTime'] != null
+          ? Time.fromJson(json['notifyTime'])
+          : Time(0, 0),
     );
   }
 
@@ -46,7 +51,7 @@ class Timetable {
       'endTime': endTime.toJson(),
       'id': id,
       'isNotify': isNotify,
-      'notifyTime': notifyTime,
+      'notifyTime': notifyTime.toJson(),
     };
   }
 }
