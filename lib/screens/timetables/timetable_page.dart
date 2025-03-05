@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/timetables/add_new_timetable_page.dart';
+import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -34,6 +36,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+    NotificationService().cancelAllNotifications();
 
     if (!context.mounted) return;
 
@@ -164,7 +167,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           ),
                         );
                       }
-              
+
                       return FutureBuilder(
                         future: fetchTimetable(currentUser.email!),
                         builder: (context, snapshot) {
@@ -181,15 +184,20 @@ class _TimetablePageState extends State<TimetablePage> {
                             return Center(
                                 child: Text('Error: ${snapshot.error}'));
                           }
-              
+
                           Map<int, List<Timetable>> data = snapshot.data ??
                               {for (var i = 0; i < 7; i++) i: []};
-              
+
                           data.forEach((key, value) {
                             value.sort((a, b) =>
                                 a.startTime.hour.compareTo(b.startTime.hour));
                           });
-              
+
+                          NotificationService()
+                              .scheduleWeeklyTimetableNotifications(
+                            data,
+                          );
+
                           return Builder(builder: (context) {
                             if (data[dateIndex]!.isEmpty) {
                               return Center(
@@ -204,7 +212,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 ),
                               );
                             }
-              
+
                             return timeTableList(data[dateIndex]!, context);
                           });
                         },

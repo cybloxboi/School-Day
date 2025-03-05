@@ -48,6 +48,8 @@ Future<bool> addTimetableEntry(
   String location,
   String professor,
   String id,
+  bool isNotify,
+  Time? notifyTime,
 ) async {
   DocumentReference timetableDoc = FirebaseFirestore.instance
       .collection('Users')
@@ -62,6 +64,8 @@ Future<bool> addTimetableEntry(
     'location': location,
     'professor': professor,
     'id': id,
+    'isNotify': isNotify,
+    'notifyTime': notifyTime,
   };
 
   try {
@@ -93,9 +97,9 @@ Future<List<Map<String, dynamic>>> getTimetable(
         .doc(day)
         .get();
 
-    if (doc.exists && doc.data() != null && doc['Lessons'] != null) {
+    if (doc.exists && doc.data() != null && doc['lessons'] != null) {
       List<Map<String, dynamic>> lessons =
-          List<Map<String, dynamic>>.from(doc['Lessons']);
+          List<Map<String, dynamic>>.from(doc['lessons']);
       return lessons;
     } else {
       return [];
@@ -115,6 +119,8 @@ Future<bool> updateTimetableEntry(
   String location,
   String professor,
   String id,
+  bool isNotify,
+  Time? notifyTime,
 ) async {
   try {
     DocumentReference oldDayDoc = FirebaseFirestore.instance
@@ -143,6 +149,8 @@ Future<bool> updateTimetableEntry(
           'location': location,
           'professor': professor,
           'id': id,
+          'isNotify': isNotify,
+          'notifyTime': notifyTime,
         };
 
         if (oldDay != newDay) {

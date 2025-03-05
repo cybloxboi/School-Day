@@ -8,6 +8,8 @@ class Timetable {
   String location;
   String professor;
   String id;
+  bool isNotify;
+  Time? notifyTime;
 
   static const Uuid _uuid = Uuid();
 
@@ -18,16 +20,20 @@ class Timetable {
     required this.startTime,
     required this.endTime,
     String? id,
+    required this.isNotify,
+    this.notifyTime,
   }) : id = id ?? _uuid.v4();
 
   factory Timetable.fromJson(Map<String, dynamic> json) {
     return Timetable(
-      title: json['title'],
-      professor: json['professor'],
-      location: json['location'],
-      startTime: Time.fromJson(json['startTime']),
-      endTime: Time.fromJson(json['endTime']),
-      id: json['id'],
+      title: json['title'] ?? 'ไม่รู้จัก',
+      professor: json['professor'] ?? 'ไม่รู้จัก',
+      location: json['location'] ?? 'ไม่รู้จัก',
+      startTime: Time.fromJson(json['startTime'] ?? Time(0, 0)),
+      endTime: Time.fromJson(json['endTime'] ?? Time(1, 0)),
+      id: json['id'] ?? _uuid.v4(),
+      isNotify: json['isNotify'] ?? false,
+      notifyTime: json['notifyTime'],
     );
   }
 
@@ -39,6 +45,8 @@ class Timetable {
       'startTime': startTime.toJson(),
       'endTime': endTime.toJson(),
       'id': id,
+      'isNotify': isNotify,
+      'notifyTime': notifyTime,
     };
   }
 }

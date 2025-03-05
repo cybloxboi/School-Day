@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:school_day/screens/auth/auth_page.dart';
+import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
 
@@ -15,6 +17,8 @@ Future<void> main() async {
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
+
+  if (!kIsWeb) NotificationService().initNotification();
 
   runApp(const MainApp());
 }

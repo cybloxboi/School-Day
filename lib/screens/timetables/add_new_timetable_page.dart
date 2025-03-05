@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/data/time.dart';
@@ -29,6 +30,12 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
   Time _startTime = Time(TimeOfDay.now().hour, 0);
   Time _endTime = Time(TimeOfDay.now().hour + 1, 0);
 
+  late bool isNotify;
+  late Time? notifyTime;
+
+  late bool isAlarmOn;
+  late bool isNotificationOn;
+
   final Map<String, String> days = {
     'monday': 'วันจันทร์',
     'tuesday': 'วันอังคาร',
@@ -54,6 +61,10 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
       _professorController.text = widget.timetable!.professor;
       _startTime = widget.timetable!.startTime;
       _endTime = widget.timetable!.endTime;
+      isNotify = widget.timetable!.isNotify;
+      notifyTime = widget.timetable!.notifyTime;
+    } else {
+      isNotify = true;
     }
 
     selectedDayIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
@@ -165,6 +176,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                       _locationController.text.trim(),
                       _professorController.text.trim(),
                       widget.timetable!.id,
+                      isNotify,
+                      notifyTime,
                     );
                   } else {
                     success = await addTimetableEntry(
@@ -176,6 +189,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                       _locationController.text.trim(),
                       _professorController.text.trim(),
                       const Uuid().v1(),
+                      isNotify,
+                      notifyTime,
                     );
                   }
 
@@ -257,10 +272,13 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                           children: [
                             const Icon(Icons.date_range_rounded),
                             const SizedBox(width: 16),
-                            Text(
-                              'วันที่เรียน',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontSize: 16,
+                            Expanded(
+                              child: Text(
+                                'วันที่เรียน',
+                                softWrap: true,
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -319,10 +337,13 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                           children: [
                             const Icon(Icons.schedule_rounded),
                             const SizedBox(width: 16),
-                            Text(
-                              'เวลาเรียน',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontSize: 16,
+                            Expanded(
+                              child: Text(
+                                'เวลาเรียน',
+                                softWrap: true,
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -414,6 +435,68 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                           ],
                         ),
                       ),
+                      if (!kIsWeb)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.notifications_outlined),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      'แจ้งเตือนก่อนถึงเวลาเข้าเรียน',
+                                      softWrap: true,
+                                      style: textTheme.bodyMedium!
+                                          .copyWith(fontSize: 16),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Switch(
+                                    value: isNotify,
+                                    onChanged: (value) {
+                                      if (!isAlarmOn || !isNotificationOn) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Padding(
+                                                padding: const EdgeInsets.all(
+                                                  16,
+                                                ),
+                                                child: Text(
+                                                  'ดูเหมือนว่าคุณยังไม่ได้อนุญาตให้เราแจ้งเตือนได้นะ :<',
+                                                  style: textTheme.bodyMedium!
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+
+                                        return;
+                                      }
+
+                                      setState(() {
+                                        isNotify = value;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 25),
+                              if (isNotify) const Text('Yipeee'),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   if (widget.timetable != null)
