@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -41,6 +42,7 @@ class NotificationService {
         priority: Priority.high,
         fullScreenIntent: true,
         enableVibration: true,
+        playSound: true,
       ),
       iOS: DarwinNotificationDetails(),
     );
@@ -65,7 +67,9 @@ class NotificationService {
     required Timetable timetable,
     required int dateIndex,
   }) async {
-    if (!timetable.isNotify) {
+    if (!timetable.isNotify ||
+        await Permission.notification.isDenied ||
+        await Permission.scheduleExactAlarm.isDenied) {
       return;
     }
 

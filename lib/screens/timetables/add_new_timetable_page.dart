@@ -30,7 +30,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
   final _professorController = TextEditingController();
 
   Time _startTime = Time(TimeOfDay.now().hour, 0);
-  Time _endTime = Time(TimeOfDay.now().hour + 1, 0);
+  late Time _endTime;
 
   late bool isNotify;
   late Time notifyTime;
@@ -116,8 +116,18 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
     selectedDayIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
 
+    if (_startTime.hour + 1 == 24) {
+      _endTime = Time(0, 0);
+    } else {
+      _endTime = Time(_startTime.hour + 1, 0);
+    }
+
     WidgetsBinding.instance.addObserver(this);
     _checkPermission();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
 
     super.initState();
   }
@@ -527,7 +537,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                       ),
                                       const Spacer(),
                                       Switch(
-                                        value: isNotify,
+                                        value: !isPermissionGranted
+                                            ? false
+                                            : isNotify,
                                         onChanged: (value) async {
                                           if (!isPermissionGranted) {
                                             _showPermissionDialog();
@@ -542,7 +554,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                     ],
                                   ),
                                   const SizedBox(height: 25),
-                                  if (isNotify)
+                                  if (isNotify && isPermissionGranted)
                                     Row(
                                       children: [
                                         Text(
