@@ -151,7 +151,7 @@ class _TimetablePageState extends State<TimetablePage> {
                   blendMode: BlendMode.dstIn,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      if (constraints.maxHeight < 300) {
+                      if (constraints.maxHeight < 300 && constraints.maxWidth >= 600) {
                         return Center(
                           child: Padding(
                             padding: const EdgeInsets.all(16),

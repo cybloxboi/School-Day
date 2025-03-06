@@ -36,8 +36,8 @@ class NotificationService {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
         'weekly_channel_id',
-        'Weekly Notifications',
-        channelDescription: 'Weekly Notification Channel',
+        'การแจ้งเตือนการเข้าเรียน',
+        channelDescription: 'แจ้งเตือนให้คุณรู้ว่าถึงเวลาเรียนตามในตารางแล้ว',
         importance: Importance.max,
         priority: Priority.high,
         fullScreenIntent: true,
