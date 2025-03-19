@@ -18,7 +18,9 @@ Future<void> main() async {
     persistenceEnabled: true,
   );
 
-  if (!kIsWeb) NotificationService().initNotification();
+  if (!kIsWeb) {
+    NotificationService().initNotification();
+  }
 
   runApp(const MainApp());
 }

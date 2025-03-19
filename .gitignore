@@ -45,3 +45,6 @@ app.*.map.json
 /android/app/release
 
 .firebase
+
+# API Key
+/lib/api_key.dart

@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:school_day/api_key.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -48,7 +49,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBGbF9gFXI77ejuzftEQr7FSakGvTy83Fg',
+    apiKey: webKey,
     appId: '1:648610348518:web:01826415520f83b889aa27',
     messagingSenderId: '648610348518',
     projectId: 'school-day-a1e87',
@@ -58,7 +59,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDqEEQOEvieCOoUQzVCmoOIX6WWKsfSDLY',
+    apiKey: androidKey,
     appId: '1:648610348518:android:a2a05922c07c312e89aa27',
     messagingSenderId: '648610348518',
     projectId: 'school-day-a1e87',
@@ -66,7 +67,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA0hBems9SVmQznrVe3J66c4BjtitBEyy4',
+    apiKey: iOSKey,
     appId: '1:648610348518:ios:5807e7f352eb30ec89aa27',
     messagingSenderId: '648610348518',
     projectId: 'school-day-a1e87',

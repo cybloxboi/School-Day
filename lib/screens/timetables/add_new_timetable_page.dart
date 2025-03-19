@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +69,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
   late bool _isExactAlarmOn;
 
   Future<bool> _checkPermission() async {
-    if (kIsWeb) return false;
+    if (kIsWeb) return true;
 
     PermissionStatus notificationStatus = await Permission.notification.status;
     PermissionStatus exactAlarmStatus =
@@ -113,15 +112,15 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
       isNotify = true;
       notifyTime = Time(0, 0);
       selectedNotification = 0;
+
+      if (_startTime.hour + 1 == 24) {
+        _endTime = Time(0, 0);
+      } else {
+        _endTime = Time(_startTime.hour + 1, 0);
+      }
     }
 
     selectedDayIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
-
-    if (_startTime.hour + 1 == 24) {
-      _endTime = Time(0, 0);
-    } else {
-      _endTime = Time(_startTime.hour + 1, 0);
-    }
 
     WidgetsBinding.instance.addObserver(this);
     _checkPermission();
@@ -508,130 +507,124 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                           ],
                         ),
                       ),
-                      if (!kIsWeb)
-                        FutureBuilder(
-                          future: _checkPermission(),
-                          builder: (context, snapshot) {
-                            bool isPermissionGranted = snapshot.data ?? false;
+                      FutureBuilder(
+                        future: _checkPermission(),
+                        builder: (context, snapshot) {
+                          bool isPermissionGranted = snapshot.data ?? false;
 
-                            return ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 600),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
+                          return ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.notifications_outlined),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        'แจ้งเตือนเวลาเข้าเรียน',
+                                        softWrap: true,
+                                        style: textTheme.bodyMedium!
+                                            .copyWith(fontSize: 16),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Switch(
+                                      value: !isPermissionGranted
+                                          ? false
+                                          : isNotify,
+                                      onChanged: (value) async {
+                                        if (!isPermissionGranted) {
+                                          _showPermissionDialog();
+                                          return;
+                                        }
+
+                                        setState(() {
+                                          isNotify = value;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 25),
+                                if (isNotify && isPermissionGranted)
                                   Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.notifications_outlined),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Text(
-                                          'แจ้งเตือนเวลาเข้าเรียน',
-                                          softWrap: true,
-                                          style: textTheme.bodyMedium!
-                                              .copyWith(fontSize: 16),
+                                      Text(
+                                        'แจ้งเตือนเมื่อ',
+                                        style: textTheme.bodyMedium!.copyWith(
+                                          fontSize: 16,
                                         ),
                                       ),
                                       const Spacer(),
-                                      Switch(
-                                        value: !isPermissionGranted
-                                            ? false
-                                            : isNotify,
-                                        onChanged: (value) async {
-                                          if (!isPermissionGranted) {
-                                            _showPermissionDialog();
-                                            return;
-                                          }
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: Text(
+                                                  'เลือกเวลาแจ้งเตือน',
+                                                  style: textTheme.bodyMedium!
+                                                      .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                content: SingleChildScrollView(
+                                                  child: Column(
+                                                    children: List.generate(
+                                                      notificationTimes.length,
+                                                      (index) {
+                                                        return RadioListTile(
+                                                          title: Text(
+                                                            notificationTimesKeys[
+                                                                index],
+                                                          ),
+                                                          value: index,
+                                                          groupValue:
+                                                              selectedNotification,
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              selectedNotification =
+                                                                  value!;
 
-                                          setState(() {
-                                            isNotify = value;
-                                          });
+                                                              notifyTime =
+                                                                  notificationTimesValues[
+                                                                      value];
+                                                            });
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
                                         },
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 25),
-                                  if (isNotify && isPermissionGranted)
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'แจ้งเตือนเมื่อ',
+                                        child: Text(
+                                          notificationTimesKeys[
+                                              selectedNotification],
                                           style: textTheme.bodyMedium!.copyWith(
                                             fontSize: 16,
                                           ),
                                         ),
-                                        const Spacer(),
-                                        TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  title: Text(
-                                                    'เลือกเวลาแจ้งเตือน',
-                                                    style: textTheme.bodyMedium!
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  content:
-                                                      SingleChildScrollView(
-                                                    child: Column(
-                                                      children: List.generate(
-                                                        notificationTimes
-                                                            .length,
-                                                        (index) {
-                                                          return RadioListTile(
-                                                            title: Text(
-                                                              notificationTimesKeys[
-                                                                  index],
-                                                            ),
-                                                            value: index,
-                                                            groupValue:
-                                                                selectedNotification,
-                                                            onChanged: (value) {
-                                                              setState(() {
-                                                                selectedNotification =
-                                                                    value!;
-
-                                                                notifyTime =
-                                                                    notificationTimesValues[
-                                                                        value];
-                                                              });
-                                                              Navigator.pop(
-                                                                context,
-                                                              );
-                                                            },
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Text(
-                                            notificationTimesKeys[
-                                                selectedNotification],
-                                            style:
-                                                textTheme.bodyMedium!.copyWith(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],

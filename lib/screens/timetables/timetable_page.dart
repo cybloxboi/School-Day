@@ -151,7 +151,7 @@ class _TimetablePageState extends State<TimetablePage> {
                   blendMode: BlendMode.dstIn,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      if (constraints.maxHeight < 300 && constraints.maxWidth >= 600) {
+                      if (constraints.maxHeight < 200) {
                         return Center(
                           child: Padding(
                             padding: const EdgeInsets.all(16),
@@ -248,23 +248,26 @@ class _TimetablePageState extends State<TimetablePage> {
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              return ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: TimelineTile(
-                  axis: TimelineAxis.horizontal,
-                  isFirst: index == 0,
-                  isLast: index == entries.length - 1,
-                  beforeLineStyle: const LineStyle(
-                    color: secondaryColor,
+              return TimelineTile(
+                axis: TimelineAxis.horizontal,
+                isFirst: index == 0,
+                isLast: index == entries.length - 1,
+                beforeLineStyle: const LineStyle(
+                  color: secondaryColor,
+                ),
+                indicatorStyle: const IndicatorStyle(
+                  color: primaryColor,
+                ),
+                endChild: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 16,
+                    right: 16,
+                    left: 16,
                   ),
-                  indicatorStyle: const IndicatorStyle(
-                    color: primaryColor,
-                  ),
-                  endChild: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 16,
-                      right: 16,
-                      left: 16,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 450,
+                      maxWidth: 600,
                     ),
                     child: Column(
                       spacing: 16,
@@ -329,26 +332,29 @@ class _TimetablePageState extends State<TimetablePage> {
               ),
               endChild: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
-                  children: [
-                    Row(
-                      spacing: 8,
-                      children: [
-                        const Icon(Icons.schedule_rounded),
-                        Text(
-                          '${entries[index].key}:00',
-                          style: textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
+                    children: [
+                      Row(
+                        spacing: 8,
+                        children: [
+                          const Icon(Icons.schedule_rounded),
+                          Text(
+                            '${entries[index].key}:00',
+                            style: textTheme.bodyMedium!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    for (var i in entries[index].value) card(i),
-                  ],
+                        ],
+                      ),
+                      const Divider(),
+                      for (var i in entries[index].value) card(i),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -377,7 +383,7 @@ class _TimetablePageState extends State<TimetablePage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            spacing: 8,
+            spacing: 16,
             children: [
               Row(
                 children: [
@@ -403,18 +409,40 @@ class _TimetablePageState extends State<TimetablePage> {
                 ],
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    details.startTime.toString(),
-                    style: textTheme.bodySmall,
+                  Row(
+                    children: [
+                      Text(
+                        details.startTime.toString(),
+                        style: textTheme.bodySmall,
+                      ),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                      ),
+                      Text(
+                        details.endTime.toString(),
+                        style: textTheme.bodySmall,
+                      ),
+                    ],
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 16,
-                  ),
-                  Text(
-                    details.endTime.toString(),
-                    style: textTheme.bodySmall,
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Icon(
+                        details.isNotify
+                            ? Icons.notifications_rounded
+                            : Icons.notifications_off,
+                        color: details.isNotify ? secondaryColor : Colors.grey,
+                      ),
+                      Text(
+                        details.isNotify
+                            ? 'การแจ้งเตือนเปิด'
+                            : 'การแจ้งเตือนปิด',
+                        style: textTheme.bodySmall,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -424,21 +452,25 @@ class _TimetablePageState extends State<TimetablePage> {
                 children: [
                   const Icon(
                     Icons.person_rounded,
-                    color: primaryColor,
+                    color: secondaryColor,
                   ),
                   Expanded(
+                    flex: 2,
                     child: Text(
                       details.professor,
                       style: textTheme.bodySmall,
                       softWrap: true,
                     ),
                   ),
-                  const Spacer(),
+                  const Spacer(
+                    flex: 1,
+                  ),
                   const Icon(
                     Icons.location_city_rounded,
-                    color: primaryColor,
+                    color: secondaryColor,
                   ),
                   Expanded(
+                    flex: 2,
                     child: Text(
                       details.location,
                       style: textTheme.bodySmall,
