@@ -1,12 +1,56 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 import '../data/time.dart';
 import '../data/timetable.dart';
 
-Future<Map<int, List<Timetable>>> fetchTimetable(String userEmail) async {
+Future<void> createFirstTimetable(String userEmail,
+    [String? timetableID]) async {
   final firestore = FirebaseFirestore.instance;
   final timetablesRef =
       firestore.collection('Users').doc(userEmail).collection('Timetables');
+
+  timetableID ??= timetablesRef.doc().id;
+
+  Map<String, dynamic> firstTimetable = {
+    'name': 'ตารางเรียนเริ่มต้น',
+    'createdAt': Timestamp.now(),
+  };
+
+  try {
+    await timetablesRef.doc(timetableID).set(firstTimetable);
+
+    List<String> days = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ];
+
+    for (String day in days) {
+      await timetablesRef.doc(timetableID).collection('Days').doc(day).set({
+        'lessons': [],
+      });
+    }
+  } catch (e) {
+    return;
+  }
+}
+
+Future<Map<int, List<Timetable>>> fetchTimetable(
+  String userEmail,
+  String timetableID,
+) async {
+  final firestore = FirebaseFirestore.instance;
+  final timetablesRef = firestore
+      .collection('Users')
+      .doc(userEmail)
+      .collection('Timetables')
+      .doc(timetableID)
+      .collection('Days');
 
   Map<int, List<Timetable>> data = {for (var i = 0; i < 7; i++) i: []};
 
@@ -15,11 +59,15 @@ Future<Map<int, List<Timetable>>> fetchTimetable(String userEmail) async {
   for (var doc in querySnapshot.docs) {
     int dayIndex = _dayNameToIndex(doc.id);
 
-    if (doc.exists && doc.data().containsKey('lessons')) {
-      List<dynamic> lessons = doc.data()['lessons'];
+    if (doc.exists) {
+      if (doc.data().containsKey('lessons') && doc.data()['lessons'] != null) {
+        List<dynamic> lessons = doc.data()['lessons'];
 
-      data[dayIndex] =
-          lessons.map((lesson) => Timetable.fromJson(lesson)).toList();
+        data[dayIndex] =
+            lessons.map((lesson) => Timetable.fromJson(lesson)).toList();
+      } else {
+        data[dayIndex] = [];
+      }
     }
   }
 
@@ -41,6 +89,7 @@ int _dayNameToIndex(String dayName) {
 
 Future<bool> addTimetableEntry(
   String userEmail,
+  String timetableID,
   String day,
   String title,
   Time startTime,
@@ -55,6 +104,8 @@ Future<bool> addTimetableEntry(
       .collection('Users')
       .doc(userEmail)
       .collection('Timetables')
+      .doc(timetableID)
+      .collection('Days')
       .doc(day);
 
   Map<String, dynamic> newLesson = {
@@ -89,6 +140,7 @@ Future<bool> addTimetableEntry(
 
 Future<bool> updateTimetableEntry(
   String userEmail,
+  String timetableID,
   String oldDay,
   String newDay,
   String title,
@@ -105,12 +157,16 @@ Future<bool> updateTimetableEntry(
         .collection('Users')
         .doc(userEmail)
         .collection('Timetables')
+        .doc(timetableID)
+        .collection('Days')
         .doc(oldDay);
 
     DocumentReference newDayDoc = FirebaseFirestore.instance
         .collection('Users')
         .doc(userEmail)
         .collection('Timetables')
+        .doc(timetableID)
+        .collection('Days')
         .doc(newDay);
 
     DocumentSnapshot oldDaySnapshot = await oldDayDoc.get();
@@ -162,12 +218,18 @@ Future<bool> updateTimetableEntry(
 }
 
 Future<bool> deleteTimetableEntry(
-    String userEmail, String day, String id) async {
+  String userEmail,
+  String timetableID,
+  String day,
+  String id,
+) async {
   try {
     DocumentReference timetableDoc = FirebaseFirestore.instance
         .collection('Users')
         .doc(userEmail)
         .collection('Timetables')
+        .doc(timetableID)
+        .collection('Days')
         .doc(day);
 
     DocumentSnapshot documentSnapshot = await timetableDoc.get();
@@ -193,5 +255,93 @@ Future<bool> deleteTimetableEntry(
     return false;
   } catch (e) {
     return false;
+  }
+}
+
+Future<String?> createTimetable(String userEmail, String timetableName) async {
+  try {
+    String timetableID = const Uuid().v4();
+
+    DocumentReference timetableRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .doc(timetableID);
+
+    await timetableRef.set({
+      'name': timetableName,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    return timetableID;
+  } catch (e) {
+    return null;
+  }
+}
+
+Future<List<Map<String, String>>> getAllTimetableSets(String userEmail) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .get();
+
+    List<Map<String, String>> timetables = [];
+
+    for (var doc in querySnapshot.docs) {
+      timetables.add({
+        'id': doc.id,
+        'name': doc['name'],
+      });
+    }
+
+    return timetables;
+  } catch (e) {
+    return [];
+  }
+}
+
+Future<List<String>> fetchTimetableIDs(String userEmail) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .get();
+
+    List<String> timetableIDs =
+        querySnapshot.docs.map((doc) => doc.id).toList();
+
+    return timetableIDs;
+  } catch (e) {
+    return [];
+  }
+}
+
+Future<void> updateCurrentTimetableID(
+  String userEmail,
+  String newTimetableID,
+) async {
+  await FirebaseFirestore.instance
+      .collection('Users')
+      .doc(userEmail)
+      .update({'currentTimetableID': newTimetableID});
+}
+
+Future<String?> getCurrentTimetableID(String userEmail) async {
+  try {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .get();
+
+    if (userDoc.exists && userDoc.data() != null) {
+      return userDoc['currentTimetableID'] as String?;
+    }
+
+    return null;
+  } catch (e) {
+    return null;
   }
 }

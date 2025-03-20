@@ -11,9 +11,15 @@ import 'package:school_day/styles/styles.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewTimetablePage extends StatefulWidget {
-  const AddNewTimetablePage({super.key, this.timetable, this.dateIndex});
+  const AddNewTimetablePage({
+    super.key,
+    this.timetable,
+    this.dateIndex,
+    required this.timetableId,
+  });
 
   final Timetable? timetable;
+  final String timetableId;
   final int? dateIndex;
 
   @override
@@ -240,6 +246,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   if (widget.timetable != null) {
                     success = await updateTimetableEntry(
                       userEmail,
+                      widget.timetableId,
                       dayKeys[widget.dateIndex!],
                       day,
                       _subjectController.text.trim(),
@@ -254,6 +261,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   } else {
                     success = await addTimetableEntry(
                       userEmail,
+                      widget.timetableId,
                       day,
                       _subjectController.text.trim(),
                       _startTime,
@@ -679,6 +687,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
                   bool success = await deleteTimetableEntry(
                     _currentUser!.email!,
+                    widget.timetableId,
                     dayKeys[selectedDayIndex],
                     widget.timetable!.id,
                   );

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/timetable_sets.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/auth/login_page.dart';
@@ -9,6 +11,7 @@ import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:uuid/uuid.dart';
 
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key, this.dateIndex});
@@ -22,6 +25,7 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage> {
   late int dateIndex;
   late final User currentUser;
+  String? currentTimetableID;
 
   final List<String> daysInAWeek = [
     'จ.',
@@ -33,9 +37,46 @@ class _TimetablePageState extends State<TimetablePage> {
     'อา.',
   ];
 
+  Future<void> fetchCurrentTimetableID() async {
+    String userEmail = currentUser.email!;
+    String? timetableID = await getCurrentTimetableID(userEmail);
+
+    if (!mounted) return;
+
+    if (timetableID != null) {
+      setState(() {
+        currentTimetableID = timetableID;
+      });
+    } else {
+      List<Map<String, String>> existingTimetables =
+          await getAllTimetableSets(userEmail);
+
+      if (existingTimetables.isNotEmpty) {
+        String firstTimetableID = existingTimetables.first['id']!;
+        await updateCurrentTimetableID(userEmail, firstTimetableID);
+
+        if (!mounted) return;
+
+        setState(() {
+          currentTimetableID = firstTimetableID;
+        });
+      } else {
+        String newTimetableID = const Uuid().v4();
+        await createFirstTimetable(userEmail, newTimetableID);
+        await updateCurrentTimetableID(userEmail, newTimetableID);
+
+        if (!mounted) return;
+
+        setState(() {
+          currentTimetableID = newTimetableID;
+        });
+      }
+    }
+  }
+
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-    NotificationService().cancelAllNotifications();
+    if (!kIsWeb) NotificationService().cancelAllNotifications();
 
     if (!context.mounted) return;
 
@@ -57,7 +98,13 @@ class _TimetablePageState extends State<TimetablePage> {
   void initState() {
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
     currentUser = FirebaseAuth.instance.currentUser!;
+    fetchCurrentTimetableID();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -72,15 +119,112 @@ class _TimetablePageState extends State<TimetablePage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: TextButton.icon(
-              onPressed: () => logOut(context),
-              icon: const Icon(Icons.logout_rounded),
-              label: Text(
-                'ล็อคเอาท์',
-                style: textTheme.bodySmall!.copyWith(
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              spacing: 4,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Spacer(),
+                                    IconButton.filledTonal(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: const Icon(Icons.cancel_rounded),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Text(
+                                  'เลือกชุดตารางเรียน',
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Divider(),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Expanded(
+                                  child: FutureBuilder(
+                                    future: currentTimetableID == null
+                                        ? Future.value(null)
+                                        : getAllTimetableSets(
+                                            currentUser.email!,
+                                          ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.waiting ||
+                                          currentTimetableID == null) {
+                                        return Center(
+                                          child: LoadingAnimationWidget
+                                              .fourRotatingDots(
+                                            color: primaryColor,
+                                            size: 80,
+                                          ),
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return Center(
+                                          child: Text(
+                                            "Error: ${snapshot.error}",
+                                          ),
+                                        );
+                                      }
+
+                                      return TimetableSets(
+                                        timetables: snapshot.data!,
+                                        currentTimetableId: currentTimetableID!,
+                                        userEmail: currentUser.email!,
+                                        onTimetableChanged:
+                                            (String newTimetableId) {
+                                          setState(() {
+                                            currentTimetableID = newTimetableId;
+                                          });
+
+                                          fetchTimetable(
+                                            currentUser.email!,
+                                            currentTimetableID!,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.list_rounded),
                 ),
-              ),
+                TextButton.icon(
+                  onPressed: () => logOut(context),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: Text(
+                    'ล็อคเอาท์',
+                    style: textTheme.bodySmall!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -90,7 +234,10 @@ class _TimetablePageState extends State<TimetablePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNewTimetablePage(dateIndex: dateIndex),
+              builder: (context) => AddNewTimetablePage(
+                dateIndex: dateIndex,
+                timetableId: currentTimetableID!,
+              ),
             ),
           );
         },
@@ -168,10 +315,16 @@ class _TimetablePageState extends State<TimetablePage> {
                       }
 
                       return FutureBuilder(
-                        future: fetchTimetable(currentUser.email!),
+                        future: currentTimetableID == null
+                            ? Future.value(null)
+                            : fetchTimetable(
+                                currentUser.email!,
+                                currentTimetableID!,
+                              ),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                                  ConnectionState.waiting ||
+                              currentTimetableID == null) {
                             return Center(
                               child: LoadingAnimationWidget.fourRotatingDots(
                                 color: primaryColor,
@@ -375,6 +528,7 @@ class _TimetablePageState extends State<TimetablePage> {
               builder: (context) => AddNewTimetablePage(
                 timetable: details,
                 dateIndex: dateIndex,
+                timetableId: currentTimetableID!,
               ),
             ),
           );
