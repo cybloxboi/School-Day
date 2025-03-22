@@ -34,140 +34,141 @@ class _TimetableSetsState extends State<TimetableSets> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _futureTimetableSets,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: primaryColor,
-                size: 80,
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
-
-          List<Map<String, String>> timetables = snapshot.data!;
-
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 400,
-              mainAxisExtent: 150,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 3 / 2,
+      future: _futureTimetableSets,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: LoadingAnimationWidget.fourRotatingDots(
+              color: primaryColor,
+              size: 80,
             ),
-            itemCount: timetables.length + 1,
-            itemBuilder: (context, index) {
-              bool isAddButton = index == timetables.length;
-              bool isSelected = !isAddButton &&
-                  timetables[index]['id'] == widget.currentTimetableId;
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
 
-              return Card(
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                color: isSelected ? secondaryColor : null,
-                child: InkWell(
-                  onTap: () async {
-                    if (isAddButton) {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return AddTimetablesetsPage(
-                            isEdited: false,
-                            userEmail: widget.userEmail,
-                            isCurrent: isSelected,
-                            onAdd: () {
-                              setState(() {
-                                _futureTimetableSets =
-                                    getAllTimetableSets(widget.userEmail);
-                              });
-                            },
-                          );
-                        },
-                      );
-                    } else {
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
+        List<Map<String, String>> timetables = snapshot.data!;
 
-                      String newTimetableId = timetables[index]['id']!;
+        return GridView.builder(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 400,
+            mainAxisExtent: 150,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 3 / 2,
+          ),
+          itemCount: timetables.length + 1,
+          itemBuilder: (context, index) {
+            bool isAddButton = index == timetables.length;
+            bool isSelected = !isAddButton &&
+                timetables[index]['id'] == widget.currentTimetableId;
 
-                      widget.onTimetableChanged(newTimetableId);
-
-                      setState(() {
-                        selectedTimetableId = newTimetableId;
-                      });
-
-                      await updateCurrentTimetableID(
-                        widget.userEmail,
-                        newTimetableId,
-                      );
+            return Card(
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              color: isSelected ? secondaryColor : null,
+              child: InkWell(
+                onTap: () async {
+                  if (isAddButton) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return AddTimetablesetsPage(
+                          isEdited: false,
+                          userEmail: widget.userEmail,
+                          isCurrent: isSelected,
+                          onAdd: () {
+                            setState(() {
+                              _futureTimetableSets =
+                                  getAllTimetableSets(widget.userEmail);
+                            });
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    if (context.mounted) {
+                      Navigator.pop(context);
                     }
-                  },
-                  onLongPress: () {
-                    if (!isAddButton) {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return AddTimetablesetsPage(
-                            isEdited: true,
-                            userEmail: widget.userEmail,
-                            timetableSetName: timetables[index]['name']!,
-                            isCurrent: isSelected,
-                            timetableSetId: timetables[index]['id'],
-                            onAdd: () {
-                              setState(() {
-                                _futureTimetableSets =
-                                    getAllTimetableSets(widget.userEmail);
-                              });
-                            },
-                          );
-                        },
-                      );
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (isAddButton)
-                            const Column(
-                              spacing: 8,
+
+                    String newTimetableId = timetables[index]['id']!;
+
+                    widget.onTimetableChanged(newTimetableId);
+
+                    setState(() {
+                      selectedTimetableId = newTimetableId;
+                    });
+
+                    await updateCurrentTimetableID(
+                      widget.userEmail,
+                      newTimetableId,
+                    );
+                  }
+                },
+                onLongPress: () {
+                  if (!isAddButton) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return AddTimetablesetsPage(
+                          isEdited: true,
+                          userEmail: widget.userEmail,
+                          timetableSetName: timetables[index]['name']!,
+                          isCurrent: isSelected,
+                          timetableSetId: timetables[index]['id'],
+                          onAdd: () {
+                            setState(() {
+                              _futureTimetableSets =
+                                  getAllTimetableSets(widget.userEmail);
+                            });
+                          },
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isAddButton)
+                          const Column(
+                            spacing: 8,
+                            children: [
+                              Icon(Icons.add_rounded),
+                              Text('สร้างเซตตารางเรียนใหม่'),
+                            ],
+                          )
+                        else
+                          Center(
+                            child: Column(
+                              spacing: 16,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_rounded),
-                                Text('สร้างเซตตารางเรียนใหม่'),
-                              ],
-                            )
-                          else
-                            Center(
-                              child: Column(
-                                spacing: 16,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    timetables[index]['name']!,
-                                    style: textTheme.bodyMedium!.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
+                                Text(
+                                  timetables[index]['name']!,
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  if (isSelected) const Icon(Icons.check_rounded),
-                                ],
-                              ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                                if (isSelected) const Icon(Icons.check_rounded),
+                              ],
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
-          );
-        });
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
