@@ -71,17 +71,25 @@ class _TimetableSetsState extends State<TimetableSets> {
                   if (isAddButton) {
                     showModalBottomSheet(
                       context: context,
+                      isScrollControlled: true,
                       builder: (context) {
-                        return AddTimetablesetsPage(
-                          isEdited: false,
-                          userEmail: widget.userEmail,
-                          isCurrent: isSelected,
-                          onAdd: () {
-                            setState(() {
-                              _futureTimetableSets =
-                                  getAllTimetableSets(widget.userEmail);
-                            });
-                          },
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                          ),
+                          child: SingleChildScrollView(
+                            child: AddTimetablesetsPage(
+                              isEdited: false,
+                              userEmail: widget.userEmail,
+                              isCurrent: isSelected,
+                              onAdd: () {
+                                setState(() {
+                                  _futureTimetableSets =
+                                      getAllTimetableSets(widget.userEmail);
+                                });
+                              },
+                            ),
+                          ),
                         );
                       },
                     );
@@ -108,19 +116,27 @@ class _TimetableSetsState extends State<TimetableSets> {
                   if (!isAddButton) {
                     showModalBottomSheet(
                       context: context,
+                      isScrollControlled: true,
                       builder: (context) {
-                        return AddTimetablesetsPage(
-                          isEdited: true,
-                          userEmail: widget.userEmail,
-                          timetableSetName: timetables[index]['name']!,
-                          isCurrent: isSelected,
-                          timetableSetId: timetables[index]['id'],
-                          onAdd: () {
-                            setState(() {
-                              _futureTimetableSets =
-                                  getAllTimetableSets(widget.userEmail);
-                            });
-                          },
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                          ),
+                          child: SingleChildScrollView(
+                            child: AddTimetablesetsPage(
+                              isEdited: true,
+                              userEmail: widget.userEmail,
+                              timetableSetName: timetables[index]['name']!,
+                              isCurrent: isSelected,
+                              timetableSetId: timetables[index]['id'],
+                              onAdd: () {
+                                setState(() {
+                                  _futureTimetableSets =
+                                      getAllTimetableSets(widget.userEmail);
+                                });
+                              },
+                            ),
+                          ),
                         );
                       },
                     );

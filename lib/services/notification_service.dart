@@ -116,3 +116,9 @@ class NotificationService {
     await notificationsPlugin.cancelAll();
   }
 }
+
+void requestNotificationPermission() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+}

@@ -40,7 +40,8 @@ class _MainAppState extends State<MainApp> {
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.noScaling), // Disable text scaling
+            textScaler: TextScaler.noScaling,
+          ),
           child: child!,
         );
       },

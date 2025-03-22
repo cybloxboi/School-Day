@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
+import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:uuid/uuid.dart';
@@ -134,6 +135,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
     });
+
+    requestNotificationPermission();
 
     super.initState();
   }
