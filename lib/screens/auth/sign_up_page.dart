@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/is_valid_email.dart';
+import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -74,32 +74,6 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
-    }
-  }
-
-  Future<void> createUserDocument(UserCredential? userCredential) async {
-    DocumentReference userDoc = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userCredential?.user!.email);
-    List<String> days = [
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-      "sunday"
-    ];
-
-    try {
-      await userDoc.set(
-          {'email': userCredential?.user!.email, 'createdAt': Timestamp.now()});
-
-      for (String day in days) {
-        await userDoc.collection('Timetables').doc(day).set({'lessons': []});
-      }
-    } catch (e) {
-      return;
     }
   }
 

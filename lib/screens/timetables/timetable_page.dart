@@ -11,7 +11,6 @@ import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-import 'package:uuid/uuid.dart';
 
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key, this.dateIndex});
@@ -43,35 +42,9 @@ class _TimetablePageState extends State<TimetablePage> {
 
     if (!mounted) return;
 
-    if (timetableID != null) {
-      setState(() {
-        currentTimetableID = timetableID;
-      });
-    } else {
-      List<Map<String, String>> existingTimetables =
-          await getAllTimetableSets(userEmail);
-
-      if (existingTimetables.isNotEmpty) {
-        String firstTimetableID = existingTimetables.first['id']!;
-        await updateCurrentTimetableID(userEmail, firstTimetableID);
-
-        if (!mounted) return;
-
-        setState(() {
-          currentTimetableID = firstTimetableID;
-        });
-      } else {
-        String newTimetableID = const Uuid().v4();
-        await createFirstTimetable(userEmail, newTimetableID);
-        await updateCurrentTimetableID(userEmail, newTimetableID);
-
-        if (!mounted) return;
-
-        setState(() {
-          currentTimetableID = newTimetableID;
-        });
-      }
-    }
+    setState(() {
+      currentTimetableID = timetableID;
+    });
   }
 
   Future logOut(BuildContext context) async {
@@ -124,13 +97,14 @@ class _TimetablePageState extends State<TimetablePage> {
               children: [
                 IconButton(
                   onPressed: () {
+                    if (currentTimetableID == null) return;
+
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
                       builder: (BuildContext context) {
                         return SizedBox(
                           height: MediaQuery.of(context).size.height * 0.8,
-                          width: MediaQuery.of(context).size.width * 0.8,
                           child: Padding(
                             padding: const EdgeInsets.all(32),
                             child: Column(
@@ -151,7 +125,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   height: 16,
                                 ),
                                 Text(
-                                  'เลือกชุดตารางเรียน',
+                                  'เลือกเซตตารางเรียน',
                                   style: textTheme.bodyMedium!.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -161,46 +135,18 @@ class _TimetablePageState extends State<TimetablePage> {
                                   height: 16,
                                 ),
                                 Expanded(
-                                  child: FutureBuilder(
-                                    future: currentTimetableID == null
-                                        ? Future.value(null)
-                                        : getAllTimetableSets(
-                                            currentUser.email!,
-                                          ),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                              ConnectionState.waiting ||
-                                          currentTimetableID == null) {
-                                        return Center(
-                                          child: LoadingAnimationWidget
-                                              .fourRotatingDots(
-                                            color: primaryColor,
-                                            size: 80,
-                                          ),
-                                        );
-                                      } else if (snapshot.hasError) {
-                                        return Center(
-                                          child: Text(
-                                            "Error: ${snapshot.error}",
-                                          ),
-                                        );
-                                      }
+                                  child: TimetableSets(
+                                    currentTimetableId: currentTimetableID!,
+                                    userEmail: currentUser.email!,
+                                    onTimetableChanged:
+                                        (String newTimetableId) {
+                                      setState(() {
+                                        currentTimetableID = newTimetableId;
+                                      });
 
-                                      return TimetableSets(
-                                        timetables: snapshot.data!,
-                                        currentTimetableId: currentTimetableID!,
-                                        userEmail: currentUser.email!,
-                                        onTimetableChanged:
-                                            (String newTimetableId) {
-                                          setState(() {
-                                            currentTimetableID = newTimetableId;
-                                          });
-
-                                          fetchTimetable(
-                                            currentUser.email!,
-                                            currentTimetableID!,
-                                          );
-                                        },
+                                      fetchTimetable(
+                                        currentUser.email!,
+                                        currentTimetableID!,
                                       );
                                     },
                                   ),

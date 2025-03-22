@@ -1,24 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/time.dart';
 import '../data/timetable.dart';
 
-Future<void> createFirstTimetable(String userEmail,
-    [String? timetableID]) async {
+Future<void> createUserDocument(UserCredential? userCredential) async {
   final firestore = FirebaseFirestore.instance;
-  final timetablesRef =
-      firestore.collection('Users').doc(userEmail).collection('Timetables');
 
-  timetableID ??= timetablesRef.doc().id;
-
-  Map<String, dynamic> firstTimetable = {
-    'name': 'ตารางเรียนเริ่มต้น',
-    'createdAt': Timestamp.now(),
-  };
+  DocumentReference userDoc = firestore.collection('Users').doc(
+        userCredential?.user!.email,
+      );
 
   try {
-    await timetablesRef.doc(timetableID).set(firstTimetable);
+    await userDoc.set({
+      'email': userCredential?.user!.email,
+      'createdAt': Timestamp.now(),
+      'currentTimetableID': null,
+    });
+
+    String timetableID = userDoc.collection('Timetables').doc().id;
+
+    Map<String, dynamic> defaultTimetable = {
+      'name': 'ตารางเรียนเริ่มต้น',
+      'createdAt': Timestamp.now(),
+    };
+    await userDoc
+        .collection('Timetables')
+        .doc(timetableID)
+        .set(defaultTimetable);
 
     List<String> days = [
       "monday",
@@ -31,10 +41,17 @@ Future<void> createFirstTimetable(String userEmail,
     ];
 
     for (String day in days) {
-      await timetablesRef.doc(timetableID).collection('Days').doc(day).set({
+      await userDoc
+          .collection('Timetables')
+          .doc(timetableID)
+          .collection('Days')
+          .doc(day)
+          .set({
         'lessons': [],
       });
     }
+
+    await userDoc.update({'currentTimetableID': timetableID});
   } catch (e) {
     return;
   }
@@ -258,7 +275,7 @@ Future<bool> deleteTimetableEntry(
   }
 }
 
-Future<String?> createTimetable(String userEmail, String timetableName) async {
+Future<bool> createTimetable(String userEmail, String timetableName) async {
   try {
     String timetableID = const Uuid().v4();
 
@@ -273,9 +290,69 @@ Future<String?> createTimetable(String userEmail, String timetableName) async {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    return timetableID;
+    List<String> days = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ];
+
+    for (String day in days) {
+      await timetableRef.collection('Days').doc(day).set({
+        'lessons': [],
+      });
+    }
+
+    return true;
   } catch (e) {
-    return null;
+    return false;
+  }
+}
+
+Future<bool> updateTimetableName(
+  String userEmail,
+  String timetableID,
+  String newTimetableName,
+) async {
+  try {
+    DocumentReference timetableRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .doc(timetableID);
+
+    await timetableRef.update({
+      'name': newTimetableName,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<bool> deleteTimetableSet(String userEmail, String timetableID) async {
+  try {
+    DocumentReference timetableRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userEmail)
+        .collection('Timetables')
+        .doc(timetableID);
+
+    QuerySnapshot daysSnapshot = await timetableRef.collection('Days').get();
+    for (DocumentSnapshot doc in daysSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    await timetableRef.delete();
+
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
