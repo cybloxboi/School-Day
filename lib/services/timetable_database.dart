@@ -379,23 +379,6 @@ Future<List<Map<String, String>>> getAllTimetableSets(String userEmail) async {
   }
 }
 
-Future<List<String>> fetchTimetableIDs(String userEmail) async {
-  try {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userEmail)
-        .collection('Timetables')
-        .get();
-
-    List<String> timetableIDs =
-        querySnapshot.docs.map((doc) => doc.id).toList();
-
-    return timetableIDs;
-  } catch (e) {
-    return [];
-  }
-}
-
 Future<void> updateCurrentTimetableID(
   String userEmail,
   String newTimetableID,
