@@ -17,7 +17,9 @@ class HomePage extends StatelessWidget {
         centerTitle: false,
       ),
       backgroundColor: backgroundColor,
-      body: const Center(),
+      body: const Center(
+        child: Text('KKK'),
+      ),
     );
   }
 }
