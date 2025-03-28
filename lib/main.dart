@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:school_day/screens/home/home_page.dart';
+import 'package:school_day/screens/todos/todo_page.dart';
 import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
@@ -57,7 +58,7 @@ class _MainAppState extends State<MainApp> {
       debugShowCheckedModeBanner: false,
       home: const Scaffold(
         backgroundColor: backgroundColor,
-        body: HomePage(),
+        body: TodoPage(),
       ),
     );
   }
