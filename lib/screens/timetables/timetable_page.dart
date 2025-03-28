@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:lottie/lottie.dart';
 import 'package:school_day/components/timetable_sets.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
@@ -299,13 +300,27 @@ class _TimetablePageState extends State<TimetablePage> {
                           return Builder(builder: (context) {
                             if (data[dateIndex]!.isEmpty) {
                               return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text(
-                                    'ไม่มีตารางเรียน :>',
-                                    softWrap: true,
-                                    textAlign: TextAlign.center,
-                                    style: textTheme.headlineLarge,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 32,
+                                      children: [
+                                        Text(
+                                          'ไม่มีตารางเรียน :>',
+                                          softWrap: true,
+                                          textAlign: TextAlign.center,
+                                          style: textTheme.headlineLarge,
+                                        ),
+                                        LottieBuilder.network(
+                                          'https://lottie.host/516ad553-56e6-4988-81b9-9924ed99be12/8Vaoi0j3bw.json',
+                                          width: 200,
+                                          height: 200,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
