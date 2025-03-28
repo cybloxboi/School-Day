@@ -136,7 +136,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
       setState(() {});
     });
 
-    requestNotificationPermission();
+    if (!kIsWeb) requestNotificationPermission();
 
     super.initState();
   }
