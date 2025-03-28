@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/components/is_valid_email.dart';
+import 'package:lottie/lottie.dart';
+import 'package:school_day/components/sign_up_widget.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -14,20 +15,10 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
-
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String _password = '';
 
   final _formKey = GlobalKey<FormState>();
-
-  bool hasUpperCase(String password) => password.contains(RegExp(r'[A-Z]'));
-
-  bool hasLowerCase(String password) => password.contains(RegExp(r'[a-z]'));
-
-  bool hasNumber(String password) => password.contains(RegExp(r'[0-9]'));
-
-  bool hasMinLength(String password) => password.length >= 6;
 
   Future signUp(BuildContext context) async {
     showDialog(
@@ -45,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
       UserCredential? userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
-        password: _password.trim(),
+        password: _passwordController.text.trim(),
       );
 
       await createUserDocument(userCredential);
@@ -77,28 +68,6 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  bool isPasswordValid(String password) {
-    return hasUpperCase(password) &&
-        hasLowerCase(password) &&
-        hasNumber(password) &&
-        hasMinLength(password);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _passwordController.addListener(() {
-      setState(() {
-        _password = _passwordController.text;
-      });
-    });
-
-    _confirmPasswordController.addListener(() {
-      setState(() {});
-    });
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -119,210 +88,67 @@ class _SignUpPageState extends State<SignUpPage> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 16,
-                children: [
-                  Text(
-                    'ยินดีต้อนรับ',
-                    style: textTheme.headlineLarge,
-                  ),
-                  Text(
-                    'มาสมัครแอคเคาท์กัน ^w^',
-                    style: textTheme.bodyMedium,
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 16,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth > 1000) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: TextFormField(
-                            controller: _emailController,
-                            autofillHints: const [AutofillHints.email],
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'อีเมล',
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'โปรดระบุอีเมล';
-                              } else if (!isValidEmail(value)) {
-                                return 'อีเมลไม่ถูกต้องน้า';
-                              }
-
-                              return null;
-                            },
+                        Flexible(
+                          flex: 1,
+                          child: LottieBuilder.network(
+                            'https://lottie.host/31da1d1e-d5b4-4b9b-b822-41fb36754d44/vbUOhZ1Kor.json',
+                            width: 400,
+                            height: 400,
                           ),
                         ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: TextFormField(
-                            autofillHints: const [AutofillHints.newPassword],
-                            controller: _passwordController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'รหัสผ่าน',
-                            ),
-                            keyboardType: TextInputType.visiblePassword,
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            obscureText: true,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'โปรดระบุรหัสผ่าน';
-                              } else if (!isPasswordValid(value)) {
-                                return 'รหัสผ่านยังไม่ปลอดภัยนะ';
-                              }
-
-                              return null;
-                            },
+                        Flexible(
+                          flex: 1,
+                          child: SignUpWidget(
+                            formKey: _formKey,
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            confirmPasswordController:
+                                _confirmPasswordController,
+                            onSignUp: (context) => signUp(context),
                           ),
                         ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: TextFormField(
-                            autofillHints: const [AutofillHints.newPassword],
-                            controller: _confirmPasswordController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'ยืนยันรหัสผ่าน',
-                            ),
-                            keyboardType: TextInputType.visiblePassword,
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            obscureText: true,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'โปรดระบุยืนยันรหัสผ่าน';
-                              } else if (value != _password) {
-                                return 'ยืนยันรหัสผ่านไม่ตรงกับรหัสผ่าน';
-                              }
-
-                              return null;
-                            },
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          flex: 1,
+                          child: LottieBuilder.network(
+                            'https://lottie.host/31da1d1e-d5b4-4b9b-b822-41fb36754d44/vbUOhZ1Kor.json',
+                            width: 300,
+                            height: 300,
                           ),
                         ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: ExpansionTile(
-                            leading: const Icon(Icons.password),
-                            title: Text(
-                              isPasswordValid(_password)
-                                  ? 'รหัสผ่านดูดีเลย :3'
-                                  : 'โอ้ ลองคิดรหัสผ่านใหม่นะ',
-                              style: textTheme.bodySmall!.copyWith(
-                                color: isPasswordValid(_password)
-                                    ? Colors.green
-                                    : null,
-                              ),
-                            ),
-                            children: [
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    spacing: 8,
-                                    children: [
-                                      PasswordRuleCheck(
-                                        text: 'มีอย่างน้อย 6 ตัวอักษร',
-                                        isValid: hasMinLength(_password),
-                                      ),
-                                      PasswordRuleCheck(
-                                        text:
-                                            'มีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร',
-                                        isValid: hasUpperCase(_password),
-                                      ),
-                                      PasswordRuleCheck(
-                                        text:
-                                            'มีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัวอักษร',
-                                        isValid: hasLowerCase(_password),
-                                      ),
-                                      PasswordRuleCheck(
-                                        text: 'มีตัวเลขอย่างน้อย 1 ตัวอักษร',
-                                        isValid: hasNumber(_password),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              signUp(context);
-                            }
-                          },
-                          child: Text(
-                            'สมัคร',
-                            style: textTheme.bodySmall,
+                        const SizedBox(height: 16),
+                        Flexible(
+                          child: SignUpWidget(
+                            formKey: _formKey,
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            confirmPasswordController:
+                                _confirmPasswordController,
+                            onSignUp: (context) => signUp(context),
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
-                    ),
-                  ),
-                ],
+                    );
+                  }
+                },
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class PasswordRuleCheck extends StatelessWidget {
-  const PasswordRuleCheck({
-    super.key,
-    required this.text,
-    required this.isValid,
-  });
-
-  final String text;
-  final bool isValid;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: 8,
-      children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
-          transitionBuilder: (child, animation) => ScaleTransition(
-            scale: animation,
-            child: child,
-          ),
-          child: Icon(
-            isValid ? Icons.check_circle : Icons.check_circle_outline_rounded,
-            key: ValueKey(isValid),
-            color: isValid ? primaryColor : Colors.grey,
-            size: 20,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            text,
-            style: textTheme.bodySmall!.copyWith(fontSize: 14),
-            softWrap: true,
-          ),
-        ),
-      ],
     );
   }
 }

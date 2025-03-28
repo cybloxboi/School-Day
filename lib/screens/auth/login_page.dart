@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/components/is_valid_email.dart';
-import 'package:school_day/screens/auth/sign_up_page.dart';
+import 'package:lottie/lottie.dart';
+import 'package:school_day/components/login_widget.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -86,114 +86,61 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 16,
-                children: [
-                  Text(
-                    'ยินดีต้อนรับ',
-                    style: textTheme.headlineLarge,
-                  ),
-                  Text(
-                    'โปรดกรอกข้อมูลเข้าสู่ระบบ',
-                    style: textTheme.bodyMedium,
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 16,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth > 1000) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: TextFormField(
-                            controller: _emailController,
-                            autofillHints: const [AutofillHints.email],
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'อีเมล',
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "โปรดระบุอีเมล";
-                              } else if (!isValidEmail(value)) {
-                                return "อีเมลไม่ถูกต้องน้า";
-                              }
-
-                              return null;
-                            },
+                        const SizedBox(
+                          width: 34,
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: LottieBuilder.network(
+                            width: 600,
+                            height: 600,
+                            'https://lottie.host/074b1f4b-b1a1-4412-b0f1-5048bb949f6a/6bx2geWlXV.json',
                           ),
                         ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 600),
-                          child: TextFormField(
-                            controller: _passwordController,
-                            autofillHints: const [AutofillHints.password],
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'รหัสผ่าน',
-                            ),
-                            keyboardType: TextInputType.visiblePassword,
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            obscureText: true,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "โปรดระบุรหัสผ่าน";
-                              }
-
-                              return null;
-                            },
-                          ),
+                        const SizedBox(
+                          width: 34,
                         ),
-                        FilledButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              logIn(context);
-                            }
-                          },
-                          child: Text(
-                            'ล็อคอิน',
-                            style: textTheme.bodySmall,
+                        Flexible(
+                          flex: 1,
+                          child: LoginWidget(
+                            formKey: _formKey,
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            onLogin: (context) => logIn(context),
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 24,
-                          children: [
-                            Text(
-                              'ยังไม่มีสมาชิกหรอ?',
-                              style: textTheme.bodySmall,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SignUpPage(),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                'สมัครเลย!',
-                                style: textTheme.bodySmall!
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
                         ),
                       ],
-                    ),
-                  ),
-                ],
+                    );
+                  } else {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LottieBuilder.network(
+                          width: 400,
+                          height: 400,
+                          'https://lottie.host/074b1f4b-b1a1-4412-b0f1-5048bb949f6a/6bx2geWlXV.json',
+                        ),
+                        const SizedBox(height: 16),
+                        Flexible(
+                          child: LoginWidget(
+                            formKey: _formKey,
+                            emailController: _emailController,
+                            passwordController: _passwordController,
+                            onLogin: (context) => logIn(context),
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    );
+                  }
+                },
               ),
             ),
           ),
