@@ -49,5 +49,8 @@ app.*.map.json
 # Firebase configuration
 android/app/google-services.json
 
+# Android native build artifacts
+android/app/.cxx/
+
 # API Key
 /lib/api_key.dart

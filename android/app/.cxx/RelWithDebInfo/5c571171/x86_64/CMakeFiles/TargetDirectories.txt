@@ -1,2 +1,0 @@
-/Users/tutor/SchoolDay/school_day/android/app/.cxx/RelWithDebInfo/5c571171/x86_64/CMakeFiles/rebuild_cache.dir
-/Users/tutor/SchoolDay/school_day/android/app/.cxx/RelWithDebInfo/5c571171/x86_64/CMakeFiles/edit_cache.dir
