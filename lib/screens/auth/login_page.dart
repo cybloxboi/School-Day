@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/login_widget.dart';
+import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -43,12 +44,15 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const TimetablePage(),
+            builder: (context) => const NavigationMenu(),
           ),
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ล็อคอินสำเร็จ! >3')),
+          const SnackBar(
+            content: Text('ล็อคอินสำเร็จ! >3'),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -64,7 +68,10 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
+          SnackBar(
+            content: Text(errorMessage),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -98,10 +105,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         Flexible(
                           flex: 1,
-                          child: LottieBuilder.network(
+                          child: LottieBuilder.asset(
+                            'assets/animations/login.json',
                             width: 600,
                             height: 600,
-                            'https://lottie.host/074b1f4b-b1a1-4412-b0f1-5048bb949f6a/6bx2geWlXV.json',
                           ),
                         ),
                         const SizedBox(
@@ -122,10 +129,10 @@ class _LoginPageState extends State<LoginPage> {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        LottieBuilder.network(
-                          width: 400,
-                          height: 400,
-                          'https://lottie.host/074b1f4b-b1a1-4412-b0f1-5048bb949f6a/6bx2geWlXV.json',
+                        LottieBuilder.asset(
+                          'assets/animations/login.json',
+                          width: 280,
+                          height: 280,
                         ),
                         const SizedBox(height: 16),
                         Flexible(

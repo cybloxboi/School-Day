@@ -5,7 +5,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
-import 'package:school_day/screens/timetables/timetable_page.dart';
+import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
@@ -182,8 +182,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TimetablePage(
+                            builder: (context) => NavigationMenu(
                               dateIndex: widget.dateIndex,
+                              screenIndex: 1,
                             ),
                           ),
                           (Route<dynamic> route) => false,
@@ -221,6 +222,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                         content: Text(
                           'เวลาเริ่มเรียน กับเวลาเลิกเรียนตรงกันไม่ได้นะคับ :(',
                         ),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                     return;
@@ -283,8 +285,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TimetablePage(
+                      builder: (context) => NavigationMenu(
                         dateIndex: selectedDayIndex,
+                        screenIndex: 1,
                       ),
                     ),
                     (Route<dynamic> route) => false,
@@ -298,6 +301,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                               ? 'เพิ่มตารางเรียนเรียบร้อยคับ!'
                               : 'แก้ไขตารางเรียนเรียบร้อย',
                         ),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   } else {
@@ -308,6 +312,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                               ? 'ดูเหมือนจะมีปัญหาการเพิ่มตารางเรียนนะ :('
                               : 'ดูเหมือนจะมีปัญหาการแก้ไขตารางเรียนนะ :(',
                         ),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   }
@@ -700,8 +705,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TimetablePage(
+                      builder: (context) => NavigationMenu(
                         dateIndex: selectedDayIndex,
+                        screenIndex: 1,
                       ),
                     ),
                     (Route<dynamic> route) => false,
@@ -711,6 +717,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('ลบตารางเรียนเรียบร้อย!'),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   } else {
@@ -719,6 +726,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                         content: Text(
                           'ดูเหมือนจะมีปัญหาการลบตารางเรียนนะ :(',
                         ),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   }

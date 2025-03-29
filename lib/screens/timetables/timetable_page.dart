@@ -48,26 +48,6 @@ class _TimetablePageState extends State<TimetablePage> {
     });
   }
 
-  Future logOut(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    if (!kIsWeb) NotificationService().cancelAllNotifications();
-
-    if (!context.mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('ล็อคเอาท์สำเร็จ'),
-      ),
-    );
-  }
-
   @override
   void initState() {
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
@@ -160,16 +140,6 @@ class _TimetablePageState extends State<TimetablePage> {
                     );
                   },
                   icon: const Icon(Icons.list_rounded),
-                ),
-                TextButton.icon(
-                  onPressed: () => logOut(context),
-                  icon: const Icon(Icons.logout_rounded),
-                  label: Text(
-                    'ล็อคเอาท์',
-                    style: textTheme.bodySmall!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -306,7 +276,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      spacing: 32,
+                                      spacing: 8,
                                       children: [
                                         Text(
                                           'ไม่มีตารางเรียน :>',
@@ -314,10 +284,15 @@ class _TimetablePageState extends State<TimetablePage> {
                                           textAlign: TextAlign.center,
                                           style: textTheme.headlineLarge,
                                         ),
-                                        LottieBuilder.network(
-                                          'https://lottie.host/516ad553-56e6-4988-81b9-9924ed99be12/8Vaoi0j3bw.json',
-                                          width: 200,
-                                          height: 200,
+                                        Text(
+                                          'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
+                                          softWrap: true,
+                                          style: textTheme.bodySmall,
+                                        ),
+                                        LottieBuilder.asset(
+                                          'assets/animations/empty_timetable.json',
+                                          width: 180,
+                                          height: 180,
                                         ),
                                       ],
                                     ),
@@ -334,7 +309,7 @@ class _TimetablePageState extends State<TimetablePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: 40),
             ],
           ),
         ),

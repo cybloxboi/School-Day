@@ -14,6 +14,7 @@ class TodoPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: false,
       ),
       backgroundColor: backgroundColor,
       body: const Placeholder(),

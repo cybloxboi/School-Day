@@ -47,7 +47,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('สร้างแอคเคาท์สำเร็จ! :3')),
+        const SnackBar(
+          content: Text('สร้างแอคเคาท์สำเร็จ! :3'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) return;
@@ -63,7 +66,10 @@ class _SignUpPageState extends State<SignUpPage> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
+        SnackBar(
+          content: Text(errorMessage),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -97,8 +103,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         Flexible(
                           flex: 1,
-                          child: LottieBuilder.network(
-                            'https://lottie.host/31da1d1e-d5b4-4b9b-b822-41fb36754d44/vbUOhZ1Kor.json',
+                          child: LottieBuilder.asset(
+                            'assets/animations/signup.json',
                             width: 400,
                             height: 400,
                           ),
@@ -122,10 +128,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         Flexible(
                           flex: 1,
-                          child: LottieBuilder.network(
-                            'https://lottie.host/31da1d1e-d5b4-4b9b-b822-41fb36754d44/vbUOhZ1Kor.json',
-                            width: 300,
-                            height: 300,
+                          child: LottieBuilder.asset(
+                            'assets/animations/signup.json',
+                            width: 280,
+                            height: 280,
                           ),
                         ),
                         const SizedBox(height: 16),
