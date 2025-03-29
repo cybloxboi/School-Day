@@ -43,10 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-android/app/google-services.json
-android/app/.cxx
 
 .firebase
+
+# Firebase configuration
+android/app/google-services.json
 
 # API Key
 /lib/api_key.dart
