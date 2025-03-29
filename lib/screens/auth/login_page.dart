@@ -4,7 +4,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/login_widget.dart';
 import 'package:school_day/screens/navigation_menu.dart';
-import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class LoginPage extends StatefulWidget {

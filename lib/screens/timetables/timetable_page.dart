@@ -1,12 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/timetable_sets.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
-import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/timetables/add_new_timetable_page.dart';
 import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/services/timetable_database.dart';
