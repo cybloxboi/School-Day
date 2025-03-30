@@ -29,7 +29,7 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            spacing: 16,
+            spacing: 32,
             children: [
               LottieBuilder.asset(
                 'assets/animations/password_reset.json',
