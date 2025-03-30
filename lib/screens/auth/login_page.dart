@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth > 1000) {
+                  if (constraints.maxWidth > 820) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,

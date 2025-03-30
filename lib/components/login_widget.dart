@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_day/components/validate.dart';
+import 'package:school_day/screens/auth/forgot_password_page.dart';
 import 'package:school_day/screens/auth/sign_up_page.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -41,7 +42,7 @@ class _LoginWidgetState extends State<LoginWidget> {
             key: widget.formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 32,
+              spacing: 16,
               children: [
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
@@ -87,6 +88,23 @@ class _LoginWidgetState extends State<LoginWidget> {
                       return null;
                     },
                   ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  spacing: 24,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordPage(),
+                          ),
+                        );
+                      },
+                      child: const Text('ลืมรหัสผ่าน?'),
+                    ),
+                  ],
                 ),
                 FilledButton(
                   onPressed: () {
