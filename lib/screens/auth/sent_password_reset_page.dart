@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/styles/styles.dart';
@@ -44,9 +45,24 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
               ),
               TextButton(
                 onPressed: () async {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => Center(
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: primaryColor,
+                        size: 80,
+                      ),
+                    ),
+                  );
+
                   await FirebaseAuth.instance.sendPasswordResetEmail(
                     email: widget.email,
                   );
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text('ส่งอีเมลใหม่'),
               ),

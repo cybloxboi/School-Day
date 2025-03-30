@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/validate.dart';
 import 'package:school_day/screens/auth/sent_password_reset_page.dart';
@@ -29,20 +30,32 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> passwordReset(BuildContext context) async {
     try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: LoadingAnimationWidget.fourRotatingDots(
+            color: primaryColor,
+            size: 80,
+          ),
+        ),
+      );
+
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: _emailController.text.trim(),
       );
 
-      if (!context.mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SentPasswordResetPage(
-            email: _emailController.text.trim(),
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SentPasswordResetPage(
+              email: _emailController.text.trim(),
+            ),
           ),
-        ),
-      );
+        );
+      }
     } on FirebaseAuthException {
       return;
     }
