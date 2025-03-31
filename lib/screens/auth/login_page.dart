@@ -61,11 +61,12 @@ class _LoginPageState extends State<LoginPage> {
           if (!context.mounted) return;
           Navigator.pop(context);
 
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => const EmailVerificationPage(),
             ),
+            (Route<dynamic> route) => false,
           );
         } catch (e) {
           if (!context.mounted) return;
