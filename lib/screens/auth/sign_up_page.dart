@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/sign_up_widget.dart';
+import 'package:school_day/screens/auth/email_verification_page.dart';
 import 'package:school_day/services/timetable_database.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -39,17 +40,22 @@ class _SignUpPageState extends State<SignUpPage> {
         password: _passwordController.text.trim(),
       );
 
-      await createUserDocument(userCredential);
+      User? user = userCredential.user;
 
-      FirebaseAuth.instance.signOut();
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+
+      await createUserDocument(userCredential);
 
       if (!context.mounted) return;
 
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('สร้างแอคเคาท์สำเร็จ! :3'),
-          behavior: SnackBarBehavior.floating,
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const EmailVerificationPage(),
         ),
       );
     } on FirebaseAuthException catch (e) {

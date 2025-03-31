@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/login_widget.dart';
+import 'package:school_day/screens/auth/email_verification_page.dart';
 import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -37,22 +38,46 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text.trim(),
       );
 
-      if (context.mounted) {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      await user?.reload();
+
+      if (user != null && user.emailVerified) {
+        if (!context.mounted) return;
+
         Navigator.pop(context);
 
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const NavigationMenu(),
+            builder: (context) => const NavigationMenu(isLogin: true),
           ),
+          (Route<dynamic> route) => false,
         );
+      } else {
+        try {
+          await user?.sendEmailVerification();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ล็อคอินสำเร็จ! >3'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+          if (!context.mounted) return;
+          Navigator.pop(context);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EmailVerificationPage(),
+            ),
+          );
+        } catch (e) {
+          if (!context.mounted) return;
+
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("โปรดรอสักครู่เนื่องจากคุณพึ่งส่งยืนยันอีเมลไป :<"),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {

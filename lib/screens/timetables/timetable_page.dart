@@ -48,10 +48,10 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   void initState() {
+    super.initState();
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
     currentUser = FirebaseAuth.instance.currentUser!;
     fetchCurrentTimetableID();
-    super.initState();
   }
 
   @override

@@ -5,21 +5,33 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/screens/auth/login_page.dart';
+import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/styles/styles.dart';
 
-class SentPasswordResetPage extends StatefulWidget {
-  const SentPasswordResetPage({super.key, required this.email});
-
-  final String email;
+class EmailVerificationPage extends StatefulWidget {
+  const EmailVerificationPage({super.key});
 
   @override
-  State<SentPasswordResetPage> createState() => _SentPasswordResetPageState();
+  State<EmailVerificationPage> createState() => _EmailVerificationPageState();
 }
 
-class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
-  bool _isDisabled = false;
-  int _countdown = 0;
+class _EmailVerificationPageState extends State<EmailVerificationPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool isEmailVerified = false;
+  bool isVerifying = false;
   Timer? _timer;
+  Timer? _countdownTimer;
+  int _countdown = 0;
+  bool _isDisabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _checkEmailVerified();
+    _startVerificationCheck();
+    _disableButton();
+  }
 
   void _disableButton() {
     setState(() {
@@ -27,7 +39,7 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
       _countdown = 60;
     });
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_countdown > 0) {
           _countdown--;
@@ -39,15 +51,52 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _disableButton();
+  Future<void> _checkEmailVerified() async {
+    User? user = _auth.currentUser;
+    await user?.reload();
+
+    setState(() {
+      isEmailVerified = user?.emailVerified ?? false;
+    });
+
+    if (isEmailVerified) {
+      _timer?.cancel();
+      _countdownTimer?.cancel();
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const NavigationMenu(
+            isLogin: true,
+          ),
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+
+  void _startVerificationCheck() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      await _checkEmailVerified();
+    });
+  }
+
+  Future<void> _sendVerificationEmail() async {
+    User? user = _auth.currentUser;
+
+    if (user != null && !user.emailVerified) {
+      setState(() => isVerifying = true);
+      await user.sendEmailVerification();
+      setState(() => isVerifying = false);
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -56,7 +105,7 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'ลืมรหัสผ่าน',
+          'ยืนยันอีเมล',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
@@ -74,7 +123,7 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
                 frameRate: const FrameRate(120),
               ),
               Text(
-                'เราได้ทำการส่งลิงค์รีเซ็ตรหัสผ่านให้แล้ว ลองเช็คอีเมลดูสิ!',
+                'เราได้ทำการส่งลิงค์ยืนยันอีเมลให้แล้ว ลองเช็คอีเมลดูสิ!',
                 style: textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -102,9 +151,7 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
                               ),
                             );
 
-                            await FirebaseAuth.instance.sendPasswordResetEmail(
-                              email: widget.email,
-                            );
+                            await _sendVerificationEmail();
 
                             if (context.mounted) {
                               Navigator.pop(context);
