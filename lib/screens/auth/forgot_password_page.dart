@@ -49,13 +49,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
       if (context.mounted) {
         Navigator.of(context).pop();
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => SentPasswordResetPage(
               email: _emailController.text.trim(),
             ),
           ),
+          (Route<dynamic> route) => false,
         );
       }
     } on FirebaseAuthException {
@@ -78,6 +79,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 32,
             children: [
               LottieBuilder.asset(
@@ -88,8 +91,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth > 800 &&
-                      constraints.maxHeight > 300) {
+                  if (constraints.maxWidth > 800) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,12 +107,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     );
                   }
 
-                  return Column(
-                    spacing: 32,
-                    children: [
-                      statement(),
-                      formInput(),
-                    ],
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 32,
+                      children: [
+                        statement(),
+                        formInput(),
+                      ],
+                    ),
                   );
                 },
               ),
