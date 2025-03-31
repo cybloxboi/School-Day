@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -88,7 +90,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     if (constraints.maxWidth > 800 &&
-                        constraints.maxHeight > 400) {
+                        constraints.maxHeight > 300) {
                       return Column(
                         children: [
                           const Spacer(
@@ -164,7 +166,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         Form(
           key: _formKey,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 450),
             child: TextFormField(
               controller: _emailController,
               autofillHints: const [AutofillHints.email],

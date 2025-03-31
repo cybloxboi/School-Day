@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -15,6 +17,40 @@ class SentPasswordResetPage extends StatefulWidget {
 }
 
 class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
+  bool _isDisabled = false;
+  int _countdown = 0;
+  Timer? _timer;
+
+  void _disableButton() {
+    setState(() {
+      _isDisabled = true;
+      _countdown = 60;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _isDisabled = false;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _disableButton();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,28 +79,42 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              TextButton(
-                onPressed: () async {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => Center(
-                      child: LoadingAnimationWidget.fourRotatingDots(
-                        color: primaryColor,
-                        size: 80,
-                      ),
-                    ),
-                  );
+              const Text(
+                'หากไม่เจออีเมลให้ลองเช็คจดหมายขยะ (Spam) หรือคลิก ส่งอีเมลใหม่ ใน 1 นาที',
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 8,
+                children: [
+                  TextButton(
+                    onPressed: _isDisabled
+                        ? null
+                        : () async {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => Center(
+                                child: LoadingAnimationWidget.fourRotatingDots(
+                                  color: primaryColor,
+                                  size: 80,
+                                ),
+                              ),
+                            );
 
-                  await FirebaseAuth.instance.sendPasswordResetEmail(
-                    email: widget.email,
-                  );
+                            await FirebaseAuth.instance.sendPasswordResetEmail(
+                              email: widget.email,
+                            );
 
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('ส่งอีเมลใหม่'),
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              _disableButton();
+                            }
+                          },
+                    child: const Text('ส่งอีเมลใหม่'),
+                  ),
+                  if (_isDisabled) Text('$_countdown วินาที'),
+                ],
               ),
               FilledButton.tonal(
                 onPressed: () {
