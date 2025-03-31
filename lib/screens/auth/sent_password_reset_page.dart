@@ -64,70 +64,82 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
       backgroundColor: backgroundColor,
       body: Center(
         child: SingleChildScrollView(
-          child: Column(
-            spacing: 32,
-            children: [
-              LottieBuilder.asset(
-                'assets/animations/loading.json',
-                width: 280,
-                height: 280,
-                frameRate: const FrameRate(120),
-              ),
-              Text(
-                'เราได้ทำการส่งลิงค์รีเซ็ตรหัสผ่านให้แล้ว ลองเช็คอีเมลดูสิ!',
-                style: textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
+          child: Padding(
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              spacing: 32,
+              children: [
+                LottieBuilder.asset(
+                  'assets/animations/loading.json',
+                  width: 280,
+                  height: 280,
+                  frameRate: const FrameRate(120),
                 ),
-              ),
-              const Text(
-                'หากไม่เจออีเมลให้ลองเช็คจดหมายขยะ (Spam) หรือคลิก ส่งอีเมลใหม่ ใน 1 นาที',
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 8,
-                children: [
-                  TextButton(
-                    onPressed: _isDisabled
-                        ? null
-                        : () async {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => Center(
-                                child: LoadingAnimationWidget.fourRotatingDots(
-                                  color: primaryColor,
-                                  size: 80,
-                                ),
-                              ),
-                            );
-
-                            await FirebaseAuth.instance.sendPasswordResetEmail(
-                              email: widget.email,
-                            );
-
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                              _disableButton();
-                            }
-                          },
-                    child: const Text('ส่งอีเมลใหม่'),
+                Text(
+                  'เราได้ทำการส่งลิงค์รีเซ็ตรหัสผ่านให้แล้ว ลองเช็คอีเมลดูสิ!',
+                  style: textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  if (_isDisabled) Text('$_countdown วินาที'),
-                ],
-              ),
-              FilledButton.tonal(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                ),
+                const Text(
+                  'หากไม่เจออีเมลให้ลองเช็คจดหมายขยะ (Spam) หรือคลิก ส่งอีเมลใหม่ ใน 1 นาที',
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: _isDisabled
+                          ? null
+                          : () async {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => Center(
+                                  child:
+                                      LoadingAnimationWidget.fourRotatingDots(
+                                    color: primaryColor,
+                                    size: 80,
+                                  ),
+                                ),
+                              );
+
+                              await FirebaseAuth.instance
+                                  .sendPasswordResetEmail(
+                                email: widget.email,
+                              );
+
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                _disableButton();
+                              }
+                            },
+                      child: const Text('ส่งอีเมลใหม่'),
                     ),
-                  );
-                },
-                child: const Text('กลับไปหน้าล็อคอิน'),
-              ),
-            ],
+                    if (_isDisabled) Text('$_countdown วินาที'),
+                  ],
+                ),
+                FilledButton.tonal(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: const Text('กลับไปหน้าล็อคอิน'),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),

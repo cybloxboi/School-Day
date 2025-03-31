@@ -44,50 +44,44 @@ class _LoginWidgetState extends State<LoginWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 16,
               children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: TextFormField(
-                    controller: widget.emailController,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'อีเมล',
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "โปรดระบุอีเมล";
-                      } else if (!isValidEmail(value)) {
-                        return "อีเมลไม่ถูกต้องน้า";
-                      }
-
-                      return null;
-                    },
+                TextFormField(
+                  controller: widget.emailController,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'อีเมล',
                   ),
+                  keyboardType: TextInputType.emailAddress,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "โปรดระบุอีเมล";
+                    } else if (!isValidEmail(value)) {
+                      return "อีเมลไม่ถูกต้องน้า";
+                    }
+                
+                    return null;
+                  },
                 ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: TextFormField(
-                    controller: widget.passwordController,
-                    autofillHints: const [AutofillHints.password],
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'รหัสผ่าน',
-                    ),
-                    keyboardType: TextInputType.visiblePassword,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    obscureText: true,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "โปรดระบุรหัสผ่าน";
-                      }
-
-                      return null;
-                    },
+                TextFormField(
+                  controller: widget.passwordController,
+                  autofillHints: const [AutofillHints.password],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'รหัสผ่าน',
                   ),
+                  keyboardType: TextInputType.visiblePassword,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  obscureText: true,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "โปรดระบุรหัสผ่าน";
+                    }
+                
+                    return null;
+                  },
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,

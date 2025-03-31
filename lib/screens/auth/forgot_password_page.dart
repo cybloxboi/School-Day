@@ -74,65 +74,51 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         centerTitle: false,
       ),
       backgroundColor: backgroundColor,
-      body: Center(
-        child: Column(
-          spacing: 16,
-          children: [
-            LottieBuilder.asset(
-              'assets/animations/forgot_password.json',
-              width: 280,
-              height: 280,
-              frameRate: const FrameRate(120),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    if (constraints.maxWidth > 800 &&
-                        constraints.maxHeight > 300) {
-                      return Column(
-                        children: [
-                          const Spacer(
-                            flex: 1,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: statement(),
-                              ),
-                              const SizedBox(width: 64),
-                              Flexible(
-                                child: formInput(),
-                              ),
-                            ],
-                          ),
-                          const Spacer(
-                            flex: 4,
-                          ),
-                        ],
-                      );
-                    }
-
-                    return SingleChildScrollView(
-                      child: Column(
-                        spacing: 32,
-                        children: [
-                          statement(),
-                          formInput(),
-                          const SizedBox(
-                            height: 32,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            spacing: 32,
+            children: [
+              LottieBuilder.asset(
+                'assets/animations/forgot_password.json',
+                width: 280,
+                height: 280,
+                frameRate: const FrameRate(120),
               ),
-            ),
-          ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth > 800 &&
+                      constraints.maxHeight > 300) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: statement(),
+                        ),
+                        const SizedBox(width: 64),
+                        Flexible(
+                          child: formInput(),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    spacing: 32,
+                    children: [
+                      statement(),
+                      formInput(),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -149,9 +135,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
           softWrap: true,
         ),
-        Text(
+        const Text(
           'เพียงแค่กรอกอีเมลที่คุณสมัครไว้ เพื่อส่งลิงค์รีเซ็ตรหัสผ่าน',
-          style: textTheme.bodyMedium,
           textAlign: TextAlign.center,
           softWrap: true,
         ),
