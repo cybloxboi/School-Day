@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/services/notification_service.dart';
 import 'package:school_day/styles/styles.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -31,6 +32,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String today = DateFormat('d MMM yyyy').format(DateTime.now());
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -38,6 +40,12 @@ class HomePage extends StatelessWidget {
           style: textTheme.bodyMedium!.copyWith(
             fontWeight: FontWeight.bold,
           ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            print("Menu button pressed");
+          },
         ),
         centerTitle: false,
         actions: [
@@ -57,9 +65,33 @@ class HomePage extends StatelessWidget {
         ],
       ),
       backgroundColor: backgroundColor,
-      body: const Center(
-        child: Text('SASSSSAA'),
-      ),
-    );
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('วันนี้',
+                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+                   ),
+                   Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      today,
+                      style: TextStyle(color: Colors.black),),
+                   )
+              ],
+            )
+          ],
+        ),
+        ),
+      );
   }
 }
