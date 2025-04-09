@@ -1,0 +1,87 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:school_day/data/timetable.dart';
+import 'package:school_day/services/timetable_database/timetable_document.dart';
+
+class TimetableEntry extends TimetableDocument {
+  int dayIndex;
+  String timetableID;
+
+  TimetableEntry({
+    required super.email,
+    required this.timetableID,
+    required this.dayIndex,
+  }) {
+    timetableDoc = getUserTimetableDoc(timetableID);
+  }
+
+  Stream<List<Timetable>> fetchLessons() {
+    return timetableDoc.snapshots().map((snapshot) {
+      if (!snapshot.exists) return [];
+
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      List<dynamic> lessonsData = data['days']?[dayIndex.toString()] ?? [];
+
+      return lessonsData
+          .map((lesson) => Timetable.fromJson(lesson as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
+  Future<bool> addLesson({
+    required Timetable newLesson,
+  }) async {
+    try {
+      // Write
+      await timetableDoc.update({
+        'days.$dayIndex': FieldValue.arrayUnion([newLesson.toJson()]),
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteLesson({
+    required Timetable lesson,
+  }) async {
+    try {
+      // Write
+      await timetableDoc.update({
+        'days.$dayIndex': FieldValue.arrayRemove([
+          lesson.toJson(),
+        ])
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateLesson({
+    required int newDayIndex,
+    required Timetable oldLesson,
+    required Timetable updatedLesson,
+  }) async {
+    try {
+      // Write
+      await timetableDoc.update({
+        'days.$dayIndex': FieldValue.arrayRemove([
+          oldLesson.toJson(),
+        ]),
+      });
+
+      // Write
+      await timetableDoc.update({
+        'days.$newDayIndex': FieldValue.arrayUnion([
+          updatedLesson.toJson(),
+        ]),
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+}

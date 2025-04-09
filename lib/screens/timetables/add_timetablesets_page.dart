@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/services/timetable_database.dart';
+import 'package:school_day/services/timetable_database/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 
 class AddTimetablesetsPage extends StatefulWidget {
   const AddTimetablesetsPage({
     super.key,
     required this.isEdited,
-    required this.userEmail,
-    required this.onAdd,
-    this.timetableSetName,
-    this.timetableSetId,
     required this.isCurrent,
+    required this.timetableSetDocument,
+    this.name,
+    this.timetableID,
   });
 
   final bool isEdited;
-  final String userEmail;
-  final Function onAdd;
   final bool isCurrent;
-  final String? timetableSetName;
-  final String? timetableSetId;
+  final TimetableSetDocument timetableSetDocument;
+  final String? name;
+  final String? timetableID;
 
   @override
   State<AddTimetablesetsPage> createState() => _AddTimetablesetsPageState();
@@ -33,8 +31,8 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
   void initState() {
     super.initState();
 
-    if (widget.timetableSetName != null) {
-      _timetablesetNameController.text = widget.timetableSetName!;
+    if (widget.name != null) {
+      _timetablesetNameController.text = widget.name!;
     }
   }
 
@@ -60,9 +58,7 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
             height: 16,
           ),
           Text(
-            !widget.isEdited
-                ? 'เพิ่มเซตตารางเรียนใหม่'
-                : 'แก้ไขเซตตารางเรียน',
+            !widget.isEdited ? 'เพิ่มเซตตารางเรียนใหม่' : 'แก้ไขเซตตารางเรียน',
             style: textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -109,15 +105,13 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
                     );
 
                     if (!widget.isEdited) {
-                      await createTimetable(
-                        widget.userEmail,
-                        _timetablesetNameController.text.trim(),
+                      await widget.timetableSetDocument.createNewTimetableSet(
+                        name: _timetablesetNameController.text.trim(),
                       );
                     } else {
-                      await updateTimetableName(
-                        widget.userEmail,
-                        widget.timetableSetId!,
-                        _timetablesetNameController.text.trim(),
+                      await widget.timetableSetDocument.updateTimetableSet(
+                        name: _timetablesetNameController.text.trim(),
+                        timetableID: widget.timetableID!,
                       );
                     }
 
@@ -125,8 +119,6 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
 
                     Navigator.pop(context);
                     Navigator.pop(context);
-
-                    widget.onAdd();
                   }
                 },
                 child: const Icon(Icons.save_rounded),
@@ -147,15 +139,15 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
                         onPressed: widget.isCurrent
                             ? null
                             : () async {
-                                bool? confirmDelete =
-                                    await showDialog<bool>(
+                                bool? confirmDelete = await showDialog<bool>(
                                   context: context,
                                   builder: (context) {
                                     return AlertDialog(
                                       content: const Padding(
                                         padding: EdgeInsets.all(8.0),
                                         child: Text(
-                                            'คุณต้องการลบเซตตารางเรียนใช่ไหม :<'),
+                                          'คุณต้องการลบเซตตารางเรียนใช่ไหม :<',
+                                        ),
                                       ),
                                       actions: [
                                         TextButton(
@@ -175,8 +167,7 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
                                   },
                                 );
 
-                                if (confirmDelete != true ||
-                                    !context.mounted) {
+                                if (confirmDelete != true || !context.mounted) {
                                   return;
                                 }
 
@@ -184,25 +175,23 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
                                   context: context,
                                   barrierDismissible: false,
                                   builder: (context) => Center(
-                                    child: LoadingAnimationWidget
-                                        .fourRotatingDots(
+                                    child:
+                                        LoadingAnimationWidget.fourRotatingDots(
                                       color: primaryColor,
                                       size: 80,
                                     ),
                                   ),
                                 );
 
-                                await deleteTimetableSet(
-                                  widget.userEmail,
-                                  widget.timetableSetId!,
+                                await widget.timetableSetDocument
+                                    .deleteTimetableSet(
+                                  timetableID: widget.timetableID!,
                                 );
 
                                 if (!context.mounted) return;
 
                                 Navigator.pop(context);
                                 Navigator.pop(context);
-
-                                widget.onAdd();
                               },
                         icon: const Icon(Icons.delete_rounded),
                         label: Text(

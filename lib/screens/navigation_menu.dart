@@ -9,12 +9,10 @@ class NavigationMenu extends StatefulWidget {
     super.key,
     this.screenIndex,
     this.dateIndex,
-    this.isLogin,
   });
 
   final int? screenIndex;
   final int? dateIndex;
-  final bool? isLogin;
 
   @override
   State<NavigationMenu> createState() => _NavigationMenuState();
@@ -35,17 +33,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
     if (widget.screenIndex != null) {
       _selectedIndex = widget.screenIndex!;
-    }
-
-    if (widget.isLogin ?? false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ล็อคอินสำเร็จ! >3'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      });
     }
   }
 

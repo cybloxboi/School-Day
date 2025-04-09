@@ -2,9 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:school_day/components/login_widget.dart';
+import 'package:school_day/components/auth/login_widget.dart';
 import 'package:school_day/screens/auth/email_verification_page.dart';
-import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/styles/styles.dart';
 
 class LoginPage extends StatefulWidget {
@@ -42,19 +41,7 @@ class _LoginPageState extends State<LoginPage> {
 
       await user?.reload();
 
-      if (user != null && user.emailVerified) {
-        if (!context.mounted) return;
-
-        Navigator.pop(context);
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const NavigationMenu(isLogin: true),
-          ),
-          (Route<dynamic> route) => false,
-        );
-      } else {
+      if (user == null || !user.emailVerified) {
         try {
           await user?.sendEmailVerification();
 

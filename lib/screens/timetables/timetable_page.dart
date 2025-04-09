@@ -1,13 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:school_day/components/timetable_sets.dart';
-import 'package:school_day/data/time.dart';
+import 'package:school_day/components/timetables/class_duration.dart';
+import 'package:school_day/components/timetables/get_current_week_days.dart';
+import 'package:school_day/components/timetables/timetable_sets.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/timetables/add_new_timetable_page.dart';
-import 'package:school_day/services/notification_service.dart';
-import 'package:school_day/services/timetable_database.dart';
+import 'package:school_day/services/notification/notification_service.dart';
+import 'package:school_day/services/timetable_database/timetable_entry.dart';
+import 'package:school_day/services/timetable_database/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -23,7 +26,9 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage> {
   late int dateIndex;
   late final User currentUser;
-  String? currentTimetableID;
+  late final TimetableSetDocument timetableSet;
+  late String? currentTimetableID;
+  bool isLoading = true;
 
   final List<String> daysInAWeek = [
     'จ.',
@@ -35,23 +40,12 @@ class _TimetablePageState extends State<TimetablePage> {
     'อา.',
   ];
 
-  Future<void> fetchCurrentTimetableID() async {
-    String userEmail = currentUser.email!;
-    String? timetableID = await getCurrentTimetableID(userEmail);
-
-    if (!mounted) return;
-
-    setState(() {
-      currentTimetableID = timetableID;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
     currentUser = FirebaseAuth.instance.currentUser!;
-    fetchCurrentTimetableID();
+    timetableSet = TimetableSetDocument(email: currentUser.email!);
   }
 
   @override
@@ -79,6 +73,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     if (currentTimetableID == null) return;
 
                     showModalBottomSheet(
+                      showDragHandle: !kIsWeb ? true : false,
                       context: context,
                       isScrollControlled: true,
                       builder: (BuildContext context) {
@@ -89,22 +84,28 @@ class _TimetablePageState extends State<TimetablePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    const Spacer(),
-                                    IconButton.filledTonal(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      icon: const Icon(Icons.cancel_rounded),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
+                                if (kIsWeb)
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Spacer(),
+                                          IconButton.filledTonal(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            icon: const Icon(
+                                                Icons.cancel_rounded),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
+                                  ),
                                 Text(
-                                  'เลือกเซตตารางเรียน',
+                                  'เซตตารางเรียน',
                                   style: textTheme.bodyMedium!.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -114,18 +115,45 @@ class _TimetablePageState extends State<TimetablePage> {
                                   height: 16,
                                 ),
                                 Expanded(
-                                  child: TimetableSets(
-                                    currentTimetableId: currentTimetableID!,
-                                    userEmail: currentUser.email!,
-                                    onTimetableChanged:
-                                        (String newTimetableId) {
-                                      setState(() {
-                                        currentTimetableID = newTimetableId;
+                                  child: StreamBuilder(
+                                    stream: timetableSet.fetchTimetableSets(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: LoadingAnimationWidget
+                                              .fourRotatingDots(
+                                            color: primaryColor,
+                                            size: 80,
+                                          ),
+                                        );
+                                      }
+
+                                      if (snapshot.hasError) {
+                                        return Text(
+                                          'เกิดข้อผิดพลาด: ${snapshot.error}',
+                                        );
+                                      }
+
+                                      List<TimetableSetInfo> timetableSets =
+                                          snapshot.data!;
+
+                                      timetableSets.sort((a, b) {
+                                        if (a.id == currentTimetableID) {
+                                          return -1;
+                                        }
+
+                                        if (b.id == currentTimetableID) {
+                                          return 1;
+                                        }
+
+                                        return 0;
                                       });
 
-                                      fetchTimetable(
-                                        currentUser.email!,
-                                        currentTimetableID!,
+                                      return TimetableSets(
+                                        currentTimetableID: currentTimetableID!,
+                                        timetableSets: timetableSets,
+                                        timetableSetDocument: timetableSet,
                                       );
                                     },
                                   ),
@@ -146,12 +174,19 @@ class _TimetablePageState extends State<TimetablePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (currentTimetableID == null) return;
+
+          TimetableEntry timetableEntry = TimetableEntry(
+            email: currentUser.email!,
+            timetableID: currentTimetableID!,
+            dayIndex: dateIndex,
+          );
+
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AddNewTimetablePage(
-                dateIndex: dateIndex,
-                timetableId: currentTimetableID!,
+                timetableEntry: timetableEntry,
               ),
             ),
           );
@@ -162,160 +197,192 @@ class _TimetablePageState extends State<TimetablePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Column(
-            children: [
-              OutlinedButton.icon(
-                icon: const Icon(Icons.today_rounded),
-                onPressed: () {
-                  setState(() {
-                    dateIndex = DateTime.now().weekday - 1;
-                  });
-                },
-                label: Text(
-                  'วันนี้',
-                  style: textTheme.bodySmall,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 16,
-                  runSpacing: 8,
-                  children: List.generate(
-                    daysInAWeek.length,
-                    (int index) {
-                      return day(
-                        daysInAWeek[index],
-                        getCurrentWeekDays()[index].day,
-                        index,
-                        context,
-                      );
-                    },
+          child: Center(
+            child: Column(
+              children: [
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.today_rounded),
+                  onPressed: () {
+                    setState(() {
+                      dateIndex = DateTime.now().weekday - 1;
+                    });
+                  },
+                  label: Text(
+                    'วันนี้',
+                    style: textTheme.bodySmall,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return const LinearGradient(
-                      begin: Alignment.center,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black,
-                        Colors.transparent,
-                      ],
-                      stops: [0.9, 1.0],
-                    ).createShader(bounds);
-                  },
-                  blendMode: BlendMode.dstIn,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxHeight < 200) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
-                              softWrap: true,
-                              textAlign: TextAlign.center,
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: List.generate(
+                      daysInAWeek.length,
+                      (int index) {
+                        return dayCard(
+                          daysInAWeek[index],
+                          getCurrentWeekDays()[index].day,
+                          index,
+                          context,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.center,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black,
+                          Colors.transparent,
+                        ],
+                        stops: [0.9, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxHeight < 200) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(
+                                'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
+                                softWrap: true,
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }
-
-                      return FutureBuilder(
-                        future: currentTimetableID == null
-                            ? Future.value(null)
-                            : fetchTimetable(
-                                currentUser.email!,
-                                currentTimetableID!,
-                              ),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.waiting ||
-                              currentTimetableID == null) {
-                            return Center(
-                              child: LoadingAnimationWidget.fourRotatingDots(
-                                color: primaryColor,
-                                size: 80,
-                              ),
-                            );
-                          }
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
-                          }
-
-                          Map<int, List<Timetable>> data = snapshot.data ??
-                              {for (var i = 0; i < 7; i++) i: []};
-
-                          data.forEach((key, value) {
-                            value.sort((a, b) =>
-                                a.startTime.hour.compareTo(b.startTime.hour));
-                          });
-
-                          NotificationService()
-                              .scheduleWeeklyTimetableNotifications(
-                            data,
                           );
+                        }
 
-                          return Builder(builder: (context) {
-                            if (data[dateIndex]!.isEmpty) {
+                        return StreamBuilder(
+                          stream: timetableSet.getCurrentTimetableID(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return Center(
-                                child: SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      spacing: 8,
-                                      children: [
-                                        Text(
-                                          'ไม่มีตารางเรียน :>',
-                                          softWrap: true,
-                                          textAlign: TextAlign.center,
-                                          style: textTheme.headlineLarge,
-                                        ),
-                                        Text(
-                                          'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
-                                          softWrap: true,
-                                          style: textTheme.bodySmall,
-                                        ),
-                                        LottieBuilder.asset(
-                                          'assets/animations/empty_timetable.json',
-                                          width: 180,
-                                          height: 180,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                child: LoadingAnimationWidget.fourRotatingDots(
+                                  color: primaryColor,
+                                  size: 80,
                                 ),
                               );
                             }
 
-                            return timeTableList(data[dateIndex]!, context);
-                          });
-                        },
-                      );
-                    },
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            }
+
+                            currentTimetableID = snapshot.data!;
+
+                            TimetableEntry timetableEntry = TimetableEntry(
+                              email: currentUser.email!,
+                              timetableID: currentTimetableID!,
+                              dayIndex: dateIndex,
+                            );
+
+                            return StreamBuilder(
+                              stream: timetableEntry.fetchLessons(),
+                              builder: (_, entrySnapshot) {
+                                if (entrySnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child:
+                                        LoadingAnimationWidget.fourRotatingDots(
+                                      color: primaryColor,
+                                      size: 80,
+                                    ),
+                                  );
+                                }
+
+                                if (entrySnapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error: ${snapshot.error}'),
+                                  );
+                                }
+
+                                List<Timetable> timetableData =
+                                    entrySnapshot.data!;
+
+                                timetableData.sort(
+                                  (a, b) => a.startTime.hour
+                                      .compareTo(b.startTime.hour),
+                                );
+
+                                NotificationService()
+                                    .scheduleWeeklyTimetableNotifications(
+                                  timetableData,
+                                  dateIndex,
+                                );
+
+                                return Builder(builder: (context) {
+                                  if (timetableData.isEmpty) {
+                                    return Center(
+                                      child: SingleChildScrollView(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            spacing: 8,
+                                            children: [
+                                              Text(
+                                                'ไม่มีตารางเรียน :>',
+                                                softWrap: true,
+                                                textAlign: TextAlign.center,
+                                                style: textTheme.headlineLarge,
+                                              ),
+                                              Text(
+                                                'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
+                                                softWrap: true,
+                                                style: textTheme.bodySmall,
+                                              ),
+                                              LottieBuilder.asset(
+                                                'assets/animations/empty_timetable.json',
+                                                width: 180,
+                                                height: 180,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return timetableList(
+                                    timetableData,
+                                    context,
+                                  );
+                                });
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget timeTableList(List<Timetable> data, BuildContext context) {
+  Widget timetableList(List<Timetable> data, BuildContext context) {
     Map<int, List<Timetable>> timetableMap = {};
 
     for (var timetable in data) {
@@ -381,7 +448,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 children: List.generate(
                                   entries[index].value.length,
                                   (cardIndex) {
-                                    return card(
+                                    return timetableDetailCard(
                                       entries[index].value[cardIndex],
                                     );
                                   },
@@ -439,7 +506,8 @@ class _TimetablePageState extends State<TimetablePage> {
                         ],
                       ),
                       const Divider(),
-                      for (var i in entries[index].value) card(i),
+                      for (var i in entries[index].value)
+                        timetableDetailCard(i),
                     ],
                   ),
                 ),
@@ -451,18 +519,25 @@ class _TimetablePageState extends State<TimetablePage> {
     );
   }
 
-  Widget card(Timetable details) {
+  Widget timetableDetailCard(Timetable details) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: InkWell(
         onTap: () {
+          if (currentTimetableID == null) return;
+
+          TimetableEntry timetableEntry = TimetableEntry(
+            email: currentUser.email!,
+            timetableID: currentTimetableID!,
+            dayIndex: dateIndex,
+          );
+
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AddNewTimetablePage(
-                timetable: details,
-                dateIndex: dateIndex,
-                timetableId: currentTimetableID!,
+                timetableEntry: timetableEntry,
+                timetableData: details,
               ),
             ),
           );
@@ -574,7 +649,7 @@ class _TimetablePageState extends State<TimetablePage> {
     );
   }
 
-  Widget day(String dayName, int date, int index, BuildContext context) {
+  Widget dayCard(String dayName, int date, int index, BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: 60,
@@ -611,42 +686,6 @@ class _TimetablePageState extends State<TimetablePage> {
           ),
         ),
       ),
-    );
-  }
-
-  List<DateTime> getCurrentWeekDays() {
-    DateTime now = DateTime.now();
-    int currentWeekday = now.weekday;
-
-    DateTime firstDayOfWeek = now.subtract(Duration(days: currentWeekday - 1));
-
-    return List.generate(
-      7,
-      (index) => firstDayOfWeek.add(
-        Duration(days: index),
-      ),
-    );
-  }
-
-  Text classDuration(Time startTime, Time endTime) {
-    Duration difference = startTime.timeDifference(endTime);
-    String text = '';
-
-    if (difference.inHours >= 1) {
-      text += '${difference.inHours} ชม.';
-    }
-
-    if (difference.inMinutes % 60 != 0) {
-      if (text.isNotEmpty) {
-        text += ' ';
-      }
-
-      text += '${difference.inMinutes % 60} นาที';
-    }
-
-    return Text(
-      text,
-      style: textTheme.bodySmall,
     );
   }
 }

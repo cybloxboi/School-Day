@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -6,22 +5,20 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/navigation_menu.dart';
-import 'package:school_day/services/notification_service.dart';
-import 'package:school_day/services/timetable_database.dart';
+import 'package:school_day/services/notification/notification_service.dart';
+import 'package:school_day/services/timetable_database/timetable_entry.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewTimetablePage extends StatefulWidget {
   const AddNewTimetablePage({
     super.key,
-    this.timetable,
-    this.dateIndex,
-    required this.timetableId,
+    required this.timetableEntry,
+    this.timetableData,
   });
 
-  final Timetable? timetable;
-  final String timetableId;
-  final int? dateIndex;
+  final TimetableEntry timetableEntry;
+  final Timetable? timetableData;
 
   @override
   State<AddNewTimetablePage> createState() => _AddNewTimetablePageState();
@@ -30,7 +27,6 @@ class AddNewTimetablePage extends StatefulWidget {
 class _AddNewTimetablePageState extends State<AddNewTimetablePage>
     with WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
-  final _currentUser = FirebaseAuth.instance.currentUser;
 
   final _subjectController = TextEditingController();
   final _locationController = TextEditingController();
@@ -45,15 +41,16 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
   late bool isAlarmOn;
   late bool isNotificationOn;
 
-  final Map<String, String> days = {
-    'monday': 'วันจันทร์',
-    'tuesday': 'วันอังคาร',
-    'wednesday': 'วันพุธ',
-    'thursday': 'วันพฤหัสบดี',
-    'friday': 'วันศุกร์',
-    'saturday': 'วันเสาร์',
-    'sunday': 'วันอาทิตย์',
-  };
+  final List<String> days = [
+    'วันจันทร์',
+    'วันอังคาร',
+    'วันพุธ',
+    'วันพฤหัสบดี',
+    'วันศุกร์',
+    'วันเสาร์',
+    'วันอาทิตย์',
+  ];
+
   final Map<String, Time> notificationTimes = {
     'ถึงเวลาเข้าเรียน': Time(0, 0),
     'ก่อน 5 นาที': Time(0, 5),
@@ -65,9 +62,6 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
   late final List<Time> notificationTimesValues;
   late final List<String> notificationTimesKeys;
-
-  late final List<String> dayValues;
-  late final List<String> dayKeys;
 
   late int selectedDayIndex;
   int selectedNotification = 0;
@@ -96,20 +90,17 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
   @override
   void initState() {
-    dayValues = days.values.toList();
-    dayKeys = days.keys.toList();
-
     notificationTimesValues = notificationTimes.values.toList();
     notificationTimesKeys = notificationTimes.keys.toList();
 
-    if (widget.timetable != null) {
-      _subjectController.text = widget.timetable!.title;
-      _locationController.text = widget.timetable!.location;
-      _professorController.text = widget.timetable!.professor;
-      _startTime = widget.timetable!.startTime;
-      _endTime = widget.timetable!.endTime;
-      isNotify = widget.timetable!.isNotify;
-      notifyTime = widget.timetable!.notifyTime;
+    if (widget.timetableData != null) {
+      _subjectController.text = widget.timetableData!.title;
+      _locationController.text = widget.timetableData!.location;
+      _professorController.text = widget.timetableData!.professor;
+      _startTime = widget.timetableData!.startTime;
+      _endTime = widget.timetableData!.endTime;
+      isNotify = widget.timetableData!.isNotify;
+      notifyTime = widget.timetableData!.notifyTime;
       selectedNotification = notificationTimes.entries.toList().indexWhere(
             (entry) =>
                 entry.value.hour == notifyTime.hour &&
@@ -127,7 +118,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
       }
     }
 
-    selectedDayIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
+    selectedDayIndex = widget.timetableEntry.dayIndex;
 
     WidgetsBinding.instance.addObserver(this);
     _checkPermission();
@@ -171,7 +162,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   content: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      widget.timetable == null
+                      widget.timetableData == null
                           ? 'ต้องการยกเลิกสร้างตารางเรียนนี้ใช่ไหม :<'
                           : 'ต้องการยกเลิกการเปลี่ยนแปลงตารางเรียนนี้ใช่ไหม :<',
                     ),
@@ -183,7 +174,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                           context,
                           MaterialPageRoute(
                             builder: (context) => NavigationMenu(
-                              dateIndex: widget.dateIndex,
+                              dateIndex: widget.timetableEntry.dayIndex,
                               screenIndex: 1,
                             ),
                           ),
@@ -206,7 +197,9 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
         ),
         centerTitle: false,
         title: Text(
-          widget.timetable == null ? 'เพิ่มตารางเรียนใหม่' : 'แก้ไขตารางเรียน',
+          widget.timetableData == null
+              ? 'เพิ่มตารางเรียนใหม่'
+              : 'แก้ไขตารางเรียน',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -228,9 +221,6 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     return;
                   }
 
-                  String userEmail = _currentUser!.email!;
-                  String day = dayKeys[selectedDayIndex];
-
                   if (!isNotify) {
                     notifyTime = Time(0, 0);
                   }
@@ -246,36 +236,28 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     ),
                   );
 
+                  Timetable newLesson = Timetable(
+                    title: _subjectController.text.trim(),
+                    professor: _professorController.text.trim(),
+                    location: _locationController.text.trim(),
+                    startTime: _startTime,
+                    endTime: _endTime,
+                    isNotify: isNotify,
+                    notifyTime: notifyTime,
+                  );
+                  newLesson.id = widget.timetableData?.id ?? const Uuid().v4();
+
                   bool success;
 
-                  if (widget.timetable != null) {
-                    success = await updateTimetableEntry(
-                      userEmail,
-                      widget.timetableId,
-                      dayKeys[widget.dateIndex!],
-                      day,
-                      _subjectController.text.trim(),
-                      _startTime,
-                      _endTime,
-                      _locationController.text.trim(),
-                      _professorController.text.trim(),
-                      widget.timetable!.id,
-                      isNotify,
-                      notifyTime,
+                  if (widget.timetableData != null) {
+                    success = await widget.timetableEntry.updateLesson(
+                      newDayIndex: selectedDayIndex,
+                      oldLesson: widget.timetableData!,
+                      updatedLesson: newLesson,
                     );
                   } else {
-                    success = await addTimetableEntry(
-                      userEmail,
-                      widget.timetableId,
-                      day,
-                      _subjectController.text.trim(),
-                      _startTime,
-                      _endTime,
-                      _locationController.text.trim(),
-                      _professorController.text.trim(),
-                      const Uuid().v1(),
-                      isNotify,
-                      notifyTime,
+                    success = await widget.timetableEntry.addLesson(
+                      newLesson: newLesson,
                     );
                   }
 
@@ -297,7 +279,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.timetable == null
+                          widget.timetableData == null
                               ? 'เพิ่มตารางเรียนเรียบร้อยคับ!'
                               : 'แก้ไขตารางเรียนเรียบร้อย',
                         ),
@@ -308,7 +290,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.timetable == null
+                          widget.timetableData == null
                               ? 'ดูเหมือนจะมีปัญหาการเพิ่มตารางเรียนนะ :('
                               : 'ดูเหมือนจะมีปัญหาการแก้ไขตารางเรียนนะ :(',
                         ),
@@ -388,7 +370,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                             days.length,
                                             (index) {
                                               return RadioListTile(
-                                                title: Text(dayValues[index]),
+                                                title: Text(days[index]),
                                                 value: index,
                                                 groupValue: selectedDayIndex,
                                                 onChanged: (value) {
@@ -407,7 +389,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                 );
                               },
                               child: Text(
-                                dayValues[selectedDayIndex],
+                                days[selectedDayIndex],
                                 style: textTheme.bodyMedium!.copyWith(
                                   fontSize: 16,
                                 ),
@@ -496,7 +478,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                       (BuildContext context, Widget? child) {
                                     return MediaQuery(
                                       data: MediaQuery.of(context).copyWith(
-                                          alwaysUse24HourFormat: true),
+                                        alwaysUse24HourFormat: true,
+                                      ),
                                       child: child!,
                                     );
                                   },
@@ -649,7 +632,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
           ),
         ),
       ),
-      bottomNavigationBar: widget.timetable != null
+      bottomNavigationBar: widget.timetableData != null
           ? Padding(
               padding: const EdgeInsets.all(16),
               child: FilledButton.icon(
@@ -693,11 +676,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     ),
                   );
 
-                  bool success = await deleteTimetableEntry(
-                    _currentUser!.email!,
-                    widget.timetableId,
-                    dayKeys[selectedDayIndex],
-                    widget.timetable!.id,
+                  bool success = await widget.timetableEntry.deleteLesson(
+                    lesson: widget.timetableData!,
                   );
 
                   if (!context.mounted) return;

@@ -49,16 +49,15 @@ class NotificationService {
   }
 
   Future<void> scheduleWeeklyTimetableNotifications(
-    Map<int, List<Timetable>> timetableList,
+    List<Timetable> timetableList,
+    int dateIndex,
   ) async {
     if (kIsWeb) return;
 
     await notificationsPlugin.cancelAll();
 
-    for (var day = 0; day < 7; day++) {
-      for (var classData in timetableList[day] ?? []) {
-        await scheduleNotification(timetable: classData, dateIndex: day);
-      }
+    for (var classData in timetableList) {
+      await scheduleNotification(timetable: classData, dateIndex: dateIndex);
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:school_day/screens/auth/login_page.dart';
-import 'package:school_day/services/notification_service.dart';
+import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/styles/styles.dart';
 
 class HomePage extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_day/components/validate.dart';
+import 'package:school_day/components/auth/validate.dart';
 import 'package:school_day/screens/auth/forgot_password_page.dart';
 import 'package:school_day/screens/auth/sign_up_page.dart';
 import 'package:school_day/styles/styles.dart';
@@ -25,21 +25,22 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'ยินดีต้อนรับ',
-            style: textTheme.headlineLarge,
-          ),
-          Text(
-            'โปรดกรอกข้อมูลเข้าสู่ระบบ',
-            style: textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 32),
-          Form(
-            key: widget.formKey,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'ยินดีต้อนรับ',
+          style: textTheme.headlineLarge,
+        ),
+        Text(
+          'โปรดกรอกข้อมูลเข้าสู่ระบบ',
+          style: textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 32),
+        Form(
+          key: widget.formKey,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 16,
@@ -139,8 +140,8 @@ class _LoginWidgetState extends State<LoginWidget> {
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
