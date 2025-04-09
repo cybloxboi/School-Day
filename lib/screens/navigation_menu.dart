@@ -20,6 +20,7 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,9 +41,29 @@ class _NavigationMenuState extends State<NavigationMenu> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        bool isWideScreen = constraints.maxWidth >= 600;
+        bool isWideScreen = constraints.maxWidth >= 750;
 
         return Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(color: Colors.pink),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
           body: Row(
             children: [
               if (isWideScreen)
@@ -70,7 +91,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               Expanded(
                 child: [
-                  const HomePage(),
+                  HomePage(
+                    scaffoldKey: scaffoldKey,
+                  ),
                   TimetablePage(
                     dateIndex: widget.dateIndex,
                   ),

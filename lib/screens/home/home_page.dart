@@ -6,9 +6,19 @@ import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({
+    super.key,
+    required this.scaffoldKey,
+  });
 
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     if (!kIsWeb) NotificationService().cancelAllNotifications();
@@ -33,6 +43,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String today = DateFormat('d MMM yyyy').format(DateTime.now());
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -42,9 +53,9 @@ class HomePage extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.menu),
+          icon: const Icon(Icons.menu),
           onPressed: () {
-  Scaffold.of(context).openDrawer();
+            widget.scaffoldKey.currentState?.openDrawer();
           },
         ),
         centerTitle: false,
@@ -64,23 +75,6 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.pink),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(backgroundColor: Colors.white,
-                  child: Icon(Icons.person),)
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
       backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -91,24 +85,32 @@ class HomePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('วันนี้',
-                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
-                   ),
-                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      today,
-                      style: TextStyle(color: Colors.black),),
-                   )
+                const Text(
+                  'วันนี้',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    today,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                )
               ],
             )
           ],
         ),
-        ),
-      );
+      ),
+    );
   }
 }
