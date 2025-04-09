@@ -28,12 +28,13 @@ class TimetableEntry extends TimetableDocument {
   }
 
   Future<bool> addLesson({
+    required int selectedDayIndex,
     required Timetable newLesson,
   }) async {
     try {
       // Write
       await timetableDoc.update({
-        'days.$dayIndex': FieldValue.arrayUnion([newLesson.toJson()]),
+        'days.$selectedDayIndex': FieldValue.arrayUnion([newLesson.toJson()]),
       });
 
       return true;

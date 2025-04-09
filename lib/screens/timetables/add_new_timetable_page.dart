@@ -257,6 +257,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                     );
                   } else {
                     success = await widget.timetableEntry.addLesson(
+                      selectedDayIndex: selectedDayIndex,
                       newLesson: newLesson,
                     );
                   }
