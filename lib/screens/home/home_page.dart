@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {
-            print("Menu button pressed");
+  Scaffold.of(context).openDrawer();
           },
         ),
         centerTitle: false,
@@ -63,6 +63,23 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.pink),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(backgroundColor: Colors.white,
+                  child: Icon(Icons.person),)
+                ],
+              ),
+            )
+          ],
+        ),
       ),
       backgroundColor: backgroundColor,
       body: Padding(
