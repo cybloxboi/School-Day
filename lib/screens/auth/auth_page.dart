@@ -13,6 +13,10 @@ class AuthPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+
             return const NavigationMenu();
           }
 

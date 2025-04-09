@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:school_day/components/sign_up_widget.dart';
+import 'package:school_day/components/auth/sign_up_widget.dart';
 import 'package:school_day/screens/auth/email_verification_page.dart';
-import 'package:school_day/services/timetable_database.dart';
+import 'package:school_day/services/timetable_database/timetable_document.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -15,6 +15,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -46,7 +47,13 @@ class _SignUpPageState extends State<SignUpPage> {
         await user.sendEmailVerification();
       }
 
-      await createUserDocument(userCredential);
+      TimetableDocument timetableDocument = TimetableDocument(
+        email: user!.email!,
+      );
+
+      await timetableDocument.createUserDocument(
+        username: _usernameController.text.trim(),
+      );
 
       if (!context.mounted) return;
 
@@ -119,6 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           flex: 1,
                           child: SignUpWidget(
                             formKey: _formKey,
+                            usernameController: _usernameController,
                             emailController: _emailController,
                             passwordController: _passwordController,
                             confirmPasswordController:
@@ -144,6 +152,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         Flexible(
                           child: SignUpWidget(
                             formKey: _formKey,
+                            usernameController: _usernameController,
                             emailController: _emailController,
                             passwordController: _passwordController,
                             confirmPasswordController:

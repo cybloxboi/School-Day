@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:school_day/components/validate.dart';
+import 'package:school_day/components/auth/validate.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpWidget extends StatefulWidget {
   const SignUpWidget({
     super.key,
     required this.formKey,
+    required this.usernameController,
     required this.emailController,
     required this.passwordController,
     required this.confirmPasswordController,
@@ -13,6 +14,7 @@ class SignUpWidget extends StatefulWidget {
   });
 
   final GlobalKey<FormState> formKey;
+  final TextEditingController usernameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
@@ -59,13 +61,30 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         ),
         Form(
           key: widget.formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 18,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: TextFormField(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 18,
+              children: [
+                TextFormField(
+                  controller: widget.usernameController,
+                  autofillHints: const [AutofillHints.username],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'ชื่อผู้ใช้งาน',
+                  ),
+                  keyboardType: TextInputType.name,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'โปรดระบุชื่อผู้ใช้งาน';
+                    }
+
+                    return null;
+                  },
+                ),
+                TextFormField(
                   controller: widget.emailController,
                   autofillHints: const [AutofillHints.email],
                   decoration: const InputDecoration(
@@ -84,10 +103,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     return null;
                   },
                 ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: TextFormField(
+                TextFormField(
                   autofillHints: const [AutofillHints.newPassword],
                   controller: widget.passwordController,
                   decoration: const InputDecoration(
@@ -109,10 +125,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     return null;
                   },
                 ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: TextFormField(
+                TextFormField(
                   autofillHints: const [AutofillHints.newPassword],
                   controller: widget.confirmPasswordController,
                   decoration: const InputDecoration(
@@ -134,63 +147,63 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     return null;
                   },
                 ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: ExpansionTile(
-                  leading: const Icon(Icons.password),
-                  title: Text(
-                    isPasswordValid(_password)
-                        ? 'รหัสผ่านดูดีเลย :3'
-                        : 'โอ้ ลองคิดรหัสผ่านใหม่นะ',
-                    style: textTheme.bodySmall!.copyWith(
-                      color: isPasswordValid(_password) ? Colors.green : null,
-                    ),
-                  ),
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          spacing: 8,
-                          children: [
-                            PasswordRuleCheck(
-                              text: 'มีอย่างน้อย 6 ตัวอักษร',
-                              isValid: hasMinLength(_password),
-                            ),
-                            PasswordRuleCheck(
-                              text: 'มีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร',
-                              isValid: hasUpperCase(_password),
-                            ),
-                            PasswordRuleCheck(
-                              text: 'มีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัวอักษร',
-                              isValid: hasLowerCase(_password),
-                            ),
-                            PasswordRuleCheck(
-                              text: 'มีตัวเลขอย่างน้อย 1 ตัวอักษร',
-                              isValid: hasNumber(_password),
-                            ),
-                          ],
-                        ),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: ExpansionTile(
+                    leading: const Icon(Icons.password),
+                    title: Text(
+                      isPasswordValid(_password)
+                          ? 'รหัสผ่านดูดีเลย :3'
+                          : 'โอ้ ลองคิดรหัสผ่านใหม่นะ',
+                      style: textTheme.bodySmall!.copyWith(
+                        color: isPasswordValid(_password) ? Colors.green : null,
                       ),
                     ),
-                  ],
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            spacing: 8,
+                            children: [
+                              PasswordRuleCheck(
+                                text: 'มีอย่างน้อย 6 ตัวอักษร',
+                                isValid: hasMinLength(_password),
+                              ),
+                              PasswordRuleCheck(
+                                text: 'มีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร',
+                                isValid: hasUpperCase(_password),
+                              ),
+                              PasswordRuleCheck(
+                                text: 'มีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัวอักษร',
+                                isValid: hasLowerCase(_password),
+                              ),
+                              PasswordRuleCheck(
+                                text: 'มีตัวเลขอย่างน้อย 1 ตัวอักษร',
+                                isValid: hasNumber(_password),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: () {
-                  if (widget.formKey.currentState!.validate()) {
-                    widget.onSignUp(context);
-                  }
-                },
-                child: Text(
-                  'สมัคร',
-                  style: textTheme.bodySmall,
+                const SizedBox(height: 8),
+                FilledButton(
+                  onPressed: () {
+                    if (widget.formKey.currentState!.validate()) {
+                      widget.onSignUp(context);
+                    }
+                  },
+                  child: Text(
+                    'สมัคร',
+                    style: textTheme.bodySmall,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ],

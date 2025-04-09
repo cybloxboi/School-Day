@@ -68,9 +68,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const NavigationMenu(
-            isLogin: true,
-          ),
+          builder: (context) => const NavigationMenu(),
         ),
         (Route<dynamic> route) => false,
       );

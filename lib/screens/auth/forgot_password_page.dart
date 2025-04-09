@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:school_day/components/validate.dart';
+import 'package:school_day/components/auth/validate.dart';
 import 'package:school_day/screens/auth/sent_password_reset_page.dart';
 import 'package:school_day/styles/styles.dart';
 
