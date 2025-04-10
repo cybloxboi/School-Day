@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/user_database/user_document.dart';
 import 'package:school_day/styles/styles.dart';
@@ -28,13 +27,6 @@ class _HomePageState extends State<HomePage> {
     if (!kIsWeb) NotificationService().cancelAllNotifications();
 
     if (!context.mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -87,26 +79,32 @@ class _HomePageState extends State<HomePage> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8,
           children: [
             StreamBuilder(
               stream: userDocument.getUsername(),
               builder: (context, snapshot) {
-                if (snapshot.hasError ||
-                    snapshot.connectionState == ConnectionState.waiting) {
-                  return Text(
-                    'สวัสดี!',
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    snapshot.hasError ||
+                            snapshot.connectionState == ConnectionState.waiting
+                        ? ''
+                        : 'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                    key: ValueKey(snapshot.data),
                     style: textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
-                  );
-                }
-
-                return Text(
-                  'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
-                  style: textTheme.bodyMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
+                    textAlign: TextAlign.start,
                   ),
                 );
               },
