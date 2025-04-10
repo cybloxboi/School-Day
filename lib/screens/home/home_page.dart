@@ -104,8 +104,8 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 return Text(
-                  'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
-                  style: textTheme.bodyMedium!.copyWith(
+                  'สวัสดี ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                  style: textTheme.bodySmall!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 );
@@ -119,15 +119,16 @@ class _HomePageState extends State<HomePage> {
                   style: textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
+                  
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
-                    vertical: 6,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     today,
