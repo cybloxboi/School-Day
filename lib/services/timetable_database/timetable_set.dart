@@ -21,7 +21,7 @@ class TimetableSetDocument extends TimetableDocument {
           name: doc['name'] as String,
         );
       }).toList();
-    });
+    }).distinct();
   }
 
   Future<void> createNewTimetableSet({

@@ -40,14 +40,14 @@ class TimetableDocument {
     timetableDoc = getUserTimetableDoc();
   }
 
-  Stream<String?> getCurrentTimetableID() {
-    return firestore.collection('Users').doc(email).snapshots().map((snapshot) {
+  Stream getCurrentTimetableID() {
+    return userDoc.snapshots().map((snapshot) {
       if (snapshot.exists) {
         return snapshot['currentTimetableID'];
       } else {
         return null;
       }
-    });
+    }).distinct();
   }
 
   Future<void> updateCurrentTimetableID(String timetableID) async {

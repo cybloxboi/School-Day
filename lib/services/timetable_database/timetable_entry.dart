@@ -14,7 +14,7 @@ class TimetableEntry extends TimetableDocument {
     timetableDoc = getUserTimetableDoc(timetableID);
   }
 
-  Stream<List<Timetable>> fetchLessons() {
+  Stream fetchLessons() {
     return timetableDoc.snapshots().map((snapshot) {
       if (!snapshot.exists) return [];
 
@@ -24,7 +24,7 @@ class TimetableEntry extends TimetableDocument {
       return lessonsData
           .map((lesson) => Timetable.fromJson(lesson as Map<String, dynamic>))
           .toList();
-    });
+    }).distinct();
   }
 
   Future<bool> addLesson({

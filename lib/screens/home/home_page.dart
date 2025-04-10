@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/services/notification/notification_service.dart';
+import 'package:school_day/services/user_database/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
 
@@ -19,6 +20,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String today = DateFormat('d MMM yyyy').format(DateTime.now());
+  late UserDocument userDocument;
+
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     if (!kIsWeb) NotificationService().cancelAllNotifications();
@@ -41,9 +45,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String today = DateFormat('d MMM yyyy').format(DateTime.now());
-    
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -80,15 +88,35 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
           children: [
-            const SizedBox(height: 10),
+            StreamBuilder(
+              stream: userDocument.getUsername(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError ||
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return Text(
+                    'สวัสดี!',
+                    style: textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                }
+
+                return Text(
+                  'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                  style: textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'วันนี้',
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -103,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Text(
                     today,
-                    style: const TextStyle(color: Colors.black),
+                    style: textTheme.bodySmall,
                   ),
                 )
               ],
