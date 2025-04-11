@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:school_day/services/timetable_database/timetable_document.dart';
+import 'package:school_day/services/database/timetable/timetable_document.dart';
 
 class TimetableSetInfo {
   final String id;

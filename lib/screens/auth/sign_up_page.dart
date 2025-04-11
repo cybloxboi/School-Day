@@ -4,7 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/auth/sign_up_widget.dart';
 import 'package:school_day/screens/auth/email_verification_page.dart';
-import 'package:school_day/services/timetable_database/timetable_document.dart';
+import 'package:school_day/services/database/timetable/timetable_document.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpPage extends StatefulWidget {

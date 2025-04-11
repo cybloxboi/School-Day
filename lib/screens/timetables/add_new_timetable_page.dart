@@ -6,7 +6,7 @@ import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/services/notification/notification_service.dart';
-import 'package:school_day/services/timetable_database/timetable_entry.dart';
+import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:uuid/uuid.dart';
 

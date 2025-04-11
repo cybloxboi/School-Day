@@ -5,7 +5,7 @@ import 'package:school_day/data/destination.dart';
 import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/screens/todos/todo_page.dart';
-import 'package:school_day/services/user_database/user_document.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/services/timetable_database/timetable_set.dart';
+import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 
 class AddTimetablesetsPage extends StatefulWidget {

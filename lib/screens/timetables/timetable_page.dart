@@ -9,8 +9,8 @@ import 'package:school_day/components/timetables/get_current_week_days.dart';
 import 'package:school_day/components/timetables/timetable_sets.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/timetables/add_new_timetable_page.dart';
-import 'package:school_day/services/timetable_database/timetable_entry.dart';
-import 'package:school_day/services/timetable_database/timetable_set.dart';
+import 'package:school_day/services/database/timetable/timetable_entry.dart';
+import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
