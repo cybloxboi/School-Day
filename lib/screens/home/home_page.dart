@@ -24,6 +24,8 @@ class _HomePageState extends State<HomePage> {
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
 
+  String greetingText = '';
+
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     if (!kIsWeb) NotificationService().cancelAllNotifications();
@@ -89,6 +91,11 @@ class _HomePageState extends State<HomePage> {
             StreamBuilder(
               stream: userDocument.getUsername(_userStream),
               builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  greetingText =
+                      'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
+                }
+
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder:
@@ -99,14 +106,12 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                   child: Text(
-                    snapshot.hasError ||
-                            snapshot.connectionState == ConnectionState.waiting
-                        ? ''
-                        : 'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                    greetingText,
                     key: ValueKey(snapshot.data),
                     style: textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.start,
                   ),
                 );
               },
