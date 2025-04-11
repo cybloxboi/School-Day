@@ -1,9 +1,11 @@
-import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:school_day/services/image/image_helper.dart';
 
 class ProfileImage extends StatefulWidget {
@@ -14,22 +16,18 @@ class ProfileImage extends StatefulWidget {
 }
 
 class _ProfileImageState extends State<ProfileImage> {
-  File? _imageFile;
-  Uint8List? _webImageBytes;
   final ImageHelper _imageHelper = ImageHelper();
+  final user = FirebaseAuth.instance.currentUser;
+  String? photoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    photoUrl = user?.photoURL;
+  }
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider imageProvider;
-
-    if (kIsWeb && _webImageBytes != null) {
-      imageProvider = MemoryImage(_webImageBytes!);
-    } else if (!kIsWeb && _imageFile != null) {
-      imageProvider = FileImage(_imageFile!);
-    } else {
-      imageProvider = const AssetImage('assets/images/blank_profile.jpg');
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -38,7 +36,9 @@ class _ProfileImageState extends State<ProfileImage> {
             fit: BoxFit.contain,
             child: CircleAvatar(
               radius: 64,
-              backgroundImage: imageProvider,
+              backgroundImage: photoUrl != null
+                  ? NetworkImage(Uri.parse(photoUrl!).toString())
+                  : const AssetImage('assets/images/blank_profile.jpg'),
             ),
           ),
         ),
@@ -60,22 +60,78 @@ class _ProfileImageState extends State<ProfileImage> {
               );
 
               if (cropped != null) {
-                if (kIsWeb) {
-                  final bytes = await cropped.readAsBytes();
-                  setState(() {
-                    _webImageBytes = bytes;
-                  });
-                } else {
-                  setState(() {
-                    _imageFile = File(cropped.path);
-                  });
-                }
+                if (!context.mounted) return;
+
+                await uploadProfileAndUpdateAuth(
+                  image: XFile(cropped.path),
+                  context: context,
+                );
               }
             }
           },
           child: const Text('เลือกรูปภาพ'),
         ),
+        ElevatedButton(
+          onPressed: () async {
+            await FirebaseAuth.instance.currentUser?.reload();
+            final refreshedUser = FirebaseAuth.instance.currentUser;
+            setState(() {
+              photoUrl = refreshedUser?.photoURL;
+            });
+          },
+          child: const Text('รีเฟรชรูปโปรไฟล์'),
+        )
       ],
     );
+  }
+
+  Future<void> uploadProfileAndUpdateAuth({
+    required XFile image,
+    required BuildContext context,
+  }) async {
+    if (user == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child('${user!.uid}.jpg');
+
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        final bytes = await image.readAsBytes();
+        uploadTask = storageRef.putData(bytes);
+      } else {
+        uploadTask = storageRef.putFile(File(image.path));
+      }
+
+      final snapshot = await uploadTask;
+      final url = await snapshot.ref.getDownloadURL();
+
+      await user!.updatePhotoURL(url);
+      await user!.reload();
+
+      print('Download URL: $url');
+
+      setState(() {
+        photoUrl = user!.photoURL;
+      });
+    } catch (e) {
+      debugPrint('เกิดข้อผิดพลาดในการอัปโหลดโปรไฟล์: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+        );
+      }
+    } finally {
+      if (context.mounted) Navigator.of(context).pop();
+    }
   }
 }

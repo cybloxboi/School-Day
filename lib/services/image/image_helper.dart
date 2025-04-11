@@ -90,9 +90,9 @@ class ImageHelper {
         WebUiSettings(
           context: context,
           viewwMode: WebViewMode.mode_2,
-          size: CropperSize(
-            width: (MediaQuery.of(context).size.width * 0.5).floor(),
-            height: (MediaQuery.of(context).size.height * 0.5).floor(),
+          size: const CropperSize(
+            width: 300,
+            height: 300,
           ),
           translations: WebTranslations(
             title: title,

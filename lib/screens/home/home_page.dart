@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:school_day/components/profile/profile_image.dart';
 import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
@@ -113,34 +112,66 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'วันนี้',
-                  style: textTheme.bodyMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEEF3),
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'วันนี้',
+                    style: textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    today,
-                    style: textTheme.bodySmall,
-                  ),
-                ),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Text(
+                      today,
+                      style: textTheme.bodySmall,
+                    ),
+                  )
+                ],
+              ),
             ),
-            const Spacer(),
-            const ProfileImage(),
-            const Spacer(),
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+            ),
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 600,
+                  mainAxisExtent: 200,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 3 / 2,
+                ),
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
