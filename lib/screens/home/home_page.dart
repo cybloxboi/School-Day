@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:school_day/components/profile/profile_image.dart';
 import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
@@ -134,9 +135,12 @@ class _HomePageState extends State<HomePage> {
                     today,
                     style: textTheme.bodySmall,
                   ),
-                )
+                ),
               ],
-            )
+            ),
+            const Spacer(),
+            const ProfileImage(),
+            const Spacer(),
           ],
         ),
       ),
