@@ -24,4 +24,9 @@ const List<Destination> destinations = [
     Icon(Icons.sticky_note_2_outlined),
     Icon(Icons.sticky_note_2_rounded),
   ),
+  Destination(
+    'รูปโปรไฟล์',
+    Icon(Icons.person_outline),
+    Icon(Icons.person_rounded),
+  ),
 ];

@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/services/image/image_helper.dart';
+import 'package:school_day/styles/styles.dart';
 
 class ProfileImage extends StatefulWidget {
   const ProfileImage({super.key});
@@ -18,71 +20,90 @@ class ProfileImage extends StatefulWidget {
 class _ProfileImageState extends State<ProfileImage> {
   final ImageHelper _imageHelper = ImageHelper();
   final user = FirebaseAuth.instance.currentUser;
-  String? photoUrl;
 
   @override
   void initState() {
     super.initState();
-    photoUrl = user?.photoURL;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Center(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: CircleAvatar(
-              radius: 64,
-              backgroundImage: photoUrl != null
-                  ? NetworkImage(Uri.parse(photoUrl!).toString())
-                  : const AssetImage('assets/images/blank_profile.jpg'),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'รูปโปรไฟล์',
+          style: textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () async {
-            final picked = await _imageHelper.pickImage(multiple: false);
-
-            if (picked.isNotEmpty) {
-              final selected = picked.first;
-
-              if (!context.mounted) return;
-
-              final cropped = await _imageHelper.crop(
-                file: selected,
-                title: 'ครอบตัดรูปภาพโปรไฟล์',
-                cropStyle: CropStyle.circle,
-                context: context,
-              );
-
-              if (cropped != null) {
-                if (!context.mounted) return;
-
-                await uploadProfileAndUpdateAuth(
-                  image: XFile(cropped.path),
-                  context: context,
+        centerTitle: false,
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FutureBuilder(
+            future: getCurrentUser(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  snapshot.data == null) {
+                return Center(
+                  child: LoadingAnimationWidget.beat(
+                    color: primaryColor,
+                    size: 80,
+                  ),
                 );
               }
-            }
-          },
-          child: const Text('เลือกรูปภาพ'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            await FirebaseAuth.instance.currentUser?.reload();
-            final refreshedUser = FirebaseAuth.instance.currentUser;
-            setState(() {
-              photoUrl = refreshedUser?.photoURL;
-            });
-          },
-          child: const Text('รีเฟรชรูปโปรไฟล์'),
-        )
-      ],
+
+              return Center(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: CircleAvatar(
+                    radius: 64,
+                    backgroundImage: snapshot.data!.photoURL != null
+                        ? NetworkImage(snapshot.data!.photoURL!)
+                        : const AssetImage('assets/images/blank_profile.jpg'),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () async {
+              final picked = await _imageHelper.pickImage(multiple: false);
+
+              if (picked.isNotEmpty) {
+                final selected = picked.first;
+
+                if (!context.mounted) return;
+
+                final cropped = await _imageHelper.crop(
+                  file: selected,
+                  title: 'ครอบตัดรูปภาพโปรไฟล์',
+                  cropStyle: CropStyle.circle,
+                  context: context,
+                );
+
+                if (cropped != null) {
+                  if (!context.mounted) return;
+
+                  await uploadProfileAndUpdateAuth(
+                    image: XFile(cropped.path),
+                    context: context,
+                  );
+                }
+              }
+            },
+            child: const Text('เลือกรูปภาพ'),
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<User?> getCurrentUser() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+    return FirebaseAuth.instance.currentUser;
   }
 
   Future<void> uploadProfileAndUpdateAuth({
@@ -94,7 +115,12 @@ class _ProfileImageState extends State<ProfileImage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => Center(
+        child: LoadingAnimationWidget.fourRotatingDots(
+          color: primaryColor,
+          size: 80,
+        ),
+      ),
     );
 
     try {
@@ -118,13 +144,10 @@ class _ProfileImageState extends State<ProfileImage> {
       await user!.updatePhotoURL(url);
       await user!.reload();
 
-      print('Download URL: $url');
-
-      setState(() {
-        photoUrl = user!.photoURL;
-      });
+      setState(() {});
     } catch (e) {
       debugPrint('เกิดข้อผิดพลาดในการอัปโหลดโปรไฟล์: $e');
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),

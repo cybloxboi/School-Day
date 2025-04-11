@@ -89,11 +89,8 @@ class ImageHelper {
         ),
         WebUiSettings(
           context: context,
+          presentStyle: WebPresentStyle.page,
           viewwMode: WebViewMode.mode_2,
-          size: const CropperSize(
-            width: 300,
-            height: 300,
-          ),
           translations: WebTranslations(
             title: title,
             rotateLeftTooltip: 'หมุนซ้าย',

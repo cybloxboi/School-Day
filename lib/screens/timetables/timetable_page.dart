@@ -344,7 +344,10 @@ class _TimetablePageState extends State<TimetablePage> {
                                                 'ไม่มีตารางเรียน :>',
                                                 softWrap: true,
                                                 textAlign: TextAlign.center,
-                                                style: textTheme.headlineLarge,
+                                                style: textTheme.bodyMedium!
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                               Text(
                                                 'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
