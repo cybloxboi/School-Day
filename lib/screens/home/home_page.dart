@@ -111,35 +111,65 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'วันนี้',
-                  style: textTheme.bodyMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
+
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Color(0xFFFFEEF3),
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'วันนี้',
+                    style: textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    today,
-                    style: textTheme.bodySmall,
-                  ),
-                )
-              ],
-            )
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Text(
+                      today,
+                      style: textTheme.bodySmall,
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            Container(
+              height: 1,
+              width: double.infinity,
+              color: Colors.black,
+              margin: EdgeInsets.symmetric(vertical: 4),
+            ),
+
+        Expanded(
+              child: ListView.builder(
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Container(
+                    height: 160,
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  );
+                },
+              ),
+            ),
+
           ],
         ),
       ),
     );
+    
   }
 }
