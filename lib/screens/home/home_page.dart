@@ -107,13 +107,6 @@ class _HomePageState extends State<HomePage> {
                     style: textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
-                  );
-                };
-
-                return Text(
-                  'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
-                  style: textTheme.bodyMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
                   ),
                 );
               },
@@ -182,6 +175,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-    
   }
 }
