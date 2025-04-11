@@ -15,8 +15,12 @@ class TimetableEntry extends TimetableDocument {
     timetableDoc = getUserTimetableDoc(timetableID);
   }
 
-  Stream fetchLessons() {
-    return timetableDoc.snapshots().map((snapshot) {
+  Stream<DocumentSnapshot> getTimetableDocumentSnapshots() {
+    return timetableDoc.snapshots();
+  }
+
+  Stream fetchLessons(Stream<DocumentSnapshot> timetableDocumentSnapshots) {
+    return timetableDocumentSnapshots.map((snapshot) {
       if (!snapshot.exists) return [];
 
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;

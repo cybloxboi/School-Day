@@ -13,8 +13,14 @@ class TimetableSetDocument extends TimetableDocument {
     required super.email,
   });
 
-  Stream<List<TimetableSetInfo>> fetchTimetableSets() {
-    return timetableCol.snapshots().map((snapshot) {
+  Stream<QuerySnapshot> getTimetableSetQuerySnapshots() {
+    return timetableCol.snapshots();
+  }
+
+  Stream<List<TimetableSetInfo>> fetchTimetableSets(
+    Stream<QuerySnapshot> timetableQuerySnapshots,
+  ) {
+    return timetableQuerySnapshots.map((snapshot) {
       return snapshot.docs.map((doc) {
         return TimetableSetInfo(
           id: doc.id,

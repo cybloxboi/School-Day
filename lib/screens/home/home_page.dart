@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String today = DateFormat('d MMM yyyy').format(DateTime.now());
   late UserDocument userDocument;
+  late final Stream<DocumentSnapshot> _userStream;
 
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -40,6 +42,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+    _userStream = userDocument.getUserDocumentSnapshots();
   }
 
   @override
@@ -84,7 +87,7 @@ class _HomePageState extends State<HomePage> {
           spacing: 8,
           children: [
             StreamBuilder(
-              stream: userDocument.getUsername(),
+              stream: userDocument.getUsername(_userStream),
               builder: (context, snapshot) {
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),

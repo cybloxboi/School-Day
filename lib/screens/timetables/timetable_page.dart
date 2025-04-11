@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +15,10 @@ import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class TimetablePage extends StatefulWidget {
-  const TimetablePage({super.key, this.dateIndex});
+  const TimetablePage({super.key, this.dateIndex, required this.userStream});
 
   final int? dateIndex;
+  final Stream<DocumentSnapshot> userStream;
 
   @override
   State<TimetablePage> createState() => _TimetablePageState();
@@ -26,6 +28,7 @@ class _TimetablePageState extends State<TimetablePage> {
   late int dateIndex;
   late final User currentUser;
   late final TimetableSetDocument timetableSet;
+  late final Stream<QuerySnapshot> _timetableSetStream;
   late String? currentTimetableID;
   bool isLoading = true;
 
@@ -45,6 +48,7 @@ class _TimetablePageState extends State<TimetablePage> {
     dateIndex = widget.dateIndex ?? DateTime.now().weekday - 1;
     currentUser = FirebaseAuth.instance.currentUser!;
     timetableSet = TimetableSetDocument(email: currentUser.email!);
+    _timetableSetStream = timetableSet.getTimetableSetQuerySnapshots();
   }
 
   @override
@@ -115,7 +119,9 @@ class _TimetablePageState extends State<TimetablePage> {
                                 ),
                                 Expanded(
                                   child: StreamBuilder(
-                                    stream: timetableSet.fetchTimetableSets(),
+                                    stream: timetableSet.fetchTimetableSets(
+                                      _timetableSetStream,
+                                    ),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
@@ -265,7 +271,9 @@ class _TimetablePageState extends State<TimetablePage> {
                         }
 
                         return StreamBuilder(
-                          stream: timetableSet.getCurrentTimetableID(),
+                          stream: timetableSet.getCurrentTimetableID(
+                            widget.userStream,
+                          ),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -292,7 +300,9 @@ class _TimetablePageState extends State<TimetablePage> {
                             );
 
                             return StreamBuilder(
-                              stream: timetableEntry.fetchLessons(),
+                              stream: timetableEntry.fetchLessons(
+                                timetableEntry.getTimetableDocumentSnapshots(),
+                              ),
                               builder: (_, entrySnapshot) {
                                 if (entrySnapshot.connectionState ==
                                     ConnectionState.waiting) {

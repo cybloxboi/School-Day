@@ -40,8 +40,12 @@ class TimetableDocument {
     timetableDoc = getUserTimetableDoc();
   }
 
-  Stream getCurrentTimetableID() {
-    return userDoc.snapshots().map((snapshot) {
+  Stream<DocumentSnapshot> getUserDocumentSnapshots() {
+    return userDoc.snapshots();
+  }
+
+  Stream getCurrentTimetableID(Stream<DocumentSnapshot> userDocumentSnapshot) {
+    return userDocumentSnapshot.map((snapshot) {
       if (snapshot.exists) {
         return snapshot['currentTimetableID'];
       } else {
