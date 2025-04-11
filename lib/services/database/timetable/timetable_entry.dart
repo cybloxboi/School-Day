@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:school_day/data/timetable.dart';
-import 'package:school_day/services/timetable_database/timetable_document.dart';
+import 'package:school_day/services/notification/notification_service.dart';
+import 'package:school_day/services/database/timetable/timetable_document.dart';
 
 class TimetableEntry extends TimetableDocument {
   int dayIndex;
@@ -14,16 +15,26 @@ class TimetableEntry extends TimetableDocument {
     timetableDoc = getUserTimetableDoc(timetableID);
   }
 
-  Stream fetchLessons() {
-    return timetableDoc.snapshots().map((snapshot) {
+  Stream<DocumentSnapshot> getTimetableDocumentSnapshots() {
+    return timetableDoc.snapshots();
+  }
+
+  Stream fetchLessons(Stream<DocumentSnapshot> timetableDocumentSnapshots) {
+    return timetableDocumentSnapshots.map((snapshot) {
       if (!snapshot.exists) return [];
 
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
       List<dynamic> lessonsData = data['days']?[dayIndex.toString()] ?? [];
 
-      return lessonsData
+      List<Timetable> lessons = lessonsData
           .map((lesson) => Timetable.fromJson(lesson as Map<String, dynamic>))
           .toList();
+
+      NotificationService()
+          .scheduleWeeklyTimetableNotifications(lessons, dayIndex);
+
+      return lessons;
     }).distinct();
   }
 

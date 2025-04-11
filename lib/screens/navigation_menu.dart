@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:school_day/data/destination.dart';
 import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/screens/todos/todo_page.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({
@@ -21,6 +24,8 @@ class NavigationMenu extends StatefulWidget {
 class _NavigationMenuState extends State<NavigationMenu> {
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  late final UserDocument userDocument;
+  late final Stream<DocumentSnapshot> _userStream;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,6 +40,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
     if (widget.screenIndex != null) {
       _selectedIndex = widget.screenIndex!;
     }
+
+    userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+    _userStream = userDocument.getUserDocumentSnapshots();
   }
 
   @override
@@ -96,6 +104,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   ),
                   TimetablePage(
                     dateIndex: widget.dateIndex,
+                    userStream: _userStream,
                   ),
                   const TodoPage(),
                 ][_selectedIndex],

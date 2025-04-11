@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:school_day/screens/auth/login_page.dart';
+import 'package:school_day/components/profile/profile_image.dart';
 import 'package:school_day/services/notification/notification_service.dart';
-import 'package:school_day/services/user_database/user_document.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
 
@@ -22,19 +23,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String today = DateFormat('d MMM yyyy').format(DateTime.now());
   late UserDocument userDocument;
+  late final Stream<DocumentSnapshot> _userStream;
 
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     if (!kIsWeb) NotificationService().cancelAllNotifications();
 
     if (!context.mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -48,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+    _userStream = userDocument.getUserDocumentSnapshots();
   }
 
   @override
@@ -87,85 +83,67 @@ class _HomePageState extends State<HomePage> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8,
           children: [
             StreamBuilder(
-              stream: userDocument.getUsername(),
+              stream: userDocument.getUsername(_userStream),
               builder: (context, snapshot) {
-                if (snapshot.hasError ||
-                    snapshot.connectionState == ConnectionState.waiting) {
-                  return Text(
-                    'สวัสดี!',
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    snapshot.hasError ||
+                            snapshot.connectionState == ConnectionState.waiting
+                        ? ''
+                        : 'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                    key: ValueKey(snapshot.data),
                     style: textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   );
-                }
+                };
 
                 return Text(
-                  'สวัสดี ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
-                  style: textTheme.bodySmall!.copyWith(
+                  'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง',
+                  style: textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 );
               },
             ),
-
-          Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Color(0xFFFFEEF3),
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'วันนี้',
-                    style: textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'วันนี้',
+                  style: textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    child: Text(
-                      today,
-                      style: textTheme.bodySmall,
-                    ),
-                  )
-                ],
-              ),
-            ),
-
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black,
-              margin: EdgeInsets.symmetric(vertical: 4),
-            ),
-
-        Expanded(
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 160,
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  );
-                },
-              ),
-            ),
-
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    today,
+                    style: textTheme.bodySmall,
+                  ),
+                )
+              ],
+            )
           ],
         ),
       ),

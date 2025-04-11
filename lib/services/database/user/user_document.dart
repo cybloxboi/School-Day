@@ -13,8 +13,12 @@ class UserDocument {
     return firestore.collection('Users').doc(email);
   }
 
-  Stream getUsername() {
-    return userDocument.snapshots().map((snapshot) {
+  Stream<DocumentSnapshot> getUserDocumentSnapshots() {
+    return userDocument.snapshots();
+  }
+
+  Stream getUsername(Stream<DocumentSnapshot> userDocumentSnapshots) {
+    return userDocumentSnapshots.map((snapshot) {
       if (snapshot.exists) {
         return snapshot['username'];
       }
