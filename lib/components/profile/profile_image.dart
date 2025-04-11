@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -19,11 +20,12 @@ class ProfileImage extends StatefulWidget {
 
 class _ProfileImageState extends State<ProfileImage> {
   final ImageHelper _imageHelper = ImageHelper();
-  final user = FirebaseAuth.instance.currentUser;
+  late final User? user;
 
   @override
   void initState() {
     super.initState();
+    user = FirebaseAuth.instance.currentUser;
   }
 
   @override
@@ -38,6 +40,7 @@ class _ProfileImageState extends State<ProfileImage> {
         ),
         centerTitle: false,
       ),
+      backgroundColor: backgroundColor,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -54,47 +57,54 @@ class _ProfileImageState extends State<ProfileImage> {
                 );
               }
 
-              return Center(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: CircleAvatar(
-                    radius: 64,
-                    backgroundImage: snapshot.data!.photoURL != null
-                        ? NetworkImage(snapshot.data!.photoURL!)
-                        : const AssetImage('assets/images/blank_profile.jpg'),
+              return Column(
+                children: [
+                  Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: CircleAvatar(
+                        radius: 64,
+                        backgroundImage: snapshot.data!.photoURL != null
+                            ? CachedNetworkImageProvider(
+                                snapshot.data!.photoURL!)
+                            : const AssetImage(
+                                'assets/images/blank_profile.jpg'),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () async {
+                      final picked =
+                          await _imageHelper.pickImage(multiple: false);
+
+                      if (picked.isNotEmpty) {
+                        final selected = picked.first;
+
+                        if (!context.mounted) return;
+
+                        final cropped = await _imageHelper.crop(
+                          file: selected,
+                          title: 'ครอบตัดรูปภาพโปรไฟล์',
+                          cropStyle: CropStyle.circle,
+                          context: context,
+                        );
+
+                        if (cropped != null) {
+                          if (!context.mounted) return;
+
+                          await uploadProfileAndUpdateAuth(
+                            image: XFile(cropped.path),
+                            context: context,
+                          );
+                        }
+                      }
+                    },
+                    child: const Text('เลือกรูปภาพ'),
+                  ),
+                ],
               );
             },
-          ),
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: () async {
-              final picked = await _imageHelper.pickImage(multiple: false);
-
-              if (picked.isNotEmpty) {
-                final selected = picked.first;
-
-                if (!context.mounted) return;
-
-                final cropped = await _imageHelper.crop(
-                  file: selected,
-                  title: 'ครอบตัดรูปภาพโปรไฟล์',
-                  cropStyle: CropStyle.circle,
-                  context: context,
-                );
-
-                if (cropped != null) {
-                  if (!context.mounted) return;
-
-                  await uploadProfileAndUpdateAuth(
-                    image: XFile(cropped.path),
-                    context: context,
-                  );
-                }
-              }
-            },
-            child: const Text('เลือกรูปภาพ'),
           ),
         ],
       ),

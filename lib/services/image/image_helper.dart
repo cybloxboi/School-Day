@@ -17,7 +17,7 @@ class ImageHelper {
 
   Future<List<XFile>> pickImage({
     ImageSource source = ImageSource.gallery,
-    int imageQuality = 100,
+    int imageQuality = 70,
     bool multiple = false,
   }) async {
     if (kIsWeb) {
