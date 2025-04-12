@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -70,7 +72,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
   late bool _isExactAlarmOn;
 
   Future<bool> _checkPermission() async {
-    if (kIsWeb) return true;
+    if (kIsWeb || Platform.isIOS) return true;
 
     PermissionStatus notificationStatus = await Permission.notification.status;
     PermissionStatus exactAlarmStatus =
@@ -561,7 +563,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
@@ -601,7 +604,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                                             setState(() {
                                                               selectedNotification =
                                                                   value!;
-                                  
+
                                                               notifyTime =
                                                                   notificationTimesValues[
                                                                       value];

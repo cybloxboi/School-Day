@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -14,9 +16,8 @@ class NotificationService {
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
-    const initSettingsAndroid = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    const initSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const initSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -30,6 +31,14 @@ class NotificationService {
     );
 
     await notificationsPlugin.initialize(initSettings);
+
+    if (Platform.isIOS) {
+      final iosPlugin =
+          notificationsPlugin.resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>();
+      await iosPlugin?.requestPermissions(
+          alert: true, badge: true, sound: true);
+    }
   }
 
   NotificationDetails notificationDetails() {
@@ -44,7 +53,11 @@ class NotificationService {
         enableVibration: true,
         playSound: true,
       ),
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
     );
   }
 
@@ -66,9 +79,14 @@ class NotificationService {
     required Timetable timetable,
     required int dateIndex,
   }) async {
-    if (!timetable.isNotify ||
-        await Permission.notification.isDenied ||
-        await Permission.scheduleExactAlarm.isDenied) {
+    final isNotificationDenied =
+        Platform.isAndroid ? await Permission.notification.isDenied : false;
+
+    final isExactAlarmDenied = Platform.isAndroid
+        ? await Permission.scheduleExactAlarm.isDenied
+        : false;
+
+    if (!timetable.isNotify || isNotificationDenied || isExactAlarmDenied) {
       return;
     }
 
@@ -107,7 +125,6 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 

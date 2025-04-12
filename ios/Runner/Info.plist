@@ -45,5 +45,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>เราต้องการเข้าถึงคลังรูปภาพของคุณเพื่อให้คุณสามารถอัปโหลดรูปโปรไฟล์ได้</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>เราต้องการเข้าถึงการแจ้งเตือนเพื่อส่งการแจ้งเตือน เช่น แจ้งเตือนการเข้าเรียน</string>
 </dict>
 </plist>

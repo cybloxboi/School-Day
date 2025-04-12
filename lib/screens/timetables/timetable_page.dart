@@ -114,7 +114,8 @@ class _TimetablePageState extends State<TimetablePage> {
                                               Navigator.pop(context);
                                             },
                                             icon: const Icon(
-                                                Icons.cancel_rounded),
+                                              Icons.cancel_rounded,
+                                            ),
                                           ),
                                         ],
                                       ),
