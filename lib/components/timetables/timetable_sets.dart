@@ -41,99 +41,102 @@ class _TimetableSetsState extends State<TimetableSets> {
         bool isSelected = !isAddButton &&
             widget.timetableSets[index].id == widget.currentTimetableID;
 
-        return Card(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          color: isSelected ? secondaryColor : null,
-          child: InkWell(
-            onTap: () async {
-              if (isAddButton) {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                      child: SingleChildScrollView(
-                        child: AddTimetablesetsPage(
-                          isEdited: false,
-                          isCurrent: isSelected,
-                          timetableSetDocument: widget.timetableSetDocument,
+        return Padding(
+          padding: EdgeInsets.only(bottom: isAddButton ? 16 : 0),
+          child: Card(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            color: isSelected ? secondaryColor : Colors.white,
+            child: InkWell(
+              onTap: () async {
+                if (isAddButton) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
+                        child: SingleChildScrollView(
+                          child: AddTimetablesetsPage(
+                            isEdited: false,
+                            isCurrent: isSelected,
+                            timetableSetDocument: widget.timetableSetDocument,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
 
-                await widget.timetableSetDocument.updateCurrentTimetableID(
-                  widget.timetableSets[index].id,
-                );
-              }
-            },
-            onLongPress: () {
-              if (!isAddButton) {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                      child: SingleChildScrollView(
-                        child: AddTimetablesetsPage(
-                          isEdited: true,
-                          isCurrent: isSelected,
-                          timetableSetDocument: widget.timetableSetDocument,
-                          name: widget.timetableSets[index].name,
-                          timetableID: widget.timetableSets[index].id,
+                  await widget.timetableSetDocument.updateCurrentTimetableID(
+                    widget.timetableSets[index].id,
+                  );
+                }
+              },
+              onLongPress: () {
+                if (!isAddButton) {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
                         ),
-                      ),
-                    );
-                  },
-                );
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isAddButton)
-                      const Column(
-                        spacing: 8,
-                        children: [
-                          Icon(Icons.add_rounded),
-                          Text('สร้างเซตตารางเรียนใหม่'),
-                        ],
-                      )
-                    else
-                      Center(
-                        child: Column(
-                          spacing: 16,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                        child: SingleChildScrollView(
+                          child: AddTimetablesetsPage(
+                            isEdited: true,
+                            isCurrent: isSelected,
+                            timetableSetDocument: widget.timetableSetDocument,
+                            name: widget.timetableSets[index].name,
+                            timetableID: widget.timetableSets[index].id,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isAddButton)
+                        const Column(
+                          spacing: 8,
                           children: [
-                            Text(
-                              widget.timetableSets[index].name,
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                            if (isSelected) const Icon(Icons.check_rounded),
+                            Icon(Icons.add_rounded),
+                            Text('สร้างเซตตารางเรียนใหม่'),
                           ],
+                        )
+                      else
+                        Center(
+                          child: Column(
+                            spacing: 16,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.timetableSets[index].name,
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
+                              if (isSelected) const Icon(Icons.check_rounded),
+                            ],
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

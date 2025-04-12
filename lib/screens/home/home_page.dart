@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
@@ -90,7 +92,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
+          spacing: 16,
           children: [
             StreamBuilder(
               stream: userDocument.getUsername(_userStream),
@@ -109,13 +111,79 @@ class _HomePageState extends State<HomePage> {
                       child: child,
                     );
                   },
-                  child: Text(
-                    greetingText,
-                    key: ValueKey(snapshot.data),
-                    style: textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          greetingText,
+                          key: ValueKey(snapshot.data),
+                          style: textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          softWrap: true,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      FutureBuilder(
+                        future: getCurrentUser(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.waiting ||
+                              snapshot.data == null) {
+                            return Center(
+                              child: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: ClipOval(
+                                    child: CircleAvatar(
+                                      radius: 64,
+                                      child: LoadingAnimationWidget.beat(
+                                        color: primaryColor,
+                                        size: 100,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Center(
+                            child: SizedBox(
+                              width: 60,
+                              height: 60,
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: ClipOval(
+                                  child: CircleAvatar(
+                                    radius: 64,
+                                    child: snapshot.data!.photoURL != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: snapshot.data!.photoURL!,
+                                            placeholder: (context, url) {
+                                              return LoadingAnimationWidget
+                                                  .beat(
+                                                color: primaryColor,
+                                                size: 100,
+                                              );
+                                            },
+                                          )
+                                        : Image.asset(
+                                            'assets/images/blank_profile.jpg'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
@@ -180,5 +248,10 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<User?> getCurrentUser() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+    return FirebaseAuth.instance.currentUser;
   }
 }

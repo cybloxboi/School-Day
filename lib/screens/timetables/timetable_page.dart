@@ -73,6 +73,18 @@ class _TimetablePageState extends State<TimetablePage> {
             child: Row(
               spacing: 4,
               children: [
+                TextButton.icon(
+                  icon: const Icon(Icons.today_rounded),
+                  onPressed: () {
+                    setState(() {
+                      dateIndex = DateTime.now().weekday - 1;
+                    });
+                  },
+                  label: Text(
+                    'วันนี้',
+                    style: textTheme.bodySmall,
+                  ),
+                ),
                 IconButton(
                   onPressed: () {
                     if (currentTimetableID == null) return;
@@ -85,7 +97,11 @@ class _TimetablePageState extends State<TimetablePage> {
                         return SizedBox(
                           height: MediaQuery.of(context).size.height * 0.8,
                           child: Padding(
-                            padding: const EdgeInsets.all(32),
+                            padding: const EdgeInsets.only(
+                              left: 32,
+                              top: 32,
+                              right: 32,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -207,18 +223,6 @@ class _TimetablePageState extends State<TimetablePage> {
           child: Center(
             child: Column(
               children: [
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.today_rounded),
-                  onPressed: () {
-                    setState(() {
-                      dateIndex = DateTime.now().weekday - 1;
-                    });
-                  },
-                  label: Text(
-                    'วันนี้',
-                    style: textTheme.bodySmall,
-                  ),
-                ),
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
