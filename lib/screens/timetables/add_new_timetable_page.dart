@@ -512,13 +512,15 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                         builder: (context, snapshot) {
                           bool isPermissionGranted = snapshot.data ?? false;
 
-                          return ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 600),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Row(
+                          return Wrap(
+                            spacing: 32,
+                            runSpacing: 32,
+                            runAlignment: WrapAlignment.center,
+                            children: [
+                              ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 600),
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -551,9 +553,16 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 25),
-                                if (isNotify && isPermissionGranted)
-                                  Row(
+                              ),
+                              if (isNotify && isPermissionGranted)
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 600,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'แจ้งเตือนเมื่อ',
@@ -592,7 +601,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                                             setState(() {
                                                               selectedNotification =
                                                                   value!;
-
+                                  
                                                               notifyTime =
                                                                   notificationTimesValues[
                                                                       value];
@@ -620,8 +629,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                       ),
                                     ],
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           );
                         },
                       ),

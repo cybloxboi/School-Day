@@ -14,6 +14,8 @@ import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
+import '../../data/time.dart';
+
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key, this.dateIndex, required this.userStream});
 
@@ -347,6 +349,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                 style: textTheme.bodyMedium!
                                                     .copyWith(
                                                   fontWeight: FontWeight.bold,
+                                                  fontSize: 30,
                                                 ),
                                               ),
                                               Text(
@@ -379,7 +382,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.08),
               ],
             ),
           ),
@@ -528,6 +531,12 @@ class _TimetablePageState extends State<TimetablePage> {
   Widget timetableDetailCard(Timetable details) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: Colors.black),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 0,
       child: InkWell(
         onTap: () {
           if (currentTimetableID == null) return;
@@ -565,15 +574,18 @@ class _TimetablePageState extends State<TimetablePage> {
                       softWrap: true,
                     ),
                   ),
-                  const Spacer(),
-                  const Icon(
-                    Icons.schedule_rounded,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  classDuration(
-                    details.startTime,
-                    details.endTime,
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.schedule_rounded,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      classDuration(
+                        details.startTime,
+                        details.endTime,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -603,7 +615,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         details.isNotify
                             ? Icons.notifications_rounded
                             : Icons.notifications_off,
-                        color: details.isNotify ? secondaryColor : Colors.grey,
+                        color: details.isNotify ? primaryColor : Colors.grey,
                       ),
                       Text(
                         details.isNotify
@@ -617,33 +629,44 @@ class _TimetablePageState extends State<TimetablePage> {
               ),
               Row(
                 spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Icon(
-                    Icons.person_rounded,
-                    color: secondaryColor,
-                  ),
                   Expanded(
                     flex: 2,
-                    child: Text(
-                      details.professor,
-                      style: textTheme.bodySmall,
-                      softWrap: true,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        const Icon(
+                          Icons.person_rounded,
+                          color: primaryColor,
+                        ),
+                        Flexible(
+                          child: Text(
+                            details.professor,
+                            style: textTheme.bodySmall,
+                            softWrap: true,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(
-                    flex: 1,
-                  ),
-                  const Icon(
-                    Icons.location_city_rounded,
-                    color: secondaryColor,
-                  ),
+                  const Spacer(),
                   Expanded(
                     flex: 2,
-                    child: Text(
-                      details.location,
-                      style: textTheme.bodySmall,
-                      softWrap: true,
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        const Icon(
+                          Icons.location_city_rounded,
+                          color: primaryColor,
+                        ),
+                        Flexible(
+                          child: Text(
+                            details.location,
+                            style: textTheme.bodySmall,
+                            softWrap: true,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

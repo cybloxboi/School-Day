@@ -50,7 +50,7 @@ class _ProfileImageState extends State<ProfileImage> {
               if (snapshot.connectionState == ConnectionState.waiting ||
                   snapshot.data == null) {
                 return Center(
-                  child: LoadingAnimationWidget.beat(
+                  child: LoadingAnimationWidget.fourRotatingDots(
                     color: primaryColor,
                     size: 80,
                   ),
@@ -62,13 +62,21 @@ class _ProfileImageState extends State<ProfileImage> {
                   Center(
                     child: FittedBox(
                       fit: BoxFit.contain,
-                      child: CircleAvatar(
-                        radius: 64,
-                        backgroundImage: snapshot.data!.photoURL != null
-                            ? CachedNetworkImageProvider(
-                                snapshot.data!.photoURL!)
-                            : const AssetImage(
-                                'assets/images/blank_profile.jpg'),
+                      child: ClipOval(
+                        child: CircleAvatar(
+                          radius: 64,
+                          child: snapshot.data!.photoURL != null
+                              ? CachedNetworkImage(
+                                  imageUrl: snapshot.data!.photoURL!,
+                                  placeholder: (context, url) {
+                                    return LoadingAnimationWidget.beat(
+                                      color: primaryColor,
+                                      size: 80,
+                                    );
+                                  },
+                                )
+                              : Image.asset('assets/images/blank_profile.jpg'),
+                        ),
                       ),
                     ),
                   ),
