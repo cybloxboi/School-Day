@@ -14,8 +14,6 @@ import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
-import '../../data/time.dart';
-
 class TimetablePage extends StatefulWidget {
   const TimetablePage({super.key, this.dateIndex, required this.userStream});
 
