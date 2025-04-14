@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
 
-  String greetingText = '';
+  String greetingText = 'สวัสดี!';
 
   Future logOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
