@@ -36,8 +36,12 @@ class NotificationService {
       final iosPlugin =
           notificationsPlugin.resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>();
+
       await iosPlugin?.requestPermissions(
-          alert: true, badge: true, sound: true);
+        alert: true,
+        badge: true,
+        sound: true,
+      );
     }
   }
 
@@ -119,7 +123,7 @@ class NotificationService {
     await notificationsPlugin.zonedSchedule(
       timetable.id.hashCode,
       'ถึงเวลาเรียน 📚',
-      'ถึงเวลาเรียนวิชา ${timetable.title} แล้วจ้า ${timetable.startTime} น. - ${timetable.endTime} น.',
+      'ถึงเวลาเรียนวิชา ${timetable.title} ${timetable.startTime} น. - ${timetable.endTime} น.',
       scheduledDate,
       notificationDetails(),
       uiLocalNotificationDateInterpretation:
