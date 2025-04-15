@@ -84,164 +84,184 @@ class _HomePageState extends State<HomePage> {
       ),
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: const EdgeInsets.only(
-          top: 20,
-          left: 20,
-          right: 20,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          children: [
-            StreamBuilder(
-              stream: userDocument.getUsername(_userStream),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  greetingText =
-                      'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
-                }
-
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              expandedHeight: 180,
+              backgroundColor: backgroundColor,
+              elevation: 0,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 16,
                     children: [
-                      Expanded(
-                        child: Text(
-                          greetingText,
-                          key: ValueKey(snapshot.data),
-                          style: textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          softWrap: true,
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 16,
-                      ),
-                      FutureBuilder(
-                        future: getCurrentUser(),
+                      StreamBuilder(
+                        stream: userDocument.getUsername(_userStream),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.waiting ||
-                              snapshot.data == null) {
-                            return Center(
-                              child: SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: FittedBox(
-                                  fit: BoxFit.contain,
-                                  child: ClipOval(
-                                    child: CircleAvatar(
-                                      radius: 64,
-                                      child: LoadingAnimationWidget.beat(
-                                        color: primaryColor,
-                                        size: 100,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
+                          if (snapshot.hasData) {
+                            greetingText =
+                                'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
                           }
-
-                          return Center(
-                            child: SizedBox(
-                              width: 60,
-                              height: 60,
-                              child: FittedBox(
-                                fit: BoxFit.contain,
-                                child: ClipOval(
-                                  child: CircleAvatar(
-                                    radius: 64,
-                                    child: snapshot.data!.photoURL != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: snapshot.data!.photoURL!,
-                                            placeholder: (context, url) {
-                                              return LoadingAnimationWidget
-                                                  .beat(
-                                                color: primaryColor,
-                                                size: 100,
-                                              );
-                                            },
-                                          )
-                                        : Image.asset(
-                                            'assets/images/blank_profile.jpg'),
+                  
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    greetingText,
+                                    key: ValueKey(snapshot.data),
+                                    style: textTheme.bodyMedium!.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    softWrap: true,
+                                    textAlign: TextAlign.start,
                                   ),
                                 ),
-                              ),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                FutureBuilder(
+                                  future: getCurrentUser(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                            ConnectionState.waiting ||
+                                        snapshot.data == null) {
+                                      return Center(
+                                        child: SizedBox(
+                                          width: 60,
+                                          height: 60,
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: ClipOval(
+                                              child: CircleAvatar(
+                                                radius: 64,
+                                                child:
+                                                    LoadingAnimationWidget.beat(
+                                                  color: primaryColor,
+                                                  size: 100,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                  
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 60,
+                                        height: 60,
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: ClipOval(
+                                            child: CircleAvatar(
+                                              radius: 64,
+                                              child: snapshot.data!.photoURL !=
+                                                      null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: snapshot
+                                                          .data!.photoURL!,
+                                                      placeholder:
+                                                          (context, url) {
+                                                        return LoadingAnimationWidget
+                                                            .beat(
+                                                          color: primaryColor,
+                                                          size: 100,
+                                                        );
+                                                      },
+                                                    )
+                                                  : Image.asset(
+                                                      'assets/images/blank_profile.jpg'),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           );
                         },
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFEEF3),
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'วันนี้',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              child: Text(
+                                today,
+                                style: textTheme.bodySmall,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 1,
+                        width: double.infinity,
+                        color: Colors.black,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                      ),
                     ],
                   ),
-                );
-              },
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEEF3),
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'วันนี้',
-                    style: textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    child: Text(
-                      today,
-                      style: textTheme.bodySmall,
-                    ),
-                  )
-                ],
+                ),
               ),
             ),
-            Container(
-              height: 1,
-              width: double.infinity,
-              color: Colors.black,
-              margin: const EdgeInsets.symmetric(vertical: 4),
-            ),
-            Expanded(
-              child: GridView.builder(
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: 20),
+              sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 600,
                   mainAxisExtent: 200,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 3 / 2,
                 ),
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  );
-                },
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    );
+                  },
+                  childCount: 10,
+                ),
               ),
             ),
           ],
