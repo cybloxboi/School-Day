@@ -254,30 +254,40 @@ class _TimetablePageState extends State<TimetablePage> {
                   ).createShader(bounds);
                 },
                 blendMode: BlendMode.dstIn,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    if (constraints.maxHeight < 200) {
+                child: StreamBuilder(
+                  stream: timetableSet.getCurrentTimetableID(
+                    widget.userStream,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
-                            softWrap: true,
-                            textAlign: TextAlign.center,
-                            style: textTheme.bodyMedium!.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: LoadingAnimationWidget.fourRotatingDots(
+                          color: primaryColor,
+                          size: 80,
                         ),
                       );
                     }
-            
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    }
+
+                    currentTimetableID = snapshot.data!;
+
+                    TimetableEntry timetableEntry = TimetableEntry(
+                      email: currentUser.email!,
+                      timetableID: currentTimetableID!,
+                      dayIndex: dateIndex,
+                    );
+
                     return StreamBuilder(
-                      stream: timetableSet.getCurrentTimetableID(
-                        widget.userStream,
+                      stream: timetableEntry.fetchLessons(
+                        timetableEntry.getTimetableDocumentSnapshots(),
                       ),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
+                      builder: (_, entrySnapshot) {
+                        if (entrySnapshot.connectionState ==
                             ConnectionState.waiting) {
                           return Center(
                             child: LoadingAnimationWidget.fourRotatingDots(
@@ -286,94 +296,62 @@ class _TimetablePageState extends State<TimetablePage> {
                             ),
                           );
                         }
-            
-                        if (snapshot.hasError) {
+
+                        if (entrySnapshot.hasError) {
                           return Center(
                             child: Text('Error: ${snapshot.error}'),
                           );
                         }
-            
-                        currentTimetableID = snapshot.data!;
-            
-                        TimetableEntry timetableEntry = TimetableEntry(
-                          email: currentUser.email!,
-                          timetableID: currentTimetableID!,
-                          dayIndex: dateIndex,
+
+                        List<Timetable> timetableData = entrySnapshot.data!;
+
+                        timetableData.sort(
+                          (a, b) =>
+                              a.startTime.hour.compareTo(b.startTime.hour),
                         );
-            
-                        return StreamBuilder(
-                          stream: timetableEntry.fetchLessons(
-                            timetableEntry.getTimetableDocumentSnapshots(),
-                          ),
-                          builder: (_, entrySnapshot) {
-                            if (entrySnapshot.connectionState ==
-                                ConnectionState.waiting) {
+
+                        return Builder(
+                          builder: (context) {
+                            if (timetableData.isEmpty) {
                               return Center(
-                                child:
-                                    LoadingAnimationWidget.fourRotatingDots(
-                                  color: primaryColor,
-                                  size: 80,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 8,
+                                      children: [
+                                        Text(
+                                          'ไม่มีตารางเรียน :>',
+                                          softWrap: true,
+                                          textAlign: TextAlign.center,
+                                          style: textTheme.bodyMedium!.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 30,
+                                          ),
+                                        ),
+                                        Text(
+                                          'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
+                                          softWrap: true,
+                                          style: textTheme.bodySmall,
+                                        ),
+                                        LottieBuilder.asset(
+                                          'assets/animations/empty_timetable.json',
+                                          width: 180,
+                                          height: 180,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               );
                             }
-            
-                            if (entrySnapshot.hasError) {
-                              return Center(
-                                child: Text('Error: ${snapshot.error}'),
-                              );
-                            }
-            
-                            List<Timetable> timetableData =
-                                entrySnapshot.data!;
-            
-                            timetableData.sort(
-                              (a, b) => a.startTime.hour
-                                  .compareTo(b.startTime.hour),
+
+                            return timetableList(
+                              timetableData,
+                              context,
                             );
-            
-                            return Builder(builder: (context) {
-                              if (timetableData.isEmpty) {
-                                return Center(
-                                  child: SingleChildScrollView(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        spacing: 8,
-                                        children: [
-                                          Text(
-                                            'ไม่มีตารางเรียน :>',
-                                            softWrap: true,
-                                            textAlign: TextAlign.center,
-                                            style: textTheme.bodyMedium!
-                                                .copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 30,
-                                            ),
-                                          ),
-                                          Text(
-                                            'คลิกปุ่ม + เพื่อเพิ่มตารางเรียน',
-                                            softWrap: true,
-                                            style: textTheme.bodySmall,
-                                          ),
-                                          LottieBuilder.asset(
-                                            'assets/animations/empty_timetable.json',
-                                            width: 180,
-                                            height: 180,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-            
-                              return timetableList(
-                                timetableData,
-                                context,
-                              );
-                            });
                           },
                         );
                       },

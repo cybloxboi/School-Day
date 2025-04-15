@@ -42,14 +42,6 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling,
-          ),
-          child: child!,
-        );
-      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.pink,
