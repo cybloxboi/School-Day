@@ -156,7 +156,7 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
                                           },
                                           child: const Text('ยกเลิก'),
                                         ),
-                                        TextButton(
+                                        FilledButton(
                                           onPressed: () {
                                             Navigator.pop(context, true);
                                           },

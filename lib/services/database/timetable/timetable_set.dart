@@ -6,6 +6,13 @@ class TimetableSetInfo {
   final String name;
 
   TimetableSetInfo({required this.id, required this.name});
+
+  factory TimetableSetInfo.fromFirestore(DocumentSnapshot doc) {
+    return TimetableSetInfo(
+      id: doc.id,
+      name: doc['name'] ?? 'ไม่มีชื่อ',
+    );
+  }
 }
 
 class TimetableSetDocument extends TimetableDocument {

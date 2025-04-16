@@ -185,7 +185,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                       },
                       child: const Text('ยกเลิก'),
                     ),
-                    TextButton(
+                    FilledButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -335,6 +335,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                   Wrap(
                     runSpacing: 32,
                     spacing: 32,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 600),
@@ -517,13 +518,13 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                           return Wrap(
                             spacing: 32,
                             runSpacing: 32,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             runAlignment: WrapAlignment.center,
                             children: [
                               ConstrainedBox(
                                 constraints:
                                     const BoxConstraints(maxWidth: 600),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -562,7 +563,6 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                     maxWidth: 600,
                                   ),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -665,7 +665,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                             },
                             child: const Text('ยกเลิก'),
                           ),
-                          TextButton(
+                          FilledButton(
                             onPressed: () {
                               Navigator.pop(context, true);
                             },
