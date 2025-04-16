@@ -256,16 +256,18 @@ class _TimetablePageState extends State<TimetablePage> {
                 blendMode: BlendMode.dstIn,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    if (constraints.maxHeight < 200) {
+                    if (constraints.maxHeight <= 200) {
                       return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
-                            softWrap: true,
-                            textAlign: TextAlign.center,
-                            style: textTheme.bodyMedium!.copyWith(
-                              fontWeight: FontWeight.bold,
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              'ขนาดหน้าจอเล็กเกินไป ไม่สามารถโหลดตารางเรียนได้ :(',
+                              softWrap: true,
+                              textAlign: TextAlign.center,
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),

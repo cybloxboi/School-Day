@@ -26,6 +26,9 @@ class _HomePageState extends State<HomePage> {
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
 
+  final GlobalKey _flexibleSpaceKey = GlobalKey();
+  double _flexibleSpaceHeight = 200;
+
   String greetingText = 'สวัสดี!';
 
   Future logOut(BuildContext context) async {
@@ -42,11 +45,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _measureFlexibleSpaceHeight() {
+    final ctx = _flexibleSpaceKey.currentContext;
+    
+    if (ctx != null) {
+      final box = ctx.findRenderObject() as RenderBox;
+      final height = box.size.height;
+
+      if (mounted) {
+        setState(() {
+          _flexibleSpaceHeight = height;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureFlexibleSpaceHeight();
+    });
   }
 
   @override
@@ -89,13 +111,14 @@ class _HomePageState extends State<HomePage> {
           slivers: [
             SliverAppBar(
               floating: true,
-              expandedHeight: 180,
+              expandedHeight: _flexibleSpaceHeight,
               backgroundColor: backgroundColor,
               elevation: 0,
               shadowColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               flexibleSpace: FlexibleSpaceBar(
                 background: Padding(
+                  key: _flexibleSpaceKey,
                   padding: const EdgeInsets.only(top: 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -109,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                             greetingText =
                                 'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
                           }
-                  
+
                           return AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             transitionBuilder:
@@ -162,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       );
                                     }
-                  
+
                                     return Center(
                                       child: SizedBox(
                                         width: 60,
