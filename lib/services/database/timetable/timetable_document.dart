@@ -76,6 +76,7 @@ class TimetableDocument {
         'username': username,
         'createdAt': Timestamp.now(),
         'currentTimetableID': timetableID,
+        'todoList': [],
       });
 
       // Write

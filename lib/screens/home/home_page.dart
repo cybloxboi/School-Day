@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,7 +48,7 @@ class _HomePageState extends State<HomePage> {
 
   void _measureFlexibleSpaceHeight() {
     final ctx = _flexibleSpaceKey.currentContext;
-    
+
     if (ctx != null) {
       final box = ctx.findRenderObject() as RenderBox;
       final height = box.size.height;
@@ -111,6 +112,7 @@ class _HomePageState extends State<HomePage> {
           slivers: [
             SliverAppBar(
               floating: true,
+              snap: true,
               expandedHeight: _flexibleSpaceHeight,
               backgroundColor: backgroundColor,
               elevation: 0,
@@ -125,103 +127,98 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 16,
                     children: [
-                      StreamBuilder(
-                        stream: userDocument.getUsername(_userStream),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            greetingText =
-                                'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
-                          }
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          StreamBuilder(
+                            stream: userDocument.getUsername(_userStream),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                greetingText =
+                                    'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
+                              }
 
-                          return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            transitionBuilder:
-                                (Widget child, Animation<double> animation) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
+                              return Expanded(
+                                child: AnimatedTextKit(
+                                  key: ValueKey(snapshot.data),
+                                  isRepeatingAnimation: false,
+                                  totalRepeatCount: 1,
+                                  animatedTexts: [
+                                    TypewriterAnimatedText(
+                                      greetingText,
+                                      textStyle:
+                                          textTheme.bodyMedium!.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      speed: const Duration(
+                                        milliseconds: 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               );
                             },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    greetingText,
-                                    key: ValueKey(snapshot.data),
-                                    style: textTheme.bodyMedium!.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    softWrap: true,
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 16,
-                                ),
-                                FutureBuilder(
-                                  future: getCurrentUser(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.waiting ||
-                                        snapshot.data == null) {
-                                      return Center(
-                                        child: SizedBox(
-                                          width: 60,
-                                          height: 60,
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: ClipOval(
-                                              child: CircleAvatar(
-                                                radius: 64,
-                                                child:
-                                                    LoadingAnimationWidget.beat(
-                                                  color: primaryColor,
-                                                  size: 100,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 60,
-                                        height: 60,
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: ClipOval(
-                                            child: CircleAvatar(
-                                              radius: 64,
-                                              child: snapshot.data!.photoURL !=
-                                                      null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: snapshot
-                                                          .data!.photoURL!,
-                                                      placeholder:
-                                                          (context, url) {
-                                                        return LoadingAnimationWidget
-                                                            .beat(
-                                                          color: primaryColor,
-                                                          size: 100,
-                                                        );
-                                                      },
-                                                    )
-                                                  : Image.asset(
-                                                      'assets/images/blank_profile.jpg'),
-                                            ),
+                          ),
+                          const SizedBox(
+                            width: 16,
+                          ),
+                          FutureBuilder(
+                            future: getCurrentUser(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting ||
+                                  snapshot.data == null) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 60,
+                                    height: 60,
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: ClipOval(
+                                        child: CircleAvatar(
+                                          radius: 64,
+                                          child: LoadingAnimationWidget.beat(
+                                            color: primaryColor,
+                                            size: 100,
                                           ),
                                         ),
                                       ),
-                                    );
-                                  },
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Center(
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: ClipOval(
+                                      child: CircleAvatar(
+                                        radius: 64,
+                                        child: snapshot.data!.photoURL != null
+                                            ? CachedNetworkImage(
+                                                imageUrl:
+                                                    snapshot.data!.photoURL!,
+                                                placeholder: (context, url) {
+                                                  return LoadingAnimationWidget
+                                                      .beat(
+                                                    color: primaryColor,
+                                                    size: 100,
+                                                  );
+                                                },
+                                              )
+                                            : Image.asset(
+                                                'assets/images/blank_profile.jpg'),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
