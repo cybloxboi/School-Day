@@ -146,8 +146,7 @@ class _HomePageState extends State<HomePage> {
                                   animatedTexts: [
                                     TypewriterAnimatedText(
                                       greetingText,
-                                      textStyle:
-                                          textTheme.bodyMedium!.copyWith(
+                                      textStyle: textTheme.bodyMedium!.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                       speed: const Duration(

@@ -27,13 +27,31 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
   final _formKey = GlobalKey<FormState>();
   final _timetablesetNameController = TextEditingController();
 
+  String _initialValue = '';
+  bool _hasChanged = false;
+
   @override
   void initState() {
     super.initState();
 
     if (widget.name != null) {
       _timetablesetNameController.text = widget.name!;
+      _initialValue = _timetablesetNameController.text;
     }
+
+    _timetablesetNameController.addListener(() {
+      final currentValue = _timetablesetNameController.text;
+
+      setState(() {
+        _hasChanged = currentValue != _initialValue;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timetablesetNameController.dispose();
   }
 
   @override
@@ -91,36 +109,40 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
               ),
               const SizedBox(width: 32),
               FilledButton.tonal(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => Center(
-                        child: LoadingAnimationWidget.fourRotatingDots(
-                          color: primaryColor,
-                          size: 80,
-                        ),
-                      ),
-                    );
+                onPressed: !_hasChanged
+                    ? null
+                    : () async {
+                        if (_formKey.currentState!.validate()) {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => Center(
+                              child: LoadingAnimationWidget.fourRotatingDots(
+                                color: primaryColor,
+                                size: 80,
+                              ),
+                            ),
+                          );
 
-                    if (!widget.isEdited) {
-                      await widget.timetableSetDocument.createNewTimetableSet(
-                        name: _timetablesetNameController.text.trim(),
-                      );
-                    } else {
-                      await widget.timetableSetDocument.updateTimetableSet(
-                        name: _timetablesetNameController.text.trim(),
-                        timetableID: widget.timetableID!,
-                      );
-                    }
+                          if (!widget.isEdited) {
+                            await widget.timetableSetDocument
+                                .createNewTimetableSet(
+                              name: _timetablesetNameController.text.trim(),
+                            );
+                          } else {
+                            await widget.timetableSetDocument
+                                .updateTimetableSet(
+                              name: _timetablesetNameController.text.trim(),
+                              timetableID: widget.timetableID!,
+                            );
+                          }
 
-                    if (!context.mounted) return;
+                          if (!context.mounted) return;
 
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  }
-                },
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        }
+                      },
                 child: const Icon(Icons.save_rounded),
               ),
             ],

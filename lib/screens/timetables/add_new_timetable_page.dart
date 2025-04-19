@@ -70,7 +70,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
   late bool _isNotificationOn;
   late bool _isExactAlarmOn;
-
+  
   Future<bool> _checkPermission() async {
     if (kIsWeb || Platform.isIOS) return true;
 
