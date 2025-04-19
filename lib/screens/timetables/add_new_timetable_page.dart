@@ -70,7 +70,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
 
   late bool _isNotificationOn;
   late bool _isExactAlarmOn;
-  
+
   Future<bool> _checkPermission() async {
     if (kIsWeb || Platform.isIOS) return true;
 
@@ -445,10 +445,12 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                         builder: (BuildContext context,
                                             Widget? child) {
                                           return MediaQuery(
-                                            data: MediaQuery.of(context)
-                                                .copyWith(
-                                                    alwaysUse24HourFormat:
-                                                        true),
+                                            data:
+                                                MediaQuery.of(context).copyWith(
+                                              alwaysUse24HourFormat: true,
+                                              textScaler:
+                                                  const TextScaler.linear(1),
+                                            ),
                                             child: child!,
                                           );
                                         },
@@ -495,6 +497,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage>
                                             data:
                                                 MediaQuery.of(context).copyWith(
                                               alwaysUse24HourFormat: true,
+                                              textScaler:
+                                                  const TextScaler.linear(1),
                                             ),
                                             child: child!,
                                           );
