@@ -220,14 +220,19 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFEEF3),
-                          border: Border.all(color: Colors.black),
+                          color: const Color.fromARGB(255, 255, 255, 255),
                           borderRadius: BorderRadius.circular(999),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        child: Row(
+                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
@@ -252,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                       Container(
                         height: 1,
                         width: double.infinity,
-                        color: Colors.black,
+                        color: const Color.fromARGB(255, 171, 169, 169),
                         margin: const EdgeInsets.symmetric(vertical: 4),
                       ),
                     ],
@@ -277,12 +282,25 @@ class _HomePageState extends State<HomePage> {
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
+                          child: Text(
+                            'วิชา  ',
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        
+                      ),
+
+
+
                     );
                   },
                   childCount: 10,
                 ),
               ),
             ),
+          
           ],
         ),
       ),
