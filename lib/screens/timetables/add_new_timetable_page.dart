@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/navigation_menu.dart';
