@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:school_day/data/timetable.dart';
-import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/database/timetable/timetable_document.dart';
 
 class TimetableEntry extends TimetableDocument {
@@ -30,9 +29,6 @@ class TimetableEntry extends TimetableDocument {
       List<Timetable> lessons = lessonsData
           .map((lesson) => Timetable.fromJson(lesson as Map<String, dynamic>))
           .toList();
-
-      NotificationService()
-          .scheduleWeeklyTimetableNotifications(lessons, dayIndex);
 
       return lessons;
     }).distinct();

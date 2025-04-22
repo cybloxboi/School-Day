@@ -40,6 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       User? user = FirebaseAuth.instance.currentUser;
 
       await user?.reload();
+      user = FirebaseAuth.instance.currentUser;
 
       if (user == null || !user.emailVerified) {
         try {
