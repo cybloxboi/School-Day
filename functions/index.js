@@ -3,126 +3,127 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
+const NOTIFICATION_TITLE = "⏰ เตรียมเข้าเรียน!";
+const NOTIFICATION_BODY = (slot) =>
+  `${slot.title || "ไม่ระบุ"} เริ่มเวลา ${slot.startTime.hour}:${String(
+    slot.startTime.minute
+  ).padStart(2, "0")} - ${slot.endTime.hour}:${String(slot.endTime.minute).padStart(
+    2,
+    "0"
+  )} ที่ ${slot.location} โดย ${slot.professor}`;
+const SCHEDULE_DATA_TYPE = "schedule";
+
 exports.notifyCurrentTimetable = functions.pubsub
-    .schedule("* * * * *")
-    .timeZone("Asia/Bangkok")
-    .onRun(async (context) => {
-      const {DateTime} = require("luxon");
+  .schedule("* * * * *")
+  .timeZone("Asia/Bangkok")
+  .onRun(async (context) => {
+    const { DateTime } = require("luxon");
 
-      const now = DateTime.now().setZone("Asia/Bangkok");
-      const currentDay = (now.weekday + 6) % 7;
-      const currentMinutes = now.hour * 60 + now.minute;
+    const now = DateTime.now().setZone("Asia/Bangkok");
+    const currentDay = (now.weekday + 6) % 7;
+    const currentMinutes = now.hour * 60 + now.minute;
 
-      const usersSnapshot = await admin.firestore().collection("Users").get();
+    console.log("🔍 ฟังก์ชัน notifyCurrentTimetable ถูกเรียกแล้ว");
+    console.log(`⏰ กำลังตรวจสอบเวลา: วันที่ ${currentDay}, นาทีที่ ${currentMinutes}`);
 
-      console.log("🔍 ฟังก์ชัน notifyCurrentTimetable ถูกเรียกแล้ว");
-      console.log(`👤 พบผู้ใช้ทั้งหมด: ${usersSnapshot.size}`);
+    const usersSnapshot = await admin.firestore().collection("Users").get();
+    console.log(`👤 พบผู้ใช้ทั้งหมด: ${usersSnapshot.size}`);
 
-      for (const userDoc of usersSnapshot.docs) {
-        const email = userDoc.id;
-        const userData = userDoc.data();
-        const timetableId = userData.currentTimetableID;
+    const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
+      const email = userDoc.id;
+      const userData = userDoc.data();
+      const timetableId = userData.currentTimetableID;
 
-        console.log(`➡️ ${email} | currentTimetableId: ${timetableId}`);
+      console.log(`➡️ ${email} | currentTimetableId: ${timetableId}`);
 
-        if (!timetableId) {
-          console.log(`⚠️ ${email} ไม่มี currentTimetableId`);
-          continue;
+      if (!timetableId) {
+        console.log(`⚠️ ${email} ไม่มี currentTimetableId`);
+        return;
+      }
+
+      const timetableDoc = await admin.firestore()
+        .collection("Users")
+        .doc(email)
+        .collection("Timetables")
+        .doc(timetableId)
+        .get();
+
+      console.log(
+        `📄 ดึง Timetable สำเร็จสำหรับ ${email}: exists=${timetableDoc.exists}`
+      );
+
+      if (!timetableDoc.exists) {
+        console.log(`⚠️ ${email} ไม่มี Timetable ID: ${timetableId}`);
+        return;
+      }
+
+      const { days = {} } = timetableDoc.data();
+      const todaySlots = days[String(currentDay)] || [];
+      console.log(`📆 ${email} | คาบวันนี้ (${currentDay}): ${todaySlots.length} คาบ`);
+
+      const slotsToNotify = todaySlots.filter((slot) => {
+        if (slot.isNotify === false) {
+          return false;
+        }
+        if (
+          !slot.startTime ||
+          typeof slot.startTime.hour !== "number" ||
+          typeof slot.startTime.minute !== "number"
+        ) {
+          console.log(`⚠️ startTime ผิด format สำหรับ ${email}:`, slot.startTime);
+          return false;
         }
 
-        const timetableDoc = await admin.firestore()
-            .collection("Users")
-            .doc(email)
-            .collection("Timetables")
-            .doc(timetableId)
-            .get();
+        const startTimeMinutes = slot.startTime.hour * 60 + slot.startTime.minute;
+        const notifyBeforeMinutes = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
+        const notifyAtMinutes = startTimeMinutes - notifyBeforeMinutes;
 
-        console.log(
-            `📄 ดึง Timetable สำเร็จสำหรับ ${email}: ` +
-            `exists=${timetableDoc.exists}`,
-        );
+        return notifyAtMinutes === currentMinutes;
+      });
 
-        if (!timetableDoc.exists) {
-          console.log(`⚠️ ${email} ไม่มี Timetable ID: ${timetableId}`);
-          continue;
-        }
+      console.log(`🔔 ${email} | คาบที่ต้องแจ้งเตือน: ${slotsToNotify.length} คาบ`);
 
-        const {days = {}} = timetableDoc.data();
-        console.log(`📅 days:`, JSON.stringify(days));
-        const todaySlots = days[String(currentDay)] || [];
-
-        console.log(
-            `📆 ${email} | คาบวันนี้ (${currentDay}): ` +
-          `${todaySlots.length} คาบ`,
-        );
-
-        for (const slot of todaySlots) {
-          if (slot.isNotify === false) {
-            console.log(`🔕 ${email} ปิดแจ้งเตือน: ${slot.title}`);
-            continue;
-          }
-
-          const startTime = slot.startTime;
-          const endTime = slot.endTime;
-          const notifyTime = slot.notifyTime || {hour: 0, minute: 0};
-
-          if (
-            !startTime ||
-            typeof startTime.hour !== "number" ||
-            typeof startTime.minute !== "number"
-          ) {
-            console.log(`⚠️ startTime ผิด format สำหรับ ${email}:`, startTime);
-            continue;
-          }
-
-          const startMinutes = (startTime.hour * 60) + startTime.minute;
-          const notifyBefore = (notifyTime.hour * 60) + notifyTime.minute;
-          const notifyAt = startMinutes - notifyBefore;
-
-          if (notifyAt != currentMinutes) {
-            console.log("ไม่แจ้งเตือน");
-            continue;
-          }
-
-          const tokenSnap = await admin.firestore()
-              .collection("Users")
-              .doc(email)
-              .collection("Tokens")
-              .get();
+      if (slotsToNotify.length > 0) {
+        const tokenSnap = await admin.firestore()
+          .collection("Users")
+          .doc(email)
+          .collection("Tokens")
+          .get();
 
           const tokens = tokenSnap.docs.map((doc) => doc.id);
           if (tokens.length === 0) {
             console.log(`📭 ${email} ไม่มี token`);
-            continue;
+            return;
           }
-
-          const response = await admin.messaging().sendEachForMulticast({
+  
+          const multicastMessage = {
             tokens: tokens,
             notification: {
-              title: "⏰ เตรียมเข้าเรียน!",
-              body: `${
-                slot.title || "ไม่ระบุ"
-              } เริ่มเวลา ${startTime.hour}:${
-                String(startTime.minute).padStart(2, "0")
-              } - ${endTime.hour}:${
-                String(endTime.minute).padStart(2, "0")
-              } ที่ ${slot.location} โดย ${slot.professor}`,
+              title: NOTIFICATION_TITLE,
+              body: NOTIFICATION_BODY(slotsToNotify[0]),
             },
             data: {
-              type: "schedule",
+              type: SCHEDULE_DATA_TYPE,
               timetableId: timetableId,
             },
-          });
-
-          response.responses.forEach((resp, idx) => {
-            if (resp.success) {
-              console.log(`✅ ส่งแจ้งเตือนสำเร็จ: ${tokens[idx]}`);
-            } else {
-              console.error(`❌ ส่งไม่สำเร็จ: ${tokens[idx]} | ${resp.error}`);
-            }
-          });
-        }
+          };
+  
+          try {
+            const response = await admin.messaging().sendEachForMulticast(multicastMessage);
+            response.responses.forEach((resp, idx) => {
+              if (resp.success) {
+                console.log(`✅ ส่งแจ้งเตือนสำเร็จไปยัง ${tokens[idx]}`);
+              } else {
+                console.error(`❌ ส่งไม่สำเร็จไปยัง ${tokens[idx]} | ${resp.error}`);
+              }
+            });
+          } catch (error) {
+            console.error(`🚨 เกิดข้อผิดพลาดในการส่งแจ้งเตือน:`, error);
+          }
       }
-
-      return null;
     });
+
+    await Promise.all(userProcessingPromises);
+
+    return null;
+  });
