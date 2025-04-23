@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage> {
 
   String greetingText = 'สวัสดี!';
 
+  int selectedPageIndex = 0;
+
   Future logOut(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('fcm_token');
@@ -235,6 +237,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+                      
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -249,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          
                           children: [
                             Text(
                               'วันนี้',
@@ -257,6 +260,8 @@ class _HomePageState extends State<HomePage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                             
+                             const SizedBox(width: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -264,12 +269,43 @@ class _HomePageState extends State<HomePage> {
                               ),
                               child: Text(
                                 today,
-                                style: textTheme.bodySmall,
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),    
                               ),
-                            )
+                            ),
+                             const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.all(4),              
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999),
+                            
+                              border: Border.all(color: Colors.grey.shade300), 
+                              ),
+                              child: ToggleButtons(
+                                borderWidth: 0,                     
+                                borderColor: Colors.transparent,
+                                selectedBorderColor: Colors.transparent,
+                                borderRadius: BorderRadius.circular(999),
+                                fillColor: Colors.pink.withOpacity(0.2), 
+                                selectedColor: Colors.pink,             
+                                color: Colors.black,                    
+                                constraints: BoxConstraints(minWidth: 60, minHeight: 36),
+                                isSelected: [selectedPageIndex == 0, selectedPageIndex == 1],
+                                onPressed: (int index) {
+                                  setState(() => selectedPageIndex = index);
+                                },
+                                children: const [
+                                  Text('วิชา'),
+                                  Text('งาน'),
+                                ],
+                              ),
+                            ),
+                           
                           ],
                         ),
                       ),
+              
+              
                       Container(
                         height: 1,
                         width: double.infinity,
@@ -290,6 +326,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
+                
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
                     return Container(
@@ -302,20 +339,19 @@ class _HomePageState extends State<HomePage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
                           child: Text(
-                            'วิชา  ',
+                            'วิชา',
                             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                           ),
                         
                       ),
-
-
-
                     );
                   },
                   childCount: 10,
                 ),
               ),
             ),
+
+            
           
           ],
         ),
