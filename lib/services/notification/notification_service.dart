@@ -49,8 +49,8 @@ class NotificationService {
           body,
           const NotificationDetails(
             android: AndroidNotificationDetails(
-              'high_importance_channel',
-              'High Importance Notifications',
+              'notify_class_time_channel',
+              'แจ้งเตือนการเข้าเรียน',
               importance: Importance.max,
               priority: Priority.high,
             ),
@@ -63,53 +63,76 @@ class NotificationService {
 
   Future<void> initTokenManagement(String email) async {
     final prefs = await SharedPreferences.getInstance();
-
     final currentToken = await _firebaseMessaging.getToken();
     final lastToken = prefs.getString('fcm_token');
 
+    debugPrint('🎯 currentToken = $currentToken');
+    debugPrint('📦 lastToken = $lastToken');
+
     if (currentToken != null && currentToken != lastToken) {
+      debugPrint('🔄 Token changed → remove old and save new');
+
       if (lastToken != null) {
         await _deleteTokenFromFirestore(email, lastToken);
       }
 
       await _saveTokenToFirestore(email, currentToken);
       await prefs.setString('fcm_token', currentToken);
+    } else {
+      debugPrint('✅ No change → skip saving token');
+    }
+  }
+
+  Future<void> ensurePermissionAndInit(String email) async {
+    NotificationSettings settings =
+        await _firebaseMessaging.getNotificationSettings();
+
+    if (settings.authorizationStatus == AuthorizationStatus.notDetermined ||
+        settings.authorizationStatus == AuthorizationStatus.denied) {
+      settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
     }
 
-    _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      final oldToken = prefs.getString('fcm_token');
-
-      if (oldToken != null && oldToken != newToken) {
-        await _deleteTokenFromFirestore(email, oldToken);
-      }
-
-      await _saveTokenToFirestore(email, newToken);
-      await prefs.setString('fcm_token', newToken);
-    });
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      await initTokenManagement(email);
+    }
   }
 
   Future<void> _saveTokenToFirestore(String email, String token) async {
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(email)
-        .collection('Tokens')
-        .doc(token)
-        .set({
-      'token': token,
-      'createdAt': FieldValue.serverTimestamp(),
-      'platform':
-          Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'web'),
-    });
+    try {
+      debugPrint("📤 Saving token $token for $email");
+
+      await FirebaseFirestore.instance.collection('Users').doc(email).set(
+        {
+          'tokens': FieldValue.arrayUnion([token]),
+          'platforms': {
+            token: Platform.isIOS
+                ? 'ios'
+                : (Platform.isAndroid ? 'android' : 'web'),
+          },
+          'tokenUpdatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
+      debugPrint("✅ Token saved successfully");
+    } catch (e) {
+      debugPrint("❌ Error saving token: $e");
+    }
   }
 
   Future<void> _deleteTokenFromFirestore(String email, String token) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(email)
-          .collection('tokens')
-          .doc(token)
-          .delete();
+      await FirebaseFirestore.instance.collection('Users').doc(email).update(
+        {
+          'tokens': FieldValue.arrayRemove([token]),
+          'platforms.$token': FieldValue.delete(),
+        },
+      );
     } catch (e) {
       return;
     }

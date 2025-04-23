@@ -39,10 +39,13 @@ class _HomePageState extends State<HomePage> {
     if (token != null && user != null) {
       await FirebaseFirestore.instance
           .collection('Users')
-          .doc(user.email)
-          .collection('Tokens')
-          .doc(token)
-          .delete();
+          .doc(user.email!)
+          .update(
+        {
+          'tokens': FieldValue.arrayRemove([token]),
+          'platforms.$token': FieldValue.delete(),
+        },
+      );
     }
 
     await prefs.remove('fcm_token');
