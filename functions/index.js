@@ -16,7 +16,7 @@ const SCHEDULE_DATA_TYPE = "schedule";
 exports.notifyCurrentTimetable = functions.pubsub
   .schedule("* * * * *")
   .timeZone("Asia/Bangkok")
-  .onRun(async (context) => {
+  .onRun(async () => {
     const { DateTime } = require("luxon");
 
     const now = DateTime.now().setZone("Asia/Bangkok");
@@ -24,7 +24,7 @@ exports.notifyCurrentTimetable = functions.pubsub
     const currentMinutes = now.hour * 60 + now.minute;
 
     console.log("🔍 ฟังก์ชัน notifyCurrentTimetable ถูกเรียกแล้ว");
-    console.log(`⏰ กำลังตรวจสอบเวลา: วันที่ ${currentDay}, นาทีที่ ${currentMinutes}`);
+    console.log(`⏰ วันที่ ${currentDay}, นาทีที่ ${currentMinutes}`);
 
     const usersSnapshot = await admin.firestore().collection("Users")
       .where("hasTodayNotification", "==", true)
@@ -40,17 +40,10 @@ exports.notifyCurrentTimetable = functions.pubsub
       const tokens = userData.tokens || [];
       const todaySlots = userData.todaySlots || [];
 
-      if (tokens.length === 0 || todaySlots.length === 0) {
-        console.log(`⛔ ข้าม ${email} เพราะไม่มี token หรือ slot`);
+      if (!timetableId || tokens.length === 0 || todaySlots.length === 0) {
+        console.log(`⛔ ข้าม ${email} เพราะไม่มี timetableId หรือ token หรือ slot`);
         return;
       }
-
-      if (!timetableId) {
-        console.log(`⚠️ ${email} ไม่มี currentTimetableId`);
-        return;
-      }
-
-      console.log(`➡️ ${email} | currentTimetableId: ${timetableId}`);
 
       const timetableDocRef = admin.firestore()
         .collection("Users")
@@ -59,17 +52,13 @@ exports.notifyCurrentTimetable = functions.pubsub
         .doc(timetableId);
 
       const timetableDoc = await timetableDocRef.get();
-
       if (!timetableDoc.exists) {
         console.log(`⚠️ ${email} ไม่มี Timetable ID: ${timetableId}`);
         return;
       }
 
-      console.log(`📆 ${email} | คาบวันนี้ (${currentDay}): ${todaySlots.length} คาบ`);
-
       const slotToNotify = todaySlots.find((slot) => {
         if (!slot.isNotify) return false;
-
         const startMinutes = slot.startTime.hour * 60 + slot.startTime.minute;
         const notifyBefore = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
         const notifyAt = startMinutes - notifyBefore;
@@ -78,11 +67,28 @@ exports.notifyCurrentTimetable = functions.pubsub
 
       if (!slotToNotify) {
         console.log(`⏳ ${email} ไม่มีคาบที่ต้องแจ้งในนาทีนี้`);
+
+        // หา slot ถัดไป
+        const nextNotifyMinutes = todaySlots
+          .map((slot) => {
+            if (!slot.isNotify) return null;
+            const start = slot.startTime.hour * 60 + slot.startTime.minute;
+            const before = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
+            const notifyAt = start - before;
+            return notifyAt > currentMinutes ? notifyAt : null;
+          })
+          .filter((m) => m != null)
+          .sort()[0];
+
+        await admin.firestore().collection("Users").doc(email).update({
+          hasTodayNotification: !!nextNotifyMinutes,
+          nextNotificationMinutes: nextNotifyMinutes || admin.firestore.FieldValue.delete(),
+        });
+
         return;
       }
 
-      console.log(`🔔 ${email} | แจ้งเตือนคาบ: ${slotToNotify.title}`);
-
+      // 🔔 ส่งแจ้งเตือน
       const payload = {
         tokens,
         notification: {
@@ -106,9 +112,25 @@ exports.notifyCurrentTimetable = functions.pubsub
       } catch (error) {
         console.error(`🚨 ข้อผิดพลาดในการส่งแจ้งเตือน:`, error);
       }
+
+      // หา slot ถัดไปหลังจากแจ้งเสร็จ
+      const nextNotifyMinutes = todaySlots
+        .map((slot) => {
+          if (!slot.isNotify) return null;
+          const start = slot.startTime.hour * 60 + slot.startTime.minute;
+          const before = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
+          const notifyAt = start - before;
+          return notifyAt > currentMinutes ? notifyAt : null;
+        })
+        .filter((m) => m != null)
+        .sort()[0];
+
+      await admin.firestore().collection("Users").doc(email).update({
+        hasTodayNotification: !!nextNotifyMinutes,
+        nextNotificationMinutes: nextNotifyMinutes || null,
+      });
     });
 
     await Promise.all(userProcessingPromises);
-
     return null;
   });

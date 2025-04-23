@@ -69,17 +69,26 @@ class NotificationService {
     debugPrint('🎯 currentToken = $currentToken');
     debugPrint('📦 lastToken = $lastToken');
 
-    if (currentToken != null && currentToken != lastToken) {
-      debugPrint('🔄 Token changed → remove old and save new');
+    if (currentToken == null) return;
 
-      if (lastToken != null) {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('Users').doc(email).get();
+    final tokens = List<String>.from(userDoc.data()?['tokens'] ?? []);
+
+    final shouldSave =
+        currentToken != lastToken || !tokens.contains(currentToken);
+
+    if (shouldSave) {
+      debugPrint('🔄 Token changed or missing in Firestore → update required');
+
+      if (lastToken != null && lastToken != currentToken) {
         await _deleteTokenFromFirestore(email, lastToken);
       }
 
       await _saveTokenToFirestore(email, currentToken);
       await prefs.setString('fcm_token', currentToken);
     } else {
-      debugPrint('✅ No change → skip saving token');
+      debugPrint('✅ No change and token exists → skip saving');
     }
   }
 
