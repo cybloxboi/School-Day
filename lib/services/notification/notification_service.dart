@@ -1,144 +1,152 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:school_day/data/timetable.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (kDebugMode) {
+    print("📩 Background message received: ${message.messageId}");
+  }
+}
 
 class NotificationService {
-  final notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final _firebaseMessaging = FirebaseMessaging.instance;
 
-  Future<void> initNotification() async {
-    tz.initializeTimeZones();
-    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(currentTimeZone));
-
-    const initSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const initSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+  Future<void> initNotifications() async {
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
     );
 
-    const initSettings = InitializationSettings(
-      android: initSettingsAndroid,
-      iOS: initSettingsIOS,
-    );
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidInit);
 
-    await notificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-    if (Platform.isIOS) {
-      final iosPlugin =
-          notificationsPlugin.resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      if (kDebugMode) {
+        print("🔔 Foreground notification received");
+      }
 
-      await iosPlugin?.requestPermissions(
+      final notification = message.notification;
+      final data = message.data;
+
+      final title = notification?.title ?? data['title'];
+      final body = notification?.body ?? data['body'];
+
+      if (title != null && body != null) {
+        await flutterLocalNotificationsPlugin.show(
+          0,
+          title,
+          body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'notify_class_time_channel',
+              'แจ้งเตือนการเข้าเรียน',
+              importance: Importance.max,
+              priority: Priority.high,
+              channelDescription: 'แสดงแจ้งเตือนก่อนเข้าเรียน',
+              playSound: true,
+              enableVibration: true,
+            ),
+            iOS: DarwinNotificationDetails(),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> initTokenManagement(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentToken = await _firebaseMessaging.getToken();
+    final lastToken = prefs.getString('fcm_token');
+
+    debugPrint('🎯 currentToken = $currentToken');
+    debugPrint('📦 lastToken = $lastToken');
+
+    if (currentToken == null) return;
+
+    final userDoc =
+        await FirebaseFirestore.instance.collection('Users').doc(email).get();
+    final tokens = List<String>.from(userDoc.data()?['tokens'] ?? []);
+
+    final shouldSave =
+        currentToken != lastToken || !tokens.contains(currentToken);
+
+    if (shouldSave) {
+      debugPrint('🔄 Token changed or missing in Firestore → update required');
+
+      if (lastToken != null && lastToken != currentToken) {
+        await _deleteTokenFromFirestore(email, lastToken);
+      }
+
+      await _saveTokenToFirestore(email, currentToken);
+      await prefs.setString('fcm_token', currentToken);
+    } else {
+      debugPrint('✅ No change and token exists → skip saving');
+    }
+  }
+
+  Future<void> ensurePermissionAndInit(String email) async {
+    NotificationSettings settings =
+        await _firebaseMessaging.getNotificationSettings();
+
+    if (settings.authorizationStatus == AuthorizationStatus.notDetermined ||
+        settings.authorizationStatus == AuthorizationStatus.denied) {
+      settings = await _firebaseMessaging.requestPermission(
         alert: true,
         badge: true,
         sound: true,
       );
     }
-  }
 
-  NotificationDetails notificationDetails() {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'weekly_channel_id',
-        'การแจ้งเตือนการเข้าเรียน',
-        channelDescription: 'แจ้งเตือนให้คุณรู้ว่าถึงเวลาเรียนตามในตารางแล้ว',
-        importance: Importance.max,
-        priority: Priority.high,
-        fullScreenIntent: true,
-        enableVibration: true,
-        playSound: true,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-  }
-
-  Future<void> scheduleWeeklyTimetableNotifications(
-    List<Timetable> timetableList,
-    int dateIndex,
-  ) async {
-    if (kIsWeb) return;
-
-    await notificationsPlugin.cancelAll();
-
-    for (var classData in timetableList) {
-      await scheduleNotification(timetable: classData, dateIndex: dateIndex);
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      await initTokenManagement(email);
     }
   }
 
-  Future<void> scheduleNotification({
-    int id = 1,
-    required Timetable timetable,
-    required int dateIndex,
-  }) async {
-    final isNotificationDenied =
-        Platform.isAndroid ? await Permission.notification.isDenied : false;
+  Future<void> _saveTokenToFirestore(String email, String token) async {
+    try {
+      debugPrint("📤 Saving token $token for $email");
 
-    final isExactAlarmDenied = Platform.isAndroid
-        ? await Permission.scheduleExactAlarm.isDenied
-        : false;
+      await FirebaseFirestore.instance.collection('Users').doc(email).set(
+        {
+          'tokens': FieldValue.arrayUnion([token]),
+          'platforms': {
+            token: Platform.isIOS
+                ? 'ios'
+                : (Platform.isAndroid ? 'android' : 'web'),
+          },
+          'tokenUpdatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
 
-    if (!timetable.isNotify || isNotificationDenied || isExactAlarmDenied) {
+      debugPrint("✅ Token saved successfully");
+    } catch (e) {
+      debugPrint("❌ Error saving token: $e");
+    }
+  }
+
+  Future<void> _deleteTokenFromFirestore(String email, String token) async {
+    try {
+      await FirebaseFirestore.instance.collection('Users').doc(email).update(
+        {
+          'tokens': FieldValue.arrayRemove([token]),
+          'platforms.$token': FieldValue.delete(),
+        },
+      );
+    } catch (e) {
       return;
     }
-
-    final now = tz.TZDateTime.now(tz.local);
-
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      timetable.startTime.hour,
-      timetable.startTime.minute,
-    );
-
-    scheduledDate = scheduledDate.subtract(
-      Duration(
-        hours: timetable.notifyTime.hour,
-        minutes: timetable.notifyTime.minute,
-      ),
-    );
-
-    int daysUntilNext = ((dateIndex + 1) - now.weekday) % 7;
-
-    if (now.isAfter(scheduledDate)) {
-      daysUntilNext += 7;
-    }
-
-    scheduledDate = scheduledDate.add(Duration(days: daysUntilNext));
-
-    await notificationsPlugin.zonedSchedule(
-      timetable.id.hashCode,
-      'ถึงเวลาเรียน 📚',
-      'ถึงเวลาเรียนวิชา ${timetable.title} ${timetable.startTime} น. - ${timetable.endTime} น.',
-      scheduledDate,
-      notificationDetails(),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-  }
-
-  Future<void> cancelAllNotifications() async {
-    await notificationsPlugin.cancelAll();
-  }
-}
-
-void requestNotificationPermission() async {
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
   }
 }

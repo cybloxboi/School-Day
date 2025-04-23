@@ -7,6 +7,7 @@ import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
 import 'package:school_day/screens/todos/todo_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
+import 'package:school_day/services/notification/notification_service.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({
@@ -44,6 +45,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
+
+    final email = FirebaseAuth.instance.currentUser!.email!;
+    NotificationService().ensurePermissionAndInit(email);
   }
 
   @override

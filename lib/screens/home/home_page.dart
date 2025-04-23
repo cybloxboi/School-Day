@@ -2,13 +2,12 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/services/notification/notification_service.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -33,8 +32,25 @@ class _HomePageState extends State<HomePage> {
   String greetingText = 'สวัสดี!';
 
   Future logOut(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('fcm_token');
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (token != null && user != null) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.email!)
+          .update(
+        {
+          'tokens': FieldValue.arrayRemove([token]),
+          'platforms.$token': FieldValue.delete(),
+        },
+      );
+    }
+
+    await prefs.remove('fcm_token');
+
     await FirebaseAuth.instance.signOut();
-    if (!kIsWeb) NotificationService().cancelAllNotifications();
 
     if (!context.mounted) return;
 

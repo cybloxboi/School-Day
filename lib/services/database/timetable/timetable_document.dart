@@ -77,6 +77,9 @@ class TimetableDocument {
         'createdAt': Timestamp.now(),
         'currentTimetableID': timetableID,
         'todoList': [],
+        'todaySlots': [],
+        'hasTodayNotification': false,
+        'nextNotificationMinutes': null,
       });
 
       // Write

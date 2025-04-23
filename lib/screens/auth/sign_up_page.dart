@@ -43,10 +43,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
       User? user = userCredential.user;
 
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-      }
-
       TimetableDocument timetableDocument = TimetableDocument(
         email: user!.email!,
       );

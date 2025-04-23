@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/auth/login_widget.dart';
-import 'package:school_day/screens/auth/email_verification_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class LoginPage extends StatefulWidget {
@@ -36,37 +35,6 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-
-      User? user = FirebaseAuth.instance.currentUser;
-
-      await user?.reload();
-
-      if (user == null || !user.emailVerified) {
-        try {
-          await user?.sendEmailVerification();
-
-          if (!context.mounted) return;
-          Navigator.pop(context);
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const EmailVerificationPage(),
-            ),
-            (Route<dynamic> route) => false,
-          );
-        } catch (e) {
-          if (!context.mounted) return;
-
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("โปรดรอสักครู่เนื่องจากคุณพึ่งส่งยืนยันอีเมลไป :<"),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
         Navigator.pop(context);

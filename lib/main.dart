@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,12 +20,13 @@ Future<void> main() async {
     persistenceEnabled: true,
   );
 
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  final notificationService = NotificationService();
+  await notificationService.initNotifications();
+
   await initializeDateFormatting('th_TH', null);
   Intl.defaultLocale = 'th_TH';
-
-  if (!kIsWeb) {
-    NotificationService().initNotification();
-  }
 
   runApp(const MainApp());
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:school_day/screens/auth/email_verification_page.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/navigation_menu.dart';
 
@@ -15,6 +16,11 @@ class AuthPage extends StatelessWidget {
           if (snapshot.hasData) {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
+            }
+
+            if (!snapshot.data!.emailVerified) {
+              snapshot.data!.sendEmailVerification();
+              return const EmailVerificationPage();
             }
 
             return const NavigationMenu();

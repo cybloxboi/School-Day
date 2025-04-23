@@ -29,6 +29,8 @@ dependencies:
   firebase_storage: ^12.4.5
   cached_network_image: ^3.4.1
   animated_text_kit: ^4.2.3
+  firebase_messaging: ^15.2.5
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
