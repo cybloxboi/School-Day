@@ -94,13 +94,11 @@ exports.notifyCurrentTimetable = functions.pubsub
         notification: {
           title: NOTIFICATION_TITLE,
           body: NOTIFICATION_BODY(slotToNotify),
-          android_channel_id: 'notify_class_time_channel',
         },
         android: {
+          priority: "high",
           notification: {
-            channel_id: 'notify_class_time_channel',
-            priority: 'HIGH',
-            sound: 'default',
+            channel_id: "notify_class_time_channel",
           },
         },
         data: {

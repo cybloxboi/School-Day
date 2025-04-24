@@ -9,6 +9,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+const String _channelId = 'notify_class_time_channel';
+const String _channelName = 'แจ้งเตือนการเข้าเรียน';
+const String _channelDescription = 'แจ้งเตือนเข้าเรียนล่วงหน้า';
+
+const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+  _channelId,
+  _channelName,
+  description: _channelDescription,
+  importance: Importance.max,
+);
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
@@ -18,6 +29,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class NotificationService {
   final _firebaseMessaging = FirebaseMessaging.instance;
+  final AndroidNotificationChannel channel = const AndroidNotificationChannel(
+    'notify_class_time_channel',
+    'แจ้งเตือนการเข้าเรียน',
+    description: 'แจ้งเตือนเข้าเรียนล่วงหน้า',
+    importance: Importance.max,
+  );
 
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission(
@@ -30,6 +47,10 @@ class NotificationService {
     const initSettings = InitializationSettings(android: androidInit);
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       if (kDebugMode) {
@@ -47,17 +68,17 @@ class NotificationService {
           0,
           title,
           body,
-          const NotificationDetails(
+          NotificationDetails(
             android: AndroidNotificationDetails(
-              'notify_class_time_channel',
-              'แจ้งเตือนการเข้าเรียน',
-              importance: Importance.max,
+              _channel.id,
+              _channel.name,
+              channelDescription: _channel.description,
+              importance: _channel.importance,
               priority: Priority.high,
-              channelDescription: 'แสดงแจ้งเตือนก่อนเข้าเรียน',
               playSound: true,
               enableVibration: true,
             ),
-            iOS: DarwinNotificationDetails(),
+            iOS: const DarwinNotificationDetails(),
           ),
         );
       }
