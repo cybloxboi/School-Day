@@ -37,12 +37,6 @@ class NotificationService {
   );
 
   Future<void> initNotifications() async {
-    await _firebaseMessaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
 
@@ -117,6 +111,10 @@ class NotificationService {
   }
 
   Future<void> ensurePermissionAndInit(String email) async {
+    if (kIsWeb) {
+      return;
+    }
+
     NotificationSettings settings =
         await _firebaseMessaging.getNotificationSettings();
 

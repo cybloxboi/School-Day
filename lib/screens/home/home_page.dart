@@ -237,75 +237,87 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 255, 255, 255),
                           borderRadius: BorderRadius.circular(999),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                       child: Row(
-                          
-                          children: [
-                            Text(
-                              'วันนี้',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
+                        child: IntrinsicHeight(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'วันนี้',
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                             
-                             const SizedBox(width: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
+                              const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 4,
+                                ),
+                                child: VerticalDivider(
+                                  thickness: 2,
+                                  color: Colors.grey,
+                                ),
                               ),
-                              child: Text(
+                              Text(
                                 today,
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),    
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                             const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.all(4),              
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(999),
-                            
-                              border: Border.all(color: Colors.grey.shade300), 
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: ToggleButtons(
+                                  borderWidth: 0,
+                                  borderColor: Colors.transparent,
+                                  selectedBorderColor: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(999),
+                                  fillColor: Colors.pink.withValues(alpha: 0.2),
+                                  selectedColor: Colors.pink,
+                                  color: Colors.black,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 60,
+                                    minHeight: 36,
+                                  ),
+                                  isSelected: [
+                                    selectedPageIndex == 0,
+                                    selectedPageIndex == 1
+                                  ],
+                                  onPressed: (int index) {
+                                    setState(() => selectedPageIndex = index);
+                                  },
+                                  children: const [
+                                    Text('วิชา'),
+                                    Text('งาน'),
+                                  ],
+                                ),
                               ),
-                              child: ToggleButtons(
-                                borderWidth: 0,                     
-                                borderColor: Colors.transparent,
-                                selectedBorderColor: Colors.transparent,
-                                borderRadius: BorderRadius.circular(999),
-                                fillColor: Colors.pink.withOpacity(0.2), 
-                                selectedColor: Colors.pink,             
-                                color: Colors.black,                    
-                                constraints: BoxConstraints(minWidth: 60, minHeight: 36),
-                                isSelected: [selectedPageIndex == 0, selectedPageIndex == 1],
-                                onPressed: (int index) {
-                                  setState(() => selectedPageIndex = index);
-                                },
-                                children: const [
-                                  Text('วิชา'),
-                                  Text('งาน'),
-                                ],
-                              ),
-                            ),
-                           
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-              
-              
                       Container(
                         height: 1,
                         width: double.infinity,
@@ -326,7 +338,6 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
                     return Container(
@@ -335,14 +346,18 @@ class _HomePageState extends State<HomePage> {
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
-                          child: Text(
-                            'วิชา',
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 18.0,
+                          vertical: 20.0,
+                        ),
+                        child: Text(
+                          'วิชา',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
                           ),
-                        
+                        ),
                       ),
                     );
                   },
@@ -350,9 +365,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-
-            
-          
           ],
         ),
       ),

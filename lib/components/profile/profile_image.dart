@@ -33,7 +33,7 @@ class _ProfileImageState extends State<ProfileImage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'รูปโปรไฟล์',
+          'ฉัน',
           style: textTheme.bodyMedium!.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -56,7 +56,7 @@ class _ProfileImageState extends State<ProfileImage> {
                   ),
                 );
               }
-
+      
               return Column(
                 children: [
                   Center(
@@ -85,22 +85,22 @@ class _ProfileImageState extends State<ProfileImage> {
                     onPressed: () async {
                       final picked =
                           await _imageHelper.pickImage(multiple: false);
-
+      
                       if (picked.isNotEmpty) {
                         final selected = picked.first;
-
+      
                         if (!context.mounted) return;
-
+      
                         final cropped = await _imageHelper.crop(
                           file: selected,
                           title: 'ครอบตัดรูปภาพโปรไฟล์',
                           cropStyle: CropStyle.circle,
                           context: context,
                         );
-
+      
                         if (cropped != null) {
                           if (!context.mounted) return;
-
+      
                           await uploadProfileAndUpdateAuth(
                             image: XFile(cropped.path),
                             context: context,
@@ -113,7 +113,7 @@ class _ProfileImageState extends State<ProfileImage> {
                 ],
               );
             },
-          ),
+          ),          
         ],
       ),
     );
