@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:school_day/screens/auth/email_verification_page.dart';
 import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/navigation_menu.dart';
+import 'package:school_day/styles/styles.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -10,6 +11,7 @@ class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {

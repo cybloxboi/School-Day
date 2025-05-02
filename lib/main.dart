@@ -7,7 +7,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:school_day/screens/auth/auth_page.dart';
 import 'package:school_day/services/notification/notification_service.dart';
-import 'package:school_day/styles/styles.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -64,10 +63,7 @@ class _MainAppState extends State<MainApp> {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const Scaffold(
-        backgroundColor: backgroundColor,
-        body: AuthPage(),
-      ),
+      home: const AuthPage(),
     );
   }
 }

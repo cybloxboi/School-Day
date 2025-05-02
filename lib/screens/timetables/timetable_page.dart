@@ -402,7 +402,8 @@ class _TimetablePageState extends State<TimetablePage> {
 
     final entries = timetableMap.entries.toList();
 
-    if (MediaQuery.of(context).size.width >= 800) {
+    if (MediaQuery.of(context).size.width >= 800 &&
+        MediaQuery.of(context).size.height >= 600) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Center(
