@@ -47,7 +47,7 @@ class _MainAppState extends State<MainApp> {
           data: MediaQuery.of(context).copyWith(
             textScaler: MediaQuery.of(context).textScaler.clamp(
                   minScaleFactor: 0,
-                  maxScaleFactor: 1,
+                  maxScaleFactor: 1.5,
                 ),
           ),
           child: child!,

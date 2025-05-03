@@ -25,6 +25,11 @@ const List<Destination> destinations = [
     Icon(Icons.sticky_note_2_rounded),
   ),
   Destination(
+    'AI',
+    Icon(Icons.chat_outlined),
+    Icon(Icons.chat_rounded),
+  ),
+  Destination(
     'ฉัน',
     Icon(Icons.person_outline),
     Icon(Icons.person_rounded),

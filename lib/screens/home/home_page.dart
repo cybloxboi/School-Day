@@ -22,7 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String today = DateFormat('d MMM yyyy').format(DateTime.now());
+  DateTime now = DateTime.now();
+  late String today;
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
 
@@ -69,7 +70,7 @@ class _HomePageState extends State<HomePage> {
 
     if (ctx != null) {
       final box = ctx.findRenderObject() as RenderBox;
-      final height = box.size.height;
+      final height = box.size.height + 10;
 
       if (mounted) {
         setState(() {
@@ -84,6 +85,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
+    today = '${DateFormat('d MMM').format(now)} ${now.year + 543}';
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _measureFlexibleSpaceHeight();
@@ -124,67 +126,89 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       backgroundColor: backgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              expandedHeight: _flexibleSpaceHeight,
-              backgroundColor: backgroundColor,
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Padding(
-                  key: _flexibleSpaceKey,
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 16,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          StreamBuilder(
-                            stream: userDocument.getUsername(_userStream),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                greetingText =
-                                    'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
-                              }
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                expandedHeight: _flexibleSpaceHeight,
+                backgroundColor: backgroundColor,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Padding(
+                    key: _flexibleSpaceKey,
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 16,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            StreamBuilder(
+                              stream: userDocument.getUsername(_userStream),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  greetingText =
+                                      'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
+                                }
 
-                              return Expanded(
-                                child: AnimatedTextKit(
-                                  key: ValueKey(snapshot.data),
-                                  isRepeatingAnimation: false,
-                                  totalRepeatCount: 1,
-                                  animatedTexts: [
-                                    TypewriterAnimatedText(
-                                      greetingText,
-                                      textStyle: textTheme.bodyMedium!.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                return Expanded(
+                                  child: AnimatedTextKit(
+                                    key: ValueKey(snapshot.data),
+                                    isRepeatingAnimation: false,
+                                    totalRepeatCount: 1,
+                                    animatedTexts: [
+                                      TypewriterAnimatedText(
+                                        greetingText,
+                                        textStyle:
+                                            textTheme.bodyMedium!.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        speed: const Duration(
+                                          milliseconds: 20,
+                                        ),
                                       ),
-                                      speed: const Duration(
-                                        milliseconds: 20,
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            FutureBuilder(
+                              future: getCurrentUser(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                        ConnectionState.waiting ||
+                                    snapshot.data == null) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
+                                        child: ClipOval(
+                                          child: CircleAvatar(
+                                            radius: 64,
+                                            child: LoadingAnimationWidget.beat(
+                                              color: primaryColor,
+                                              size: 100,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                            width: 16,
-                          ),
-                          FutureBuilder(
-                            future: getCurrentUser(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                      ConnectionState.waiting ||
-                                  snapshot.data == null) {
+                                  );
+                                }
+
                                 return Center(
                                   child: SizedBox(
                                     width: 60,
@@ -194,178 +218,162 @@ class _HomePageState extends State<HomePage> {
                                       child: ClipOval(
                                         child: CircleAvatar(
                                           radius: 64,
-                                          child: LoadingAnimationWidget.beat(
-                                            color: primaryColor,
-                                            size: 100,
-                                          ),
+                                          child: snapshot.data!.photoURL != null
+                                              ? CachedNetworkImage(
+                                                  imageUrl:
+                                                      snapshot.data!.photoURL!,
+                                                  placeholder: (context, url) {
+                                                    return LoadingAnimationWidget
+                                                        .beat(
+                                                      color: primaryColor,
+                                                      size: 100,
+                                                    );
+                                                  },
+                                                )
+                                              : Image.asset(
+                                                  'assets/images/blank_profile.jpg'),
                                         ),
                                       ),
                                     ),
                                   ),
                                 );
-                              }
-
-                              return Center(
-                                child: SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: ClipOval(
-                                      child: CircleAvatar(
-                                        radius: 64,
-                                        child: snapshot.data!.photoURL != null
-                                            ? CachedNetworkImage(
-                                                imageUrl:
-                                                    snapshot.data!.photoURL!,
-                                                placeholder: (context, url) {
-                                                  return LoadingAnimationWidget
-                                                      .beat(
-                                                    color: primaryColor,
-                                                    size: 100,
-                                                  );
-                                                },
-                                              )
-                                            : Image.asset(
-                                                'assets/images/blank_profile.jpg'),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          borderRadius: BorderRadius.circular(999),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                              },
                             ),
                           ],
                         ),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'วันนี้',
-                                style: textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 4,
-                                ),
-                                child: VerticalDivider(
-                                  thickness: 2,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Text(
-                                today,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Spacer(),
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ToggleButtons(
-                                  borderWidth: 0,
-                                  borderColor: Colors.transparent,
-                                  selectedBorderColor: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(999),
-                                  fillColor: Colors.pink.withValues(alpha: 0.2),
-                                  selectedColor: Colors.pink,
-                                  color: Colors.black,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 60,
-                                    minHeight: 36,
-                                  ),
-                                  isSelected: [
-                                    selectedPageIndex == 0,
-                                    selectedPageIndex == 1
-                                  ],
-                                  onPressed: (int index) {
-                                    setState(() => selectedPageIndex = index);
-                                  },
-                                  children: const [
-                                    Text('วิชา'),
-                                    Text('งาน'),
-                                  ],
-                                ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
+                          child: IntrinsicHeight(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'วันนี้',
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 4,
+                                  ),
+                                  child: VerticalDivider(
+                                    thickness: 2,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  today,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border:
+                                        Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: ToggleButtons(
+                                    borderWidth: 0,
+                                    borderColor: Colors.transparent,
+                                    selectedBorderColor: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(999),
+                                    fillColor:
+                                        Colors.pink.withValues(alpha: 0.2),
+                                    selectedColor: Colors.pink,
+                                    color: Colors.black,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 60,
+                                      minHeight: 36,
+                                    ),
+                                    isSelected: [
+                                      selectedPageIndex == 0,
+                                      selectedPageIndex == 1
+                                    ],
+                                    onPressed: (int index) {
+                                      setState(() => selectedPageIndex = index);
+                                    },
+                                    children: const [
+                                      Text('วิชา'),
+                                      Text('งาน'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      Container(
-                        height: 1,
-                        width: double.infinity,
-                        color: const Color.fromARGB(255, 171, 169, 169),
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                      ),
-                    ],
+                        Container(
+                          height: 1,
+                          width: double.infinity,
+                          color: const Color.fromARGB(255, 171, 169, 169),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.only(bottom: 20),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 600,
-                  mainAxisExtent: 200,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 18.0,
-                          vertical: 20.0,
+              SliverPadding(
+                padding: const EdgeInsets.only(bottom: 20),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 600,
+                    mainAxisExtent: 200,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Text(
-                          'วิชา',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 18.0,
+                            vertical: 20.0,
+                          ),
+                          child: Text(
+                            'วิชา',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                  childCount: 10,
+                      );
+                    },
+                    childCount: 10,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
