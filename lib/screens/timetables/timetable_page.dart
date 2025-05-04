@@ -381,12 +381,16 @@ class _TimetablePageState extends State<TimetablePage> {
 
     final entries = timetableMap.entries.toList();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: ListView.builder(
-        itemCount: entries.length,
-        itemBuilder: (context, index) {
-          return TimelineTile(
+    return ListView.builder(
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: MediaQuery.of(context).size.width <= 700
+                ? 16
+                : MediaQuery.of(context).size.width * 0.075,
+          ),
+          child: TimelineTile(
             isFirst: index == 0,
             isLast: index == entries.length - 1,
             beforeLineStyle: const LineStyle(
@@ -396,14 +400,18 @@ class _TimetablePageState extends State<TimetablePage> {
               color: primaryColor,
             ),
             endChild: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
+              padding: EdgeInsets.fromLTRB(
+                MediaQuery.of(context).size.width <= 700
+                    ? 16
+                    : MediaQuery.of(context).size.width * 0.04,
+                16,
+                16,
+                16,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 16,
                 children: [
                   Row(
                     spacing: 8,
@@ -417,14 +425,17 @@ class _TimetablePageState extends State<TimetablePage> {
                       ),
                     ],
                   ),
-                  const Divider(),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 700),
+                    child: const Divider(),
+                  ),
                   for (var i in entries[index].value) timetableDetailCard(i),
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -459,136 +470,142 @@ class _TimetablePageState extends State<TimetablePage> {
         },
         child: Padding(
           padding: const EdgeInsets.all(32),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      details.title,
-                      style: textTheme.bodyMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      softWrap: true,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 32,
-                  ),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.schedule_rounded,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      classDuration(
-                        details.startTime,
-                        details.endTime,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              details.startTime.toString(),
-                              style: textTheme.bodySmall,
-                            ),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 16,
-                            ),
-                            Text(
-                              details.endTime.toString(),
-                              style: textTheme.bodySmall,
-                            ),
-                          ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        details.title,
+                        style: textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.person_rounded,
-                              color: primaryColor,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                details.professor,
-                                style: textTheme.bodySmall,
-                                softWrap: true,
-                              ),
-                            ),
-                          ],
+                        softWrap: true,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 32,
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        classDuration(
+                          details.startTime,
+                          details.endTime,
                         ),
                       ],
                     ),
-                  ),
-                  const Spacer(),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              details.isNotify
-                                  ? Icons.notifications_rounded
-                                  : Icons.notifications_off,
-                              color:
-                                  details.isNotify ? primaryColor : Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                details.startTime.toString(),
+                                style: textTheme.bodySmall,
+                              ),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                              ),
+                              Text(
+                                details.endTime.toString(),
+                                style: textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.person_rounded,
+                                color: primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  details.professor,
+                                  style: textTheme.bodySmall,
+                                  softWrap: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
                                 details.isNotify
-                                    ? 'การแจ้งเตือนเปิด'
-                                    : 'การแจ้งเตือนปิด',
-                                style: textTheme.bodySmall,
-                                softWrap: true,
+                                    ? Icons.notifications_rounded
+                                    : Icons.notifications_off,
+                                color: details.isNotify
+                                    ? primaryColor
+                                    : Colors.grey,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.location_city_rounded,
-                              color: primaryColor,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                details.location,
-                                style: textTheme.bodySmall,
-                                softWrap: true,
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  details.isNotify
+                                      ? 'การแจ้งเตือนเปิด'
+                                      : 'การแจ้งเตือนปิด',
+                                  style: textTheme.bodySmall,
+                                  softWrap: true,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.location_city_rounded,
+                                color: primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  details.location,
+                                  style: textTheme.bodySmall,
+                                  softWrap: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

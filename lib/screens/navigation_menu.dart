@@ -5,7 +5,7 @@ import 'package:school_day/components/profile/profile_image.dart';
 import 'package:school_day/data/destination.dart';
 import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
-import 'package:school_day/screens/todos/chat_page.dart';
+import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/screens/todos/todo_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/notification/notification_service.dart';

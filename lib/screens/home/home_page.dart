@@ -288,6 +288,7 @@ class _HomePageState extends State<HomePage> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
+                                    vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
