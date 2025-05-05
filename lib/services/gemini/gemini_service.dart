@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:school_day/api_key.dart';
 
 class GeminiService {
-  static Future<String?> ask(String userMessage) async {
+  static Future<Map<String, dynamic>> ask(String userMessage) async {
     const model = 'gemini-1.5-flash';
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiKey';
@@ -18,14 +18,14 @@ class GeminiService {
 - ตอบกลับเป็น **JSON มาตรฐาน** หากเป็นคำสั่งเกี่ยวกับการเพิ่ม / แก้ไข / ลบงาน
 - ตอบกลับเป็นข้อความภาษาไทยปกติ หากเป็นคำถามทั่วไป
 
-📦 คำตอบต้องอยู่ในรูปแบบ JSON เสมอ และมีโครงสร้างแบบนี้:
+คำตอบต้องอยู่ในรูปแบบ JSON เสมอ และมีโครงสร้างแบบนี้:
 
 {
   "responseText": "ข้อความตอบกลับภาษาไทยเพื่อพูดคุยกับผู้ใช้ เช่น สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ",
   "tasks": [ ... ] // หรือ null หากไม่เกี่ยวข้องกับงาน
 }
 
-📌 รูปแบบของ tasks แต่ละรายการ (เฉพาะกรณีที่เกี่ยวข้องกับงาน):
+รูปแบบของ tasks แต่ละรายการ (เฉพาะกรณีที่เกี่ยวข้องกับงาน):
 - เพิ่มงานใหม่:
   {
     "action": "add",
@@ -62,7 +62,7 @@ class GeminiService {
     }
   }
 
-❗ข้อบังคับสำคัญ:
+ข้อบังคับสำคัญ:
 - ต้องมี `responseText` เสมอ
 - `tasks` ต้องเป็น array หรือ `null` เท่านั้น
 - ห้ามส่งข้อความนอก JSON
@@ -121,23 +121,39 @@ class GeminiService {
       final data = jsonDecode(response.body);
 
       try {
-        final jsonText = data['candidates'][0]['content']['parts'][0]['text'];
+        final rawText = data['candidates'][0]['content']['parts'][0]['text'];
+        final parsed = jsonDecode(rawText);
 
-        final parsed = jsonDecode(jsonText);
-
-        if (parsed is Map && parsed.containsKey('responseText')) {
-          return parsed['responseText'];
+        if (parsed is Map &&
+            parsed.containsKey('responseText') &&
+            parsed.containsKey('tasks')) {
+          return {
+            "responseText": parsed['responseText'],
+            "tasks": parsed['tasks'],
+          };
         } else {
-          debugPrint("⚠️ ไม่มี responseText ใน JSON");
-          return "รูปแบบคำตอบจาก AI ไม่ถูกต้อง";
+          debugPrint("⚠️ JSON ไม่ถูกต้อง ไม่มี key ที่ต้องการ");
+          
+          return {
+            "responseText": "รูปแบบคำตอบจาก AI ไม่ถูกต้อง",
+            "tasks": null,
+          };
         }
       } catch (e) {
-        debugPrint("❌ ไม่สามารถแปลงข้อความเป็น JSON ได้: $e");
-        return "เกิดข้อผิดพลาดในการแปลงข้อความ AI เป็นข้อมูล";
+        debugPrint("❌ JSON Decode Error: $e");
+
+        return {
+          "responseText": "เกิดข้อผิดพลาดในการแปลงข้อมูลจาก AI",
+          "tasks": null,
+        };
       }
     } else {
       debugPrint("❌ Gemini error: ${response.statusCode}");
-      return "เกิดข้อผิดพลาดจากฝั่ง AI";
+
+      return {
+        "responseText": "เกิดข้อผิดพลาดจากฝั่ง AI",
+        "tasks": null,
+      };
     }
   }
 }
