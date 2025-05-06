@@ -5,7 +5,6 @@ import 'package:school_day/components/profile/profile_image.dart';
 import 'package:school_day/data/destination.dart';
 import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
-import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/screens/todos/todo_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/notification/notification_service.dart';
@@ -26,7 +25,6 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   int _selectedIndex = 0;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late final UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
 
@@ -58,26 +56,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
         bool isWideScreen = constraints.maxWidth >= 750;
 
         return Scaffold(
-          key: scaffoldKey,
-          drawer: const Drawer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(color: Colors.pink),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
           body: Row(
             children: [
               if (isWideScreen)
@@ -105,15 +83,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 ),
               Expanded(
                 child: [
-                  HomePage(
-                    scaffoldKey: scaffoldKey,
-                  ),
+                  const HomePage(),
                   TimetablePage(
                     dateIndex: widget.dateIndex,
                     userStream: _userStream,
                   ),
                   const TodoPage(),
-                  const ChatPage(),
                   const ProfileImage(),
                 ][_selectedIndex],
               ),

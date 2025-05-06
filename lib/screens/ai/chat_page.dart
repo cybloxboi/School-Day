@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -26,6 +25,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   String? _userInput;
 
   void sendPrompt() async {
+    FocusScope.of(context).unfocus();
+
     final input = _promptController.text.trim();
     if (input.isEmpty) return;
 
@@ -100,6 +101,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           'School Day AI',
@@ -110,55 +112,55 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         centerTitle: false,
       ),
       backgroundColor: backgroundColor,
-      body: Center(
-        child: SafeArea(
+      body: SafeArea(
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
-                  child: _userInput == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            Text(
-                              'สวัสดี!',
-                              textAlign: TextAlign.center,
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
+                  child: SingleChildScrollView(
+                    child: _userInput == null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 16,
+                            children: [
+                              Text(
+                                'สวัสดี!',
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'มีอะไรให้ช่วยไหม?',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                'มีอะไรให้ช่วยไหม?',
+                                style: textTheme.bodyMedium!.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            Flexible(
-                              child: LottieBuilder.asset(
+                              LottieBuilder.asset(
                                 'assets/animations/ai_introduction.json',
                                 controller: _controller,
                                 frameRate: FrameRate.max,
                                 onLoaded: (composition) {
                                   _controller
                                     ..duration = Duration(
-                                      milliseconds:
-                                          (composition.duration.inMilliseconds /
-                                                  2)
-                                              .round(),
+                                      milliseconds: (composition
+                                                  .duration.inMilliseconds /
+                                              2)
+                                          .round(),
                                     )
                                     ..repeat();
                                 },
                                 width: 300,
                                 height: 300,
                               ),
-                            ),
-                          ],
-                        )
-                      : SingleChildScrollView(
-                          child: SlideTransition(
+                            ],
+                          )
+                        : SlideTransition(
                             position: _slideAnimation,
                             child: FadeTransition(
                               opacity: _fadeAnimation,
@@ -173,7 +175,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                 padding: const EdgeInsets.all(20),
                                 child: Column(
                                   spacing: 16,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       _userInput!,
@@ -202,22 +205,22 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                               ],
                                             );
                                           }
-
+            
                                           if (snapshot.hasError) {
                                             return const Text(
                                               'เกิดข้อผิดพลาด กรุณาลองใหม่',
                                             );
                                           }
-
+            
                                           if (!snapshot.hasData) {
                                             return const SizedBox();
                                           }
-
+            
                                           final data = snapshot.data!;
                                           final responseText =
                                               data['responseText'] ?? '';
                                           final tasks = data['tasks'];
-
+            
                                           return Column(
                                             spacing: 32,
                                             children: [
@@ -225,28 +228,31 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                               if (tasks != null &&
                                                   tasks.isNotEmpty)
                                                 ...tasks.map((task) {
-                                                  final action = task['action'];
-                                                  final title = task['title'] ??
-                                                      'ไม่ระบุชื่อ';
+                                                  final action =
+                                                      task['action'];
+                                                  final title =
+                                                      task['title'] ??
+                                                          'ไม่ระบุชื่อ';
                                                   final due = task['due'];
                                                   final priority =
                                                       task['priority'];
                                                   final note = task['note'];
-
+            
                                                   return Card(
                                                     margin: const EdgeInsets
-                                                        .symmetric(vertical: 8),
+                                                        .symmetric(
+                                                        vertical: 8),
                                                     elevation: 2,
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
+                                                          BorderRadius
+                                                              .circular(12),
                                                     ),
                                                     child: Padding(
                                                       padding:
-                                                          const EdgeInsets.all(
-                                                              16),
+                                                          const EdgeInsets
+                                                              .all(16),
                                                       child: Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -267,7 +273,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                                                   .textTheme
                                                                   .bodySmall,
                                                             ),
-                                                          if (priority != null)
+                                                          if (priority !=
+                                                              null)
                                                             Text(
                                                               "⭐ ความสำคัญ: $priority",
                                                               style: Theme.of(
@@ -297,7 +304,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                               ),
                             ),
                           ),
-                        ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
                 ),
                 const Text(
                   'สำคัญ! : โปรดโน้ตว่า AI นั้นมีผิดพลาดได้เสมอ โปรดตรวจสอบข้อมูลก่อนดำเนินการ',
@@ -310,6 +320,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 700),
                   child: Container(
+                    height: 55,
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(255, 255, 255, 255),
                       borderRadius: BorderRadius.circular(999),
@@ -322,14 +333,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(32, 16, 16, 16),
+                      padding: const EdgeInsets.fromLTRB(32, 8, 8, 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
                             child: TextFormField(
                               controller: _promptController,
-                              decoration: const InputDecoration(
+                              decoration: const InputDecoration.collapsed(
                                 hintText: 'ลองถาม AI ดูสิ',
                               ),
                               onEditingComplete: sendPrompt,
@@ -344,7 +355,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                 : sendPrompt,
                             icon: _isLoading
                                 ? LoadingAnimationWidget.staggeredDotsWave(
-                                    color: primaryColor,
+                                    color: Colors.grey,
                                     size: 20,
                                   )
                                 : const Icon(Icons.send_rounded),

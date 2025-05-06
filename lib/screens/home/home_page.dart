@@ -4,18 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({
-    super.key,
-    required this.scaffoldKey,
-  });
-
-  final GlobalKey<ScaffoldState> scaffoldKey;
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,9 +22,6 @@ class _HomePageState extends State<HomePage> {
   late String today;
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
-
-  final GlobalKey _flexibleSpaceKey = GlobalKey();
-  double _flexibleSpaceHeight = 200;
 
   String greetingText = 'สวัสดี!';
 
@@ -65,31 +58,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _measureFlexibleSpaceHeight() {
-    final ctx = _flexibleSpaceKey.currentContext;
-
-    if (ctx != null) {
-      final box = ctx.findRenderObject() as RenderBox;
-      final height = box.size.height + 10;
-
-      if (mounted) {
-        setState(() {
-          _flexibleSpaceHeight = height;
-        });
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
     today = '${DateFormat('d MMM').format(now)} ${now.year + 543}';
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureFlexibleSpaceHeight();
-    });
   }
 
   @override
@@ -102,14 +76,29 @@ class _HomePageState extends State<HomePage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            widget.scaffoldKey.currentState?.openDrawer();
-          },
-        ),
         centerTitle: false,
         actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ChatPage(),
+              ),
+            ),
+            icon: const Icon(Icons.try_sms_star_rounded),
+            label: Text(
+              'AI',
+              style: textTheme.bodySmall!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: VerticalDivider(
+              width: 2,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: TextButton.icon(
@@ -134,19 +123,18 @@ class _HomePageState extends State<HomePage> {
               SliverAppBar(
                 floating: true,
                 snap: true,
-                expandedHeight: _flexibleSpaceHeight,
+                expandedHeight: 230,
                 backgroundColor: backgroundColor,
                 elevation: 0,
                 shadowColor: Colors.transparent,
                 surfaceTintColor: Colors.transparent,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Padding(
-                    key: _flexibleSpaceKey,
-                    padding: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 16,
+                      spacing: 20,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,7 +156,8 @@ class _HomePageState extends State<HomePage> {
                                       TypewriterAnimatedText(
                                         greetingText,
                                         textStyle:
-                                            textTheme.bodyMedium!.copyWith(
+                                            textTheme.bodySmall!.copyWith(
+                                          fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         speed: const Duration(
@@ -249,13 +238,6 @@ class _HomePageState extends State<HomePage> {
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 255, 255, 255),
                             borderRadius: BorderRadius.circular(999),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
                           ),
                           child: IntrinsicHeight(
                             child: Row(
@@ -263,7 +245,8 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 Text(
                                   'วันนี้',
-                                  style: textTheme.bodyMedium!.copyWith(
+                                  style: textTheme.bodySmall!.copyWith(
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -279,25 +262,24 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 Text(
                                   today,
-                                  style: const TextStyle(
-                                    fontSize: 14,
+                                  style: textTheme.bodySmall!.copyWith(
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const Spacer(),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 8,
-                                  ),
+                                  height: 50,
+                                  padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(999),
-                                    border:
-                                        Border.all(color: Colors.grey.shade300),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
                                   ),
                                   child: ToggleButtons(
-                                    borderWidth: 0,
+                                    borderWidth: 2,
                                     borderColor: Colors.transparent,
                                     selectedBorderColor: Colors.transparent,
                                     borderRadius: BorderRadius.circular(999),
@@ -305,10 +287,6 @@ class _HomePageState extends State<HomePage> {
                                         Colors.pink.withValues(alpha: 0.2),
                                     selectedColor: Colors.pink,
                                     color: Colors.black,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 60,
-                                      minHeight: 36,
-                                    ),
                                     isSelected: [
                                       selectedPageIndex == 0,
                                       selectedPageIndex == 1
@@ -326,12 +304,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        Container(
-                          height: 1,
-                          width: double.infinity,
-                          color: const Color.fromARGB(255, 171, 169, 169),
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                        ),
+                        const Divider(),
                       ],
                     ),
                   ),
