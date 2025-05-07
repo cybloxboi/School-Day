@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             child: VerticalDivider(
               width: 2,
             ),

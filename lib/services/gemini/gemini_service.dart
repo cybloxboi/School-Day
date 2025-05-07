@@ -10,6 +10,24 @@ class GeminiService {
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiKey';
 
+    // final taskSnapshots = await FirebaseFirestore.instance
+    //     .collection('Users')
+    //     .doc(userId)
+    //     .collection('tasks')
+    //     .orderBy('due') // หรือตามที่เหมาะสม
+    //     .limit(10) // ดึงแค่ 10 งานล่าสุดเพื่อไม่ให้ prompt ยาวเกิน
+    //     .get();
+
+    // final taskList = taskSnapshots.docs.map((doc) {
+    //   final data = doc.data();
+    //   return {
+    //     "title": data['title'],
+    //     "due": data['due'],
+    //     "priority": data['priority'],
+    //     "note": data['note'],
+    //   };
+    // }).toList();
+
     final prompt = """
 คุณคือผู้ช่วยจัดการตารางเรียน และงานของผู้ใช้ในแอปชื่อ School Day พัฒนาโดยนักเรียนโรงเรียนอำนาจเจริญ
 
@@ -133,7 +151,7 @@ class GeminiService {
           };
         } else {
           debugPrint("⚠️ JSON ไม่ถูกต้อง ไม่มี key ที่ต้องการ");
-          
+
           return {
             "responseText": "รูปแบบคำตอบจาก AI ไม่ถูกต้อง",
             "tasks": null,
