@@ -3,30 +3,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_day/api_key.dart';
+import 'package:school_day/services/database/todo/todo_document.dart';
 
 class GeminiService {
-  static Future<Map<String, dynamic>> ask(String userMessage) async {
+  static Future<Map<String, dynamic>> ask(
+      String userMessage, String email) async {
     const model = 'gemini-1.5-flash';
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiKey';
 
-    // final taskSnapshots = await FirebaseFirestore.instance
-    //     .collection('Users')
-    //     .doc(userId)
-    //     .collection('tasks')
-    //     .orderBy('due') // หรือตามที่เหมาะสม
-    //     .limit(10) // ดึงแค่ 10 งานล่าสุดเพื่อไม่ให้ prompt ยาวเกิน
-    //     .get();
-
-    // final taskList = taskSnapshots.docs.map((doc) {
-    //   final data = doc.data();
-    //   return {
-    //     "title": data['title'],
-    //     "due": data['due'],
-    //     "priority": data['priority'],
-    //     "note": data['note'],
-    //   };
-    // }).toList();
+    final todoList = await TodoDocument(email).getTodoListFuture();
+    final todoContext = todoList.isEmpty
+        ? 'ตอนนี้ผู้ใช้ยังไม่มีงานในระบบ'
+        : todoList.map((t) {
+            return "- ${t['title']} (${t['priority'] ?? 'ปกติ'})${t['alarmTime'] != null ? " ตั้งเตือน: ${t['alarmTime']}" : ""} กลุ่มหัวข้อ: ${t['category']}";
+          }).join("\n");
 
     final prompt = """
 คุณคือผู้ช่วยจัดการตารางเรียน และงานของผู้ใช้ในแอปชื่อ School Day พัฒนาโดยนักเรียนโรงเรียนอำนาจเจริญ
@@ -42,6 +33,9 @@ class GeminiService {
   "responseText": "ข้อความตอบกลับภาษาไทยเพื่อพูดคุยกับผู้ใช้ เช่น สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ",
   "tasks": [ ... ] // หรือ null หากไม่เกี่ยวข้องกับงาน
 }
+
+ผู้ใช้มีงานในระบบ School Day ดังนี้:
+$todoContext
 
 รูปแบบของ tasks แต่ละรายการ (เฉพาะกรณีที่เกี่ยวข้องกับงาน):
 - เพิ่มงานใหม่:

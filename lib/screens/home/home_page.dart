@@ -321,26 +321,49 @@ class _HomePageState extends State<HomePage> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 18.0,
-                            vertical: 20.0,
+                      if (selectedPageIndex == 0) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text(
-                            'วิชา',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 18.0,
+                              vertical: 20.0,
+                            ),
+                            child: Text(
+                              'วิชา',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 18.0,
+                              vertical: 20.0,
+                            ),
+                            child: Text(
+                              'งาน',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                     },
                     childCount: 10,
                   ),

@@ -1,9 +1,16 @@
 import 'package:school_day/data/time.dart';
 import 'package:uuid/uuid.dart';
 
+enum Priority {
+  low,
+  medium,
+  high,
+}
+
 class Todo {
   String id;
   String category;
+  Priority? priority;
   String title;
   String? description;
   Time? alarmTime;
@@ -14,6 +21,7 @@ class Todo {
     String? id,
     required this.category,
     required this.title,
+    this.priority,
     this.description,
     this.alarmTime,
   }) : id = id ?? _uuid.v4();
@@ -26,6 +34,12 @@ class Todo {
       description: json['description'],
       alarmTime:
           json['alarmTime'] != null ? Time.fromJson(json['alarmTime']) : null,
+      priority: json['priority'] != null
+          ? Priority.values.firstWhere(
+              (e) => e.name == json['priority'],
+              orElse: () => Priority.low,
+            )
+          : null,
     );
   }
 
@@ -36,6 +50,7 @@ class Todo {
       'title': title,
       'description': description,
       'alarmTime': alarmTime?.toJson(),
+      'priority': priority?.name,
     };
   }
 }

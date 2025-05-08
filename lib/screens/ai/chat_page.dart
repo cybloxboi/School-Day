@@ -1,4 +1,5 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -17,6 +18,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
   final TextEditingController _promptController = TextEditingController();
+
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   Future<Map<String, dynamic>>? _geminiResponse;
 
@@ -42,7 +45,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       _isLoading = true;
       _userInput = input;
       _promptController.clear();
-      _geminiResponse = GeminiService.ask(input);
+      _geminiResponse = GeminiService.ask(input, _currentUser!.email!);
     });
 
     _promptAnimation.forward(from: 0);
