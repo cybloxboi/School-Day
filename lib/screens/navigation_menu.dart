@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:school_day/components/profile/profile_image.dart';
+import 'package:school_day/screens/profile/profile_page.dart';
 import 'package:school_day/data/destination.dart';
 import 'package:school_day/screens/home/home_page.dart';
 import 'package:school_day/screens/timetables/timetable_page.dart';
@@ -89,7 +89,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
                     userStream: _userStream,
                   ),
                   const TodoPage(),
-                  const ProfileImage(),
+                  const ProfilePage(),
                 ][_selectedIndex],
               ),
             ],
