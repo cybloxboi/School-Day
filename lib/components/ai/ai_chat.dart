@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/ai/action_display.dart';
 import 'package:school_day/styles/styles.dart';
 
 class AiChat extends StatefulWidget {
@@ -197,48 +198,22 @@ class _AiProcessCardState extends State<AiProcessCard> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 16,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 8,
                           children: [
-                            Text(
-                              "$title (${action.toUpperCase()})",
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            if (confirmationStatus[index])
-                              const Row(
-                                spacing: 8,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle_rounded,
-                                    color: primaryColor,
-                                  ),
-                                  Text(
-                                    'เพิ่มงานเรียบร้อย :3',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (confirmed[index] && !confirmationStatus[index])
-                              const Row(
-                                spacing: 8,
-                                children: [
-                                  Icon(
-                                    Icons.cancel_rounded,
-                                  ),
-                                  Text(
-                                    'ปัดทิ้ง :<',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            Icon(actionMap[action]!.icon),
+                            Text(actionMap[action]!.label),
                           ],
+                        ),
+                        const Divider(),
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
                           "⏰ กำหนดส่ง: $due",
@@ -252,6 +227,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                           "📝 หมายเหตุ: $note",
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
+                        const Divider(),
                         AnimatedSize(
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeInOut,
@@ -267,63 +243,84 @@ class _AiProcessCardState extends State<AiProcessCard> {
                               ),
                             ),
                             child: confirmed[index]
-                                ? const SizedBox.shrink(key: ValueKey('empty'))
-                                : Column(
-                                    key: ValueKey('buttons-$index'),
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    spacing: 16,
+                                ? Row(
+                                    spacing: 8,
                                     children: [
-                                      const Divider(),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: loading[index]
-                                            ? [
-                                                LoadingAnimationWidget
-                                                    .threeArchedCircle(
-                                                  color: primaryColor,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(
-                                                  width: 16,
-                                                ),
-                                                const Text('กำลังเพิ่มงาน...'),
-                                              ]
-                                            : [
-                                                FilledButton.tonalIcon(
-                                                  icon: const Icon(
-                                                      Icons.check_rounded),
-                                                  label: const Text("ยืนยัน"),
-                                                  onPressed: () async {
-                                                    setState(() {
-                                                      loading[index] = true;
-                                                    });
-
-                                                    await onConfirmTask(task);
-
-                                                    setState(() {
-                                                      confirmed[index] = true;
-                                                      confirmationStatus[
-                                                          index] = true;
-                                                      loading[index] = false;
-                                                    });
-                                                  },
-                                                ),
-                                                const SizedBox(width: 8),
-                                                TextButton.icon(
-                                                  icon: const Icon(
-                                                      Icons.cancel_rounded),
-                                                  label: const Text("ปัดทิ้ง"),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      confirmed[index] = true;
-                                                    });
-                                                  },
-                                                ),
-                                              ],
+                                      Icon(
+                                        confirmationStatus[index]
+                                            ? Icons.check_circle_rounded
+                                            : Icons.cancel_rounded,
+                                        color: confirmationStatus[index]
+                                            ? primaryColor
+                                            : null,
+                                      ),
+                                      Text(
+                                        confirmationStatus[index]
+                                            ? '${actionMap[action]!.label}เรียบร้อย :3'
+                                            : 'ปัดทิ้ง :<',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
+                                  )
+                                : Row(
+                                    key: ValueKey('buttons-$index'),
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: loading[index]
+                                        ? [
+                                            LoadingAnimationWidget
+                                                .threeArchedCircle(
+                                              color: primaryColor,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(
+                                              width: 16,
+                                            ),
+                                            Text(
+                                              'กำลัง${actionMap[action]!.label}...',
+                                            ),
+                                          ]
+                                        : [
+                                            FilledButton.icon(
+                                              icon: const Icon(
+                                                  Icons.check_rounded),
+                                              label: const Text("ยืนยัน"),
+                                              onPressed: () async {
+                                                setState(() {
+                                                  loading[index] = true;
+                                                });
+
+                                                await onConfirmTask(task);
+
+                                                setState(() {
+                                                  confirmed[index] = true;
+                                                  confirmationStatus[index] =
+                                                      true;
+                                                  loading[index] = false;
+                                                });
+                                              },
+                                            ),
+                                            const SizedBox(width: 8),
+                                            FilledButton.tonalIcon(
+                                              icon: const Icon(
+                                                Icons.edit_rounded,
+                                              ),
+                                              label: const Text("แก้ไข"),
+                                              onPressed: () {},
+                                            ),
+                                            const SizedBox(width: 8),
+                                            TextButton.icon(
+                                              icon: const Icon(
+                                                  Icons.cancel_rounded),
+                                              label: const Text("ปัดทิ้ง"),
+                                              onPressed: () {
+                                                setState(() {
+                                                  confirmed[index] = true;
+                                                });
+                                              },
+                                            ),
+                                          ],
                                   ),
                           ),
                         ),
