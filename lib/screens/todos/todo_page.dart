@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_day/screens/todos/add_new_todo_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class TodoPage extends StatefulWidget {
@@ -35,47 +34,110 @@ class _TodoPageState extends State<TodoPage> {
       ),
       backgroundColor: backgroundColor,
       body: ListView.builder(
-        itemCount: 20,
+        padding: EdgeInsets.all(8),
+        itemCount: 5,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.all(32),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+                side: BorderSide(color: Colors.black, width: 1),
               ),
+              color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+                padding: const EdgeInsets.all(15),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text('ชื่องาน'),
-                        Spacer(),
-                        Icon(Icons.schedule),
-                        Text('เวลา'),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text('Detail'),
-                    const Divider(),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return AddNewTodoPage();
-                            },
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4),
+                          Text(
+                            'ชื่อวิชา',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
                           ),
-                        );
-                      },
-                      icon: Icon(Icons.add),
-                      label: Text('Add'),
+                          SizedBox(height: 10),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.assignment, size: 16, color: Colors.grey[700]),
+                              SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'รายละเอียด',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.info_outline, size: 16, color: Colors.grey[700]),
+                              SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'เรื่อง:',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(Icons.schedule, size: 16, color: Colors.grey[700]),
+                            SizedBox(width: 4),
+                            Text(
+                              'วันครบกำหนด',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(Icons.flag, size: 16, color: Colors.redAccent),
+                            SizedBox(width: 4),
+                            Text(
+                              'ความสำคัญ',
+                              style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, size: 18, color: Colors.blue),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, size: 18, color: Colors.red),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
