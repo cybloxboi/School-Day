@@ -11,14 +11,14 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/services/image/image_helper.dart';
 import 'package:school_day/styles/styles.dart';
 
-class ProfileImage extends StatefulWidget {
-  const ProfileImage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<ProfileImage> createState() => _ProfileImageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileImageState extends State<ProfileImage> {
+class _ProfilePageState extends State<ProfilePage> {
   final ImageHelper _imageHelper = ImageHelper();
   late final User? user;
 
@@ -56,7 +56,7 @@ class _ProfileImageState extends State<ProfileImage> {
                   ),
                 );
               }
-      
+
               return Column(
                 children: [
                   Center(
@@ -85,22 +85,22 @@ class _ProfileImageState extends State<ProfileImage> {
                     onPressed: () async {
                       final picked =
                           await _imageHelper.pickImage(multiple: false);
-      
+
                       if (picked.isNotEmpty) {
                         final selected = picked.first;
-      
+
                         if (!context.mounted) return;
-      
+
                         final cropped = await _imageHelper.crop(
                           file: selected,
                           title: 'ครอบตัดรูปภาพโปรไฟล์',
                           cropStyle: CropStyle.circle,
                           context: context,
                         );
-      
+
                         if (cropped != null) {
                           if (!context.mounted) return;
-      
+
                           await uploadProfileAndUpdateAuth(
                             image: XFile(cropped.path),
                             context: context,
@@ -113,7 +113,7 @@ class _ProfileImageState extends State<ProfileImage> {
                 ],
               );
             },
-          ),          
+          ),
         ],
       ),
     );

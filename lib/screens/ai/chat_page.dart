@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
+import 'package:school_day/components/ai/ai_chat.dart';
 import 'package:school_day/services/gemini/gemini_service.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -15,8 +16,6 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   late final AnimationController _promptAnimation;
-  late final Animation<Offset> _slideAnimation;
-  late final Animation<double> _fadeAnimation;
   final TextEditingController _promptController = TextEditingController();
 
   final User? _currentUser = FirebaseAuth.instance.currentUser;
@@ -74,22 +73,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       ),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _promptAnimation,
-      curve: Curves.easeOut,
-    ));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(
-      parent: _promptAnimation,
-      curve: Curves.easeIn,
-    ));
-
     _promptController.addListener(() {
       final isNotEmpty = _promptController.text.trim().isNotEmpty;
 
@@ -104,7 +87,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _promptController.dispose();
-    _promptAnimation.dispose();
     super.dispose();
   }
 
@@ -181,153 +163,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                               ),
                             ],
                           )
-                        : SlideTransition(
-                            position: _slideAnimation,
-                            child: FadeTransition(
-                              opacity: _fadeAnimation,
-                              child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 700),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    spacing: 16,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _userInput!,
-                                        style: textTheme.bodySmall!.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const Divider(),
-                                      if (_geminiResponse != null)
-                                        FutureBuilder<Map<String, dynamic>>(
-                                          future: _geminiResponse,
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return Row(
-                                                children: [
-                                                  LoadingAnimationWidget
-                                                      .staggeredDotsWave(
-                                                    color: primaryColor,
-                                                    size: 30,
-                                                  ),
-                                                  const SizedBox(width: 16),
-                                                  const Text(
-                                                    'กำลังจัดการงานให้คุณ...',
-                                                  ),
-                                                ],
-                                              );
-                                            }
-
-                                            if (snapshot.hasError) {
-                                              return const Text(
-                                                'เกิดข้อผิดพลาด กรุณาลองใหม่',
-                                              );
-                                            }
-
-                                            if (!snapshot.hasData) {
-                                              return const SizedBox();
-                                            }
-
-                                            final data = snapshot.data!;
-                                            final responseText =
-                                                data['responseText'] ?? '';
-                                            final tasks = data['tasks'];
-
-                                            return Column(
-                                              spacing: 32,
-                                              children: [
-                                                Text(responseText),
-                                                if (tasks != null &&
-                                                    tasks.isNotEmpty)
-                                                  ...tasks.map((task) {
-                                                    final action =
-                                                        task['action'];
-                                                    final title =
-                                                        task['title'] ??
-                                                            'ไม่ระบุชื่อ';
-                                                    final due = task['due'];
-                                                    final priority =
-                                                        task['priority'];
-                                                    final note = task['note'];
-
-                                                    return Card(
-                                                      margin: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      elevation: 2,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(16),
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                              "$title (${action.toUpperCase()})",
-                                                              style: Theme.of(
-                                                                      context)
-                                                                  .textTheme
-                                                                  .titleMedium,
-                                                            ),
-                                                            if (due != null)
-                                                              Text(
-                                                                "⏰ กำหนดส่ง: ${due.toString().replaceFirst('T', ' ').split('.').first}",
-                                                                style: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodySmall,
-                                                              ),
-                                                            if (priority !=
-                                                                null)
-                                                              Text(
-                                                                "⭐ ความสำคัญ: $priority",
-                                                                style: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodySmall,
-                                                              ),
-                                                            if (note != null)
-                                                              Text(
-                                                                "📝 หมายเหตุ: $note",
-                                                                style: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodySmall,
-                                                              ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                        : AiChat(
+                            userInput: _userInput,
+                            geminiResponse: _geminiResponse,
+                            promptAnimation: _promptAnimation,
+                            userEmail: _currentUser!.email!,
                           ),
                   ),
                 ),
