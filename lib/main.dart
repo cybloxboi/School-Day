@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -21,8 +24,15 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  final notificationService = NotificationService();
-  await notificationService.initNotifications();
+  if (Platform.isAndroid) {
+    final notificationService = NotificationService();
+    await notificationService.initNotifications();
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+  }
 
   await initializeDateFormatting('th_TH', null);
   Intl.defaultLocale = 'th_TH';
@@ -47,7 +57,7 @@ class _MainAppState extends State<MainApp> {
           data: MediaQuery.of(context).copyWith(
             textScaler: MediaQuery.of(context).textScaler.clamp(
                   minScaleFactor: 0,
-                  maxScaleFactor: 1,
+                  maxScaleFactor: 0.8,
                 ),
           ),
           child: child!,

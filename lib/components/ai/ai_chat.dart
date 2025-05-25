@@ -243,8 +243,11 @@ class _AiProcessCardState extends State<AiProcessCard> {
                               ),
                             ),
                             child: confirmed[index]
-                                ? Row(
+                                ? Wrap(
                                     spacing: 8,
+                                    runSpacing: 8,
+                                    alignment: WrapAlignment.start,
+                                    crossAxisAlignment: WrapCrossAlignment.end,
                                     children: [
                                       Icon(
                                         confirmationStatus[index]
@@ -264,18 +267,18 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                       ),
                                     ],
                                   )
-                                : Row(
+                                : Wrap(
                                     key: ValueKey('buttons-$index'),
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    alignment: WrapAlignment.start,
+                                    crossAxisAlignment: WrapCrossAlignment.end,
+                                    spacing: 8,
+                                    runSpacing: 8,
                                     children: loading[index]
                                         ? [
                                             LoadingAnimationWidget
                                                 .threeArchedCircle(
                                               color: primaryColor,
                                               size: 20,
-                                            ),
-                                            const SizedBox(
-                                              width: 16,
                                             ),
                                             Text(
                                               'กำลัง${actionMap[action]!.label}...',
@@ -301,7 +304,6 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                 });
                                               },
                                             ),
-                                            const SizedBox(width: 8),
                                             FilledButton.tonalIcon(
                                               icon: const Icon(
                                                 Icons.edit_rounded,
@@ -309,7 +311,6 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                               label: const Text("แก้ไข"),
                                               onPressed: () {},
                                             ),
-                                            const SizedBox(width: 8),
                                             TextButton.icon(
                                               icon: const Icon(
                                                   Icons.cancel_rounded),

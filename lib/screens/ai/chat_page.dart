@@ -140,13 +140,14 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                 height: 300,
                               ),
                               Text(
-                                'ทดลองใช้คำสั่งเช่น ',
+                                'ตัวอย่างคำสั่งที่สามารถใช้งานได้',
                                 style: textTheme.bodySmall!.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Wrap(
                                 alignment: WrapAlignment.center,
+                                runAlignment: WrapAlignment.center,
                                 children: [
                                   AnimatedTextKit(
                                     repeatForever: true,
@@ -156,6 +157,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                       return TypewriterAnimatedText(
                                         '"$command"',
                                         textStyle: textTheme.bodySmall,
+                                        textAlign: TextAlign.center,
                                       );
                                     }).toList(),
                                   ),

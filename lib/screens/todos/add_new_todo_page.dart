@@ -12,7 +12,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Text('Hello'),
+      body: const Text('Hello'),
     );
   }
 }

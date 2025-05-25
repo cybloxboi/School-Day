@@ -38,7 +38,10 @@ class NotificationService {
 
   Future<void> initNotifications() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidInit);
+    const initSettings = InitializationSettings(
+      android: androidInit,
+      iOS: DarwinInitializationSettings(),
+    );
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
     await flutterLocalNotificationsPlugin
@@ -80,6 +83,10 @@ class NotificationService {
   }
 
   Future<void> initTokenManagement(String email) async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final currentToken = await _firebaseMessaging.getToken();
     final lastToken = prefs.getString('fcm_token');
