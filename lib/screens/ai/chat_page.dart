@@ -176,14 +176,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 const SizedBox(
                   height: 16,
                 ),
-                const Text(
-                  'สำคัญ! : โปรดโน้ตว่า AI นั้นมีผิดพลาดได้เสมอ โปรดตรวจสอบข้อมูลก่อนดำเนินการ',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 700),
                   child: Container(

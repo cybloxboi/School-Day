@@ -165,9 +165,12 @@ class _AiProcessCardState extends State<AiProcessCard> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 32,
+      spacing: 16,
       children: [
-        Text(widget.responseText),
+        Text(
+          widget.responseText,
+          style: textTheme.bodySmall,
+        ),
         if (tasks.isNotEmpty)
           ...tasks.asMap().entries.map(
             (entry) {
@@ -261,7 +264,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                         confirmationStatus[index]
                                             ? '${actionMap[action]!.label}เรียบร้อย :3'
                                             : 'ปัดทิ้ง :<',
-                                        style: const TextStyle(
+                                        style: textTheme.bodySmall!.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -282,12 +285,14 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                             ),
                                             Text(
                                               'กำลัง${actionMap[action]!.label}...',
+                                              style: textTheme.bodySmall,
                                             ),
                                           ]
                                         : [
                                             FilledButton.icon(
                                               icon: const Icon(
-                                                  Icons.check_rounded),
+                                                Icons.check_rounded,
+                                              ),
                                               label: const Text("ยืนยัน"),
                                               onPressed: () async {
                                                 setState(() {

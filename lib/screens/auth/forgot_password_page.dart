@@ -47,6 +47,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         email: _emailController.text.trim(),
       );
 
+      debugPrint('Sent Password Reset!');
+
       if (context.mounted) {
         Navigator.of(context).pop();
         Navigator.pushAndRemoveUntil(

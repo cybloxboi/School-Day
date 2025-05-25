@@ -114,6 +114,8 @@ class _SentPasswordResetPageState extends State<SentPasswordResetPage> {
                                 email: widget.email,
                               );
 
+                              debugPrint('Sent Password Reset!');
+
                               if (context.mounted) {
                                 Navigator.pop(context);
                                 _disableButton();
