@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/services/database/user/user_document.dart';
@@ -145,6 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         );
                       },
                     ),
+                    // TODO: ย้ายปุ่มเลือกรูปภาพไปไว้หน้าแก้ไขโปรไฟล์
                     // TextButton(
                     //   onPressed: () async {
                     //     final picked =
