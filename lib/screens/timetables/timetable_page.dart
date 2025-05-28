@@ -532,7 +532,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           ),
                           const SizedBox(height: 20),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.person_rounded,
@@ -560,6 +560,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Icon(
                                 details.isNotify
@@ -572,9 +573,7 @@ class _TimetablePageState extends State<TimetablePage> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  details.isNotify
-                                      ? 'การแจ้งเตือนเปิด'
-                                      : 'การแจ้งเตือนปิด',
+                                  details.isNotify ? 'เปิด' : 'ปิด',
                                   style: textTheme.bodySmall,
                                   softWrap: true,
                                 ),
@@ -583,7 +582,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           ),
                           const SizedBox(height: 20),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.location_city_rounded,

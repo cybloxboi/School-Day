@@ -38,7 +38,7 @@ class _TodoPageState extends State<TodoPage> {
         itemCount: 5,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.all(8),
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -46,7 +46,7 @@ class _TodoPageState extends State<TodoPage> {
               ),
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(15),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -67,7 +67,8 @@ class _TodoPageState extends State<TodoPage> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.assignment, size: 16, color: Colors.grey[700]),
+                              Icon(Icons.assignment,
+                                  size: 16, color: Colors.grey[700]),
                               const SizedBox(width: 4),
                               const Expanded(
                                 child: Text(
@@ -81,7 +82,8 @@ class _TodoPageState extends State<TodoPage> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.info_outline, size: 16, color: Colors.grey[700]),
+                              Icon(Icons.info_outline,
+                                  size: 16, color: Colors.grey[700]),
                               const SizedBox(width: 4),
                               const Expanded(
                                 child: Text(
@@ -102,7 +104,8 @@ class _TodoPageState extends State<TodoPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Icon(Icons.schedule, size: 16, color: Colors.grey[700]),
+                            Icon(Icons.schedule,
+                                size: 16, color: Colors.grey[700]),
                             const SizedBox(width: 4),
                             const Text(
                               'วันครบกำหนด',
@@ -115,11 +118,13 @@ class _TodoPageState extends State<TodoPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Icon(Icons.flag, size: 16, color: Colors.redAccent),
+                            Icon(Icons.flag,
+                                size: 16, color: Colors.redAccent),
                             SizedBox(width: 4),
                             Text(
                               'ความสำคัญ',
-                              style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.redAccent),
                             ),
                           ],
                         ),
@@ -128,11 +133,13 @@ class _TodoPageState extends State<TodoPage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit, size: 18, color: Colors.blue),
+                              icon: const Icon(Icons.edit,
+                                  size: 18, color: Colors.blue),
                               onPressed: () {},
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                              icon: const Icon(Icons.delete,
+                                  size: 18, color: Colors.red),
                               onPressed: () {},
                             ),
                           ],

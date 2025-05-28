@@ -45,107 +45,142 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: FilledButton.icon(
+              onPressed: () {},
+              label: const Text('แก้ไขข้อมูล'),
+              icon: const Icon(Icons.edit_rounded),
+            ),
+          ),
+        ],
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                FutureBuilder(
-                  future: getCurrentUser(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting ||
-                        snapshot.data == null) {
-                      return Center(
-                        child: LoadingAnimationWidget.fourRotatingDots(
-                          color: primaryColor,
-                          size: 80,
-                        ),
-                      );
-                    }
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: FutureBuilder(
+            future: getCurrentUser(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  snapshot.data == null) {
+                return Center(
+                  child: LoadingAnimationWidget.fourRotatingDots(
+                    color: primaryColor,
+                    size: 80,
+                  ),
+                );
+              }
 
-                    return Column(
-                      spacing: 8,
-                      children: [
-                        Center(
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: ClipOval(
-                              child: CircleAvatar(
-                                radius: 64,
-                                child: snapshot.data!.photoURL != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: snapshot.data!.photoURL!,
-                                        placeholder: (context, url) {
-                                          return LoadingAnimationWidget.beat(
-                                            color: primaryColor,
-                                            size: 80,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        'assets/images/blank_profile.jpg'),
+              return SingleChildScrollView(
+                child: Column(
+                  spacing: 16,
+                  children: [
+                    StreamBuilder(
+                      stream: userDocument.getUsername(_userStream),
+                      builder: (context, username) {
+                        return Column(
+                          spacing: 16,
+                          children: [
+                            Text(
+                              'สวัสดี, ${username.data}',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final picked =
-                                await _imageHelper.pickImage(multiple: false);
+                            FittedBox(
+                              fit: BoxFit.contain,
+                              child: ClipOval(
+                                child: CircleAvatar(
+                                  radius: 64,
+                                  child: snapshot.data!.photoURL != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: snapshot.data!.photoURL!,
+                                          placeholder: (context, url) {
+                                            return LoadingAnimationWidget.beat(
+                                              color: primaryColor,
+                                              size: 80,
+                                            );
+                                          },
+                                        )
+                                      : Image.asset(
+                                          'assets/images/blank_profile.jpg'),
+                                ),
+                              ),
+                            ),
+                            const Divider(),
+                            Text(
+                              'รายละเอียดโปรไฟล์',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.email),
+                              title: Text(snapshot.data!.email!),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.person),
+                              title: Text(username.data.toString()),
+                            ),
+                            const Divider(),
+                            Text(
+                              'การแจ้งเตือน',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                            SwitchListTile(
+                              value: false,
+                              onChanged: (value) {},
+                              title: Text(
+                                'เปิด/ปิดการแจ้งเตือนตารางเรียน',
+                                style: textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    // TextButton(
+                    //   onPressed: () async {
+                    //     final picked =
+                    //         await _imageHelper.pickImage(multiple: false);
 
-                            if (picked.isNotEmpty) {
-                              final selected = picked.first;
+                    //     if (picked.isNotEmpty) {
+                    //       final selected = picked.first;
 
-                              if (!context.mounted) return;
+                    //       if (!context.mounted) return;
 
-                              final cropped = await _imageHelper.crop(
-                                file: selected,
-                                title: 'ครอบตัดรูปภาพโปรไฟล์',
-                                cropStyle: CropStyle.circle,
-                                context: context,
-                              );
+                    //       final cropped = await _imageHelper.crop(
+                    //         file: selected,
+                    //         title: 'ครอบตัดรูปภาพโปรไฟล์',
+                    //         cropStyle: CropStyle.circle,
+                    //         context: context,
+                    //       );
 
-                              if (cropped != null) {
-                                if (!context.mounted) return;
+                    //       if (cropped != null) {
+                    //         if (!context.mounted) return;
 
-                                await uploadProfileAndUpdateAuth(
-                                  image: XFile(cropped.path),
-                                  context: context,
-                                );
-                              }
-                            }
-                          },
-                          child: Text(
-                            'เลือกรูปภาพ',
-                            style: textTheme.bodySmall,
-                          ),
-                        ),
-                        StreamBuilder(
-                          stream: userDocument.getUsername(_userStream),
-                          builder: (context, snapshot) {
-                            return Text(
-                              'Current username: ${snapshot.data ?? 'null'}',
-                              style: textTheme.bodySmall,
-                            );
-                          },
-                        ),
-                        Text(
-                          'Current email: ${snapshot.data!.email ?? 'null'}',
-                          style: textTheme.bodySmall,
-                        ),
-                        Text(
-                          'Is verified: ${snapshot.data!.emailVerified}',
-                          style: textTheme.bodySmall,
-                        ),
-                      ],
-                    );
-                  },
+                    //         await uploadProfileAndUpdateAuth(
+                    //           image: XFile(cropped.path),
+                    //           context: context,
+                    //         );
+                    //       }
+                    //     }
+                    //   },
+                    //   child: Text(
+                    //     'เลือกรูปภาพ',
+                    //     style: textTheme.bodySmall,
+                    //   ),
+                    // ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
