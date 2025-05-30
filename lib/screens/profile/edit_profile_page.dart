@@ -35,8 +35,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       TextEditingController();
 
   Future<User?> getCurrentUser() async {
-    await FirebaseAuth.instance.currentUser?.reload();
-    return FirebaseAuth.instance.currentUser;
+    await user?.reload();
+    return user;
   }
 
   @override
@@ -78,125 +78,130 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 16,
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.contain,
-                          child: ClipOval(
-                            child: CircleAvatar(
-                              radius: 64,
-                              child: snapshot.data!.photoURL != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: snapshot.data!.photoURL!,
-                                      placeholder: (context, url) {
-                                        return LoadingAnimationWidget.beat(
-                                          color: primaryColor,
-                                          size: 80,
-                                        );
-                                      },
-                                    )
-                                  : Image.asset(
-                                      'assets/images/blank_profile.jpg'),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 16,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.contain,
+                            child: ClipOval(
+                              child: CircleAvatar(
+                                radius: 64,
+                                child: snapshot.data!.photoURL != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: snapshot.data!.photoURL!,
+                                        placeholder: (context, url) {
+                                          return LoadingAnimationWidget.beat(
+                                            color: primaryColor,
+                                            size: 80,
+                                          );
+                                        },
+                                      )
+                                    : Image.asset(
+                                        'assets/images/blank_profile.jpg'),
+                              ),
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final picked =
-                                await _imageHelper.pickImage(multiple: false);
+                          TextButton(
+                            onPressed: () async {
+                              final picked =
+                                  await _imageHelper.pickImage(multiple: false);
 
-                            if (picked.isNotEmpty) {
-                              final selected = picked.first;
+                              if (picked.isNotEmpty) {
+                                final selected = picked.first;
 
-                              if (!context.mounted) return;
-
-                              final cropped = await _imageHelper.crop(
-                                file: selected,
-                                title: 'ครอบตัดรูปภาพโปรไฟล์',
-                                cropStyle: CropStyle.circle,
-                                context: context,
-                              );
-
-                              if (cropped != null) {
                                 if (!context.mounted) return;
 
-                                await uploadProfileAndUpdateAuth(
-                                  image: XFile(cropped.path),
+                                final cropped = await _imageHelper.crop(
+                                  file: selected,
+                                  title: 'ครอบตัดรูปภาพโปรไฟล์',
+                                  cropStyle: CropStyle.circle,
                                   context: context,
                                 );
+
+                                if (cropped != null) {
+                                  if (!context.mounted) return;
+
+                                  await uploadProfileAndUpdateAuth(
+                                    image: XFile(cropped.path),
+                                    context: context,
+                                  );
+                                }
                               }
-                            }
-                          },
-                          child: Text(
-                            'เลือกรูปภาพ',
-                            style: textTheme.bodySmall,
+                            },
+                            child: Text(
+                              'เลือกรูปภาพ',
+                              style: textTheme.bodySmall,
+                            ),
                           ),
-                        ),
-                        const Divider(),
-                        Form(
-                          child: Column(
-                            spacing: 16,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 16,
-                                children: [
-                                  const Icon(Icons.email_rounded),
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _emailController,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        hintText: 'อีเมล',
-                                      ),
-                                      keyboardType: TextInputType.emailAddress,
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "โปรดระบุอีเมล";
-                                        } else if (!isValidEmail(value)) {
-                                          return "อีเมลไม่ถูกต้องน้า";
-                                        }
+                          const Divider(),
+                          Form(
+                            child: Column(
+                              spacing: 16,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
+                                  children: [
+                                    const Icon(Icons.email_rounded),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _emailController,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          hintText: 'อีเมล',
+                                        ),
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "โปรดระบุอีเมล";
+                                          } else if (!isValidEmail(value)) {
+                                            return "อีเมลไม่ถูกต้องน้า";
+                                          }
 
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 16,
-                                children: [
-                                  const Icon(Icons.person_rounded),
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _usernameController,
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        hintText: 'ชื่อผู้ใช้งาน',
+                                          return null;
+                                        },
                                       ),
-                                      keyboardType: TextInputType.emailAddress,
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "โปรดระบุชื่อผู้ใช้งาน";
-                                        }
-
-                                        return null;
-                                      },
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
+                                  children: [
+                                    const Icon(Icons.person_rounded),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _usernameController,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          hintText: 'ชื่อผู้ใช้งาน',
+                                        ),
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "โปรดระบุชื่อผู้ใช้งาน";
+                                          }
+
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
