@@ -266,8 +266,8 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(bottom: 20),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 600,
-                    mainAxisExtent: 200,
+                    maxCrossAxisExtent: 500,
+                    mainAxisExtent: 140,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
@@ -280,20 +280,62 @@ class _HomePageState extends State<HomePage> {
                             border: Border.all(color: Colors.black),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
+                         child: Padding(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 18.0,
                               vertical: 20.0,
                             ),
-                            child: Text(
-                              'วิชา',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'วิชา',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      'เวลาเรียนถีงกี่โมง',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time, size: 24 ,color: primaryColor),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'วันเวลาที่เรียน',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+
+                                Row(
+                                  children: [
+                                    Icon(Icons.person, size: 24 ,color: primaryColor),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'ครูผู้สอน',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         );
+
                       } else {
                         return Container(
                           decoration: BoxDecoration(
@@ -301,17 +343,46 @@ class _HomePageState extends State<HomePage> {
                             border: Border.all(color: Colors.black),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 18.0,
                               vertical: 20.0,
                             ),
-                            child: Text(
-                              'งาน',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'วิชา',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time, size: 24 ,color: primaryColor),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'วันเวลาที่',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+
+                                Row(
+                                  children: [
+                                    Icon(Icons.note, size: 24 ,color: primaryColor),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'หมวดหมู่',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         );
