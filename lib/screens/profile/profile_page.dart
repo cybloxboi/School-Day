@@ -19,10 +19,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late final User? user;
+  late User? user;
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
-  late Future<User?> _futureUser;
 
   @override
   void initState() {
@@ -30,7 +29,6 @@ class _ProfilePageState extends State<ProfilePage> {
     user = FirebaseAuth.instance.currentUser;
     userDocument = UserDocument(user!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
-    _futureUser = getCurrentUser();
   }
 
   Future logOut(BuildContext context) async {
@@ -95,11 +93,9 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: FutureBuilder(
-            future: _futureUser,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  snapshot.data == null) {
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (user == null) {
                 return Center(
                   child: LoadingAnimationWidget.fourRotatingDots(
                     color: primaryColor,
@@ -134,13 +130,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                     child: ClipOval(
                                       child: CircleAvatar(
                                         radius: 64,
-                                        child: snapshot.data!.photoURL != null
+                                        child: user!.photoURL != null
                                             ? CachedNetworkImage(
                                                 key: ValueKey(
-                                                  snapshot.data!.photoURL,
+                                                  user!.photoURL,
                                                 ),
-                                                imageUrl:
-                                                    snapshot.data!.photoURL!,
+                                                imageUrl: user!.photoURL!,
                                                 placeholder: (context, url) {
                                                   return LoadingAnimationWidget
                                                       .beat(
@@ -148,11 +143,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                                     size: 80,
                                                   );
                                                 },
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Image.asset(
-                                                  'assets/images/blank_profile.jpg',
-                                                ),
                                               )
                                             : Image.asset(
                                                 'assets/images/blank_profile.jpg'),
@@ -169,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   ListTile(
                                     leading: const Icon(Icons.email),
-                                    title: Text(snapshot.data!.email!),
+                                    title: Text(user!.email!),
                                   ),
                                   ListTile(
                                     leading: const Icon(Icons.person),
@@ -182,18 +172,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                         MaterialPageRoute(
                                           builder: (context) => EditProfilePage(
                                             username: username.data,
-                                            email: snapshot.data!.email!,
+                                            email: user!.email!,
                                           ),
                                         ),
                                       );
 
                                       await FirebaseAuth.instance.currentUser
                                           ?.reload();
-                                      final updatedUser =
-                                          FirebaseAuth.instance.currentUser;
 
                                       setState(() {
-                                        _futureUser = Future.value(updatedUser);
+                                        user =
+                                            FirebaseAuth.instance.currentUser;
                                       });
                                     },
                                     label: const Text('แก้ไขข้อมูล'),

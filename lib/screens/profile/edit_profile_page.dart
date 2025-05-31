@@ -26,11 +26,10 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  late final User? user;
+  late User? user;
   final ImageHelper _imageHelper = ImageHelper();
   late final TextEditingController _usernameController =
       TextEditingController();
-  late Future<User?> _userFuture;
   bool _isChanged = false;
 
   Future<User?> getCurrentUser() async {
@@ -53,8 +52,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         });
       }
     });
-
-    _userFuture = getCurrentUser();
   }
 
   @override
@@ -83,124 +80,122 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: FutureBuilder(
-            future: _userFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting ||
-                  snapshot.data == null) {
-                return Center(
-                  child: LoadingAnimationWidget.fourRotatingDots(
-                    color: primaryColor,
-                    size: 80,
-                  ),
-                );
-              }
+        child: LayoutBuilder(builder: (context, constraints) {
+          if (user == null) {
+            return Center(
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: primaryColor,
+                size: 80,
+              ),
+            );
+          }
 
-              final photoUrl = snapshot.data!.photoURL;
+          final photoUrl = user!.photoURL;
 
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 16,
-                        children: [
-                          FittedBox(
-                            fit: BoxFit.contain,
-                            child: ClipOval(
-                              child: CircleAvatar(
-                                radius: 64,
-                                child: snapshot.data!.photoURL != null
-                                    ? CachedNetworkImage(
-                                        key: ValueKey(
-                                            photoUrl! + UniqueKey().toString()),
-                                        imageUrl: photoUrl,
-                                        placeholder: (context, url) {
-                                          return LoadingAnimationWidget.beat(
-                                            color: primaryColor,
-                                            size: 80,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        'assets/images/blank_profile.jpg'),
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 16,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: ClipOval(
+                          child: CircleAvatar(
+                            radius: 64,
+                            child: photoUrl != null
+                                ? CachedNetworkImage(
+                                    key: ValueKey(
+                                      photoUrl + UniqueKey().toString(),
+                                    ),
+                                    imageUrl: photoUrl,
+                                    placeholder: (context, url) {
+                                      return LoadingAnimationWidget.beat(
+                                        color: primaryColor,
+                                        size: 80,
+                                      );
+                                    },
+                                  )
+                                : Image.asset(
+                                    'assets/images/blank_profile.jpg'),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final picked =
+                              await _imageHelper.pickImage(multiple: false);
+
+                          if (picked.isNotEmpty) {
+                            final selected = picked.first;
+
+                            if (!context.mounted) return;
+
+                            final cropped = await _imageHelper.crop(
+                              file: selected,
+                              title: 'ครอบตัดรูปภาพโปรไฟล์',
+                              cropStyle: CropStyle.circle,
+                              context: context,
+                            );
+
+                            if (cropped != null) {
+                              if (!context.mounted) return;
+
+                              await uploadProfileAndUpdateAuth(
+                                image: XFile(cropped.path),
+                                context: context,
+                              );
+                            }
+                          }
+                        },
+                        child: Text(
+                          'เลือกรูปภาพ',
+                          style: textTheme.bodySmall,
+                        ),
+                      ),
+                      const Divider(),
+                      Form(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 16,
+                          children: [
+                            const Icon(Icons.person_rounded),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _usernameController,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.always,
+                                  labelText: 'ชื่อผู้ใช้งาน',
+                                  hintText: 'ชื่อผู้ใช้งาน',
+                                ),
+                                keyboardType: TextInputType.emailAddress,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "โปรดระบุชื่อผู้ใช้งาน";
+                                  }
+
+                                  return null;
+                                },
                               ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              final picked =
-                                  await _imageHelper.pickImage(multiple: false);
-
-                              if (picked.isNotEmpty) {
-                                final selected = picked.first;
-
-                                if (!context.mounted) return;
-
-                                final cropped = await _imageHelper.crop(
-                                  file: selected,
-                                  title: 'ครอบตัดรูปภาพโปรไฟล์',
-                                  cropStyle: CropStyle.circle,
-                                  context: context,
-                                );
-
-                                if (cropped != null) {
-                                  if (!context.mounted) return;
-
-                                  await uploadProfileAndUpdateAuth(
-                                    image: XFile(cropped.path),
-                                    context: context,
-                                  );
-                                }
-                              }
-                            },
-                            child: Text(
-                              'เลือกรูปภาพ',
-                              style: textTheme.bodySmall,
-                            ),
-                          ),
-                          const Divider(),
-                          Form(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 16,
-                              children: [
-                                const Icon(Icons.person_rounded),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _usernameController,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      floatingLabelBehavior:
-                                          FloatingLabelBehavior.always,
-                                      labelText: 'ชื่อผู้ใช้งาน',
-                                      hintText: 'ชื่อผู้ใช้งาน',
-                                    ),
-                                    keyboardType: TextInputType.emailAddress,
-                                    autovalidateMode:
-                                        AutovalidateMode.onUserInteraction,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "โปรดระบุชื่อผู้ใช้งาน";
-                                      }
-
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              );
-            }),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -268,12 +263,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
       await CachedNetworkImage.evictFromCache(url);
 
-      await Future.delayed(const Duration(milliseconds: 300));
       await user!.updatePhotoURL(url);
       await user!.reload();
 
       setState(() {
-        _userFuture = getCurrentUser();
+        user = FirebaseAuth.instance.currentUser;
       });
     } catch (e) {
       debugPrint('เกิดข้อผิดพลาดในการอัปโหลดโปรไฟล์: $e');
