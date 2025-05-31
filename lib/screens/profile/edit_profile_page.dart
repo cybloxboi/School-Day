@@ -5,10 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:school_day/components/auth/validate.dart';
 import 'package:school_day/services/image/image_helper.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -29,22 +28,33 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   late final User? user;
   final ImageHelper _imageHelper = ImageHelper();
-
-  late final TextEditingController _emailController = TextEditingController();
   late final TextEditingController _usernameController =
       TextEditingController();
+  late Future<User?> _userFuture;
+  bool _isChanged = false;
 
   Future<User?> getCurrentUser() async {
-    await user?.reload();
-    return user;
+    await FirebaseAuth.instance.currentUser?.reload();
+    return FirebaseAuth.instance.currentUser;
   }
 
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    _emailController.value = TextEditingValue(text: widget.email);
     _usernameController.value = TextEditingValue(text: widget.username);
+
+    _usernameController.addListener(() {
+      final isChanged =
+          _usernameController.text.trim() != widget.username.trim();
+      if (_isChanged != isChanged) {
+        setState(() {
+          _isChanged = isChanged;
+        });
+      }
+    });
+
+    _userFuture = getCurrentUser();
   }
 
   @override
@@ -58,11 +68,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: FilledButton.icon(
+              onPressed: _isChanged ? () {} : null,
+              label: const Text('บันทึก'),
+              icon: const Icon(
+                Icons.save_rounded,
+              ),
+            ),
+          ),
+        ],
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: FutureBuilder(
-            future: getCurrentUser(),
+            future: _userFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting ||
                   snapshot.data == null) {
@@ -73,6 +95,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 );
               }
+
+              final photoUrl = snapshot.data!.photoURL;
 
               return SingleChildScrollView(
                 child: Padding(
@@ -91,7 +115,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 radius: 64,
                                 child: snapshot.data!.photoURL != null
                                     ? CachedNetworkImage(
-                                        imageUrl: snapshot.data!.photoURL!,
+                                        key: ValueKey(
+                                            photoUrl! + UniqueKey().toString()),
+                                        imageUrl: photoUrl,
                                         placeholder: (context, url) {
                                           return LoadingAnimationWidget.beat(
                                             color: primaryColor,
@@ -138,64 +164,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                           const Divider(),
                           Form(
-                            child: Column(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               spacing: 16,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  spacing: 16,
-                                  children: [
-                                    const Icon(Icons.email_rounded),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _emailController,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          hintText: 'อีเมล',
-                                        ),
-                                        keyboardType:
-                                            TextInputType.emailAddress,
-                                        autovalidateMode:
-                                            AutovalidateMode.onUserInteraction,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return "โปรดระบุอีเมล";
-                                          } else if (!isValidEmail(value)) {
-                                            return "อีเมลไม่ถูกต้องน้า";
-                                          }
-
-                                          return null;
-                                        },
-                                      ),
+                                const Icon(Icons.person_rounded),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _usernameController,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      floatingLabelBehavior:
+                                          FloatingLabelBehavior.always,
+                                      labelText: 'ชื่อผู้ใช้งาน',
+                                      hintText: 'ชื่อผู้ใช้งาน',
                                     ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  spacing: 16,
-                                  children: [
-                                    const Icon(Icons.person_rounded),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _usernameController,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          hintText: 'ชื่อผู้ใช้งาน',
-                                        ),
-                                        keyboardType:
-                                            TextInputType.emailAddress,
-                                        autovalidateMode:
-                                            AutovalidateMode.onUserInteraction,
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return "โปรดระบุชื่อผู้ใช้งาน";
-                                          }
+                                    keyboardType: TextInputType.emailAddress,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "โปรดระบุชื่อผู้ใช้งาน";
+                                      }
 
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                      return null;
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
@@ -237,25 +231,60 @@ class _EditProfilePageState extends State<EditProfilePage> {
       UploadTask uploadTask;
 
       if (kIsWeb) {
-        final bytes = await image.readAsBytes();
-        uploadTask = storageRef.putData(bytes);
+        final rawBytes = await image.readAsBytes();
+
+        final compressedBytes = await FlutterImageCompress.compressWithList(
+          rawBytes,
+          quality: 70,
+          format: CompressFormat.jpeg,
+        );
+
+        uploadTask = storageRef.putData(
+          compressedBytes,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
       } else {
-        uploadTask = storageRef.putFile(File(image.path));
+        final compressedFile = await FlutterImageCompress.compressAndGetFile(
+          image.path,
+          '${image.path}_compressed.jpg',
+          quality: 70,
+        );
+
+        if (compressedFile == null) throw 'ไม่สามารถบีบอัดไฟล์รูปภาพได้';
+
+        uploadTask = storageRef.putFile(
+          File(compressedFile.path),
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
       }
 
       final snapshot = await uploadTask;
       final url = await snapshot.ref.getDownloadURL();
 
+      final oldUrl = user!.photoURL;
+
+      if (oldUrl != null) {
+        await CachedNetworkImage.evictFromCache(oldUrl);
+      }
+      await CachedNetworkImage.evictFromCache(url);
+
+      await Future.delayed(const Duration(milliseconds: 300));
       await user!.updatePhotoURL(url);
       await user!.reload();
 
-      setState(() {});
+      setState(() {
+        _userFuture = getCurrentUser();
+      });
     } catch (e) {
       debugPrint('เกิดข้อผิดพลาดในการอัปโหลดโปรไฟล์: $e');
 
       if (context.mounted) {
+        final errorMessage = e.toString().contains('Message too long')
+            ? 'ไม่สามารถอัปโหลดรูปภาพได้: ไฟล์รูปภาพมีขนาดใหญ่เกินไป'
+            : 'เกิดข้อผิดพลาด $e';
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } finally {

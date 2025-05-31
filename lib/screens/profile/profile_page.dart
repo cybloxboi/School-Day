@@ -9,6 +9,7 @@ import 'package:school_day/screens/profile/edit_profile_page.dart';
 import 'package:school_day/screens/report/report_problem_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,13 +22,46 @@ class _ProfilePageState extends State<ProfilePage> {
   late final User? user;
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
+  late Future<User?> _futureUser;
 
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+    userDocument = UserDocument(user!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
+    _futureUser = getCurrentUser();
+  }
+
+  Future logOut(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('fcm_token');
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (token != null && user != null) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.email!)
+          .update(
+        {
+          'tokens': FieldValue.arrayRemove([token]),
+          'platforms.$token': FieldValue.delete(),
+        },
+      );
+    }
+
+    await prefs.remove('fcm_token');
+
+    await FirebaseAuth.instance.signOut();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ล็อคเอาท์สำเร็จ'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -41,13 +75,28 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: TextButton.icon(
+              onPressed: () => logOut(context),
+              icon: const Icon(Icons.logout_rounded),
+              label: Text(
+                'ล็อคเอาท์',
+                style: textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: FutureBuilder(
-            future: getCurrentUser(),
+            future: _futureUser,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting ||
                   snapshot.data == null) {
@@ -87,6 +136,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                         radius: 64,
                                         child: snapshot.data!.photoURL != null
                                             ? CachedNetworkImage(
+                                                key: ValueKey(
+                                                  snapshot.data!.photoURL,
+                                                ),
                                                 imageUrl:
                                                     snapshot.data!.photoURL!,
                                                 placeholder: (context, url) {
@@ -96,6 +148,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                                     size: 80,
                                                   );
                                                 },
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Image.asset(
+                                                  'assets/images/blank_profile.jpg',
+                                                ),
                                               )
                                             : Image.asset(
                                                 'assets/images/blank_profile.jpg'),
@@ -119,8 +176,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     title: Text(username.data.toString()),
                                   ),
                                   FilledButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
+                                    onPressed: () async {
+                                      await Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => EditProfilePage(
@@ -129,6 +186,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                           ),
                                         ),
                                       );
+
+                                      await FirebaseAuth.instance.currentUser
+                                          ?.reload();
+                                      final updatedUser =
+                                          FirebaseAuth.instance.currentUser;
+
+                                      setState(() {
+                                        _futureUser = Future.value(updatedUser);
+                                      });
                                     },
                                     label: const Text('แก้ไขข้อมูล'),
                                     icon: const Icon(Icons.edit_rounded),

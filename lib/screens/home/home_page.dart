@@ -8,7 +8,6 @@ import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,37 +25,6 @@ class _HomePageState extends State<HomePage> {
   String greetingText = 'สวัสดี!';
 
   int selectedPageIndex = 0;
-
-  Future logOut(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('fcm_token');
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (token != null && user != null) {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.email!)
-          .update(
-        {
-          'tokens': FieldValue.arrayRemove([token]),
-          'platforms.$token': FieldValue.delete(),
-        },
-      );
-    }
-
-    await prefs.remove('fcm_token');
-
-    await FirebaseAuth.instance.signOut();
-
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('ล็อคเอาท์สำเร็จ'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -78,34 +46,18 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: false,
         actions: [
-          TextButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ChatPage(),
-              ),
-            ),
-            icon: const Icon(Icons.try_sms_star_rounded),
-            label: Text(
-              'AI',
-              style: textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: VerticalDivider(
-              width: 2,
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: TextButton.icon(
-              onPressed: () => logOut(context),
-              icon: const Icon(Icons.logout_rounded),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChatPage(),
+                ),
+              ),
+              icon: const Icon(Icons.try_sms_star_rounded),
               label: Text(
-                'ล็อคเอาท์',
+                'AI',
                 style: textTheme.bodySmall!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

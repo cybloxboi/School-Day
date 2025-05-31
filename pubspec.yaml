@@ -35,6 +35,7 @@ dependencies:
   dash_chat_2: ^0.0.20
   webview_flutter: ^4.13.0
   js: ^0.7.2
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_test:
