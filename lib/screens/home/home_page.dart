@@ -4,7 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:lottie/lottie.dart';
+import 'package:school_day/components/home/subjects_grid.dart';
+import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/ai/chat_page.dart';
+import 'package:school_day/services/database/timetable/timetable_entry.dart';
+import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +26,10 @@ class _HomePageState extends State<HomePage> {
   late String today;
   late UserDocument userDocument;
   late final Stream<DocumentSnapshot> _userStream;
+  late final TimetableSetDocument timetableSet;
+  late final Stream _timetableIDStream;
+  late int dateIndex;
+  late User? currentUser;
 
   String greetingText = 'สวัสดี!';
 
@@ -29,9 +38,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    userDocument = UserDocument(FirebaseAuth.instance.currentUser!.email!);
+    currentUser = FirebaseAuth.instance.currentUser;
+    userDocument = UserDocument(currentUser!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
     today = '${DateFormat('d MMM').format(now)} ${now.year + 543}';
+    timetableSet = TimetableSetDocument(email: currentUser!.email!);
+    _timetableIDStream = timetableSet.getCurrentTimetableID(_userStream);
+    dateIndex = DateTime.now().weekday - 1;
   }
 
   @override
@@ -124,61 +137,32 @@ class _HomePageState extends State<HomePage> {
                             const SizedBox(
                               width: 16,
                             ),
-                            FutureBuilder(
-                              future: getCurrentUser(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                        ConnectionState.waiting ||
-                                    snapshot.data == null) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: ClipOval(
-                                          child: CircleAvatar(
-                                            radius: 64,
-                                            child: LoadingAnimationWidget.beat(
-                                              color: primaryColor,
-                                              size: 100,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return Center(
-                                  child: SizedBox(
-                                    width: 60,
-                                    height: 60,
-                                    child: FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: ClipOval(
-                                        child: CircleAvatar(
-                                          radius: 64,
-                                          child: snapshot.data!.photoURL != null
-                                              ? CachedNetworkImage(
-                                                  imageUrl:
-                                                      snapshot.data!.photoURL!,
-                                                  placeholder: (context, url) {
-                                                    return LoadingAnimationWidget
-                                                        .beat(
-                                                      color: primaryColor,
-                                                      size: 100,
-                                                    );
-                                                  },
-                                                )
-                                              : Image.asset(
-                                                  'assets/images/blank_profile.jpg'),
-                                        ),
-                                      ),
+                            Center(
+                              child: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: ClipOval(
+                                    child: CircleAvatar(
+                                      radius: 64,
+                                      child: currentUser!.photoURL != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: currentUser!.photoURL!,
+                                              placeholder: (context, url) {
+                                                return LoadingAnimationWidget
+                                                    .beat(
+                                                  color: primaryColor,
+                                                  size: 100,
+                                                );
+                                              },
+                                            )
+                                          : Image.asset(
+                                              'assets/images/blank_profile.jpg'),
                                     ),
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -264,132 +248,155 @@ class _HomePageState extends State<HomePage> {
               ),
               SliverPadding(
                 padding: const EdgeInsets.only(bottom: 20),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 500,
-                    mainAxisExtent: 140,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      if (selectedPageIndex == 0) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(16),
+                sliver: StreamBuilder(
+                  stream: _timetableIDStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                          child: LoadingAnimationWidget.fourRotatingDots(
+                            color: primaryColor,
+                            size: 80,
                           ),
-                         child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18.0,
-                              vertical: 20.0,
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return SliverToBoxAdapter(
+                        child: Center(
+                            child: Text('เกิดข้อผิดพลาด: ${snapshot.error}')),
+                      );
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: Center(child: Text('ไม่พบ currentTimetableId')),
+                      );
+                    }
+
+                    TimetableEntry? timetableEntry = selectedPageIndex != 0
+                        ? null
+                        : TimetableEntry(
+                            email: currentUser!.email!,
+                            timetableID: snapshot.data!,
+                            dayIndex: dateIndex,
+                          );
+
+                    return StreamBuilder(
+                      stream: timetableEntry?.fetchLessons(
+                        timetableEntry.getTimetableDocumentSnapshots(),
+                      ),
+                      builder: (context, entrySnapshot) {
+                        if (entrySnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SliverToBoxAdapter(
+                            child: Center(
+                              child: LoadingAnimationWidget.fourRotatingDots(
+                                color: primaryColor,
+                                size: 80,
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          );
+                        }
+
+                        if (entrySnapshot.hasError) {
+                          return SliverToBoxAdapter(
+                            child: Center(
+                              child: Text('Error: ${snapshot.error}'),
+                            ),
+                          );
+                        }
+
+                        List<Timetable> timetableData = entrySnapshot.data!;
+
+                        if (timetableData.isEmpty) {
+                          return SliverToBoxAdapter(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
                                   children: [
                                     Text(
-                                      'วิชา',
-                                      style: TextStyle(
-                                        fontSize: 24,
+                                      'ไม่มีตารางเรียน :>',
+                                      softWrap: true,
+                                      textAlign: TextAlign.center,
+                                      style: textTheme.bodyMedium!.copyWith(
                                         fontWeight: FontWeight.bold,
+                                        fontSize: 30,
                                       ),
                                     ),
-                                    Text(
-                                      'เวลาเรียนถีงกี่โมง',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey[600],
-                                      ),
+                                    LottieBuilder.asset(
+                                      'assets/animations/empty_timetable.json',
+                                      width: 180,
+                                      height: 180,
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 10),
-
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time, size: 24 ,color: primaryColor),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'วันเวลาที่เรียน',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-
-                                Row(
-                                  children: [
-                                    Icon(Icons.person, size: 24 ,color: primaryColor),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'ครูผู้สอน',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
+                          );
+                        }
+
+                        timetableData.sort((a, b) {
+                          int rank(Timetable entry) {
+                            final start = DateTime(now.year, now.month, now.day,
+                                entry.startTime.hour, entry.startTime.minute);
+                            final end = DateTime(now.year, now.month, now.day,
+                                entry.endTime.hour, entry.endTime.minute);
+
+                            if (now.isAfter(start) && now.isBefore(end)) {
+                              return 0; // กำลังเรียนอยู่
+                            } else if (now.isBefore(start)) {
+                              return 1; // ยังไม่เริ่ม
+                            } else {
+                              return 2; // เรียนจบแล้ว
+                            }
+                          }
+
+                          final rankA = rank(a);
+                          final rankB = rank(b);
+
+                          if (rankA != rankB) {
+                            return rankA.compareTo(rankB);
+                          }
+
+                          final aStart = DateTime(now.year, now.month, now.day,
+                              a.startTime.hour, a.startTime.minute);
+                          final bStart = DateTime(now.year, now.month, now.day,
+                              b.startTime.hour, b.startTime.minute);
+
+                          return aStart.compareTo(bStart);
+                        });
+
+                        return SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 500,
+                            mainAxisExtent: 200,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            childCount: timetableData.length,
+                            (BuildContext context, int index) {
+                              final details = timetableData[index];
+
+                              return SubjectsGrid(
+                                title: details.title,
+                                startTime: details.startTime,
+                                endTime: details.endTime,
+                                location: details.location,
+                                professor: details.professor,
+                              );
+                            },
                           ),
                         );
-
-                      } else {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18.0,
-                              vertical: 20.0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'วิชา',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time, size: 24 ,color: primaryColor),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'วันเวลาที่',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10),
-
-                                Row(
-                                  children: [
-                                    Icon(Icons.note, size: 24 ,color: primaryColor),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'หมวดหมู่',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    childCount: 10,
-                  ),
+                      },
+                    );
+                  },
                 ),
               ),
             ],

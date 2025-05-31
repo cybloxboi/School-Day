@@ -483,6 +483,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           fontWeight: FontWeight.bold,
                         ),
                         softWrap: true,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(
@@ -516,6 +517,13 @@ class _TimetablePageState extends State<TimetablePage> {
                         children: [
                           Row(
                             children: [
+                              const Icon(
+                                Icons.access_time,
+                                color: primaryColor,
+                              ),
+                              const SizedBox(
+                                width: 8,
+                              ),
                               Text(
                                 details.startTime.toString(),
                                 style: textTheme.bodySmall,
@@ -544,6 +552,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   details.professor,
                                   style: textTheme.bodySmall,
                                   softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -594,6 +603,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   details.location,
                                   style: textTheme.bodySmall,
                                   softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
