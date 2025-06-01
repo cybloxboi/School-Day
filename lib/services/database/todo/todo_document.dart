@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:school_day/data/todo.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 
+// TODO: รื้อทำระบบ TodoDocument ใหม่
 class TodoDocument extends UserDocument {
   TodoDocument(super.email);
 

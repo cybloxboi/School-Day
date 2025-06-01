@@ -2,10 +2,12 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/home/subjects_grid.dart';
+import 'package:school_day/components/home/tasks_grid.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
@@ -275,102 +277,146 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
 
-                    TimetableEntry? timetableEntry = selectedPageIndex != 0
-                        ? null
-                        : TimetableEntry(
-                            email: currentUser!.email!,
-                            timetableID: snapshot.data!,
-                            dayIndex: dateIndex,
-                          );
+                    if (selectedPageIndex == 0) {
+                      TimetableEntry? timetableEntry = selectedPageIndex != 0
+                          ? null
+                          : TimetableEntry(
+                              email: currentUser!.email!,
+                              timetableID: snapshot.data!,
+                              dayIndex: dateIndex,
+                            );
 
-                    return StreamBuilder(
-                      stream: timetableEntry?.fetchLessons(
-                        timetableEntry.getTimetableDocumentSnapshots(),
-                      ),
-                      builder: (context, entrySnapshot) {
-                        if (entrySnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SliverToBoxAdapter(
-                            child: Center(
-                              child: LoadingAnimationWidget.fourRotatingDots(
-                                color: primaryColor,
-                                size: 80,
-                              ),
-                            ),
-                          );
-                        }
-
-                        if (entrySnapshot.hasError) {
-                          return SliverToBoxAdapter(
-                            child: Center(
-                              child: Text('Error: ${snapshot.error}'),
-                            ),
-                          );
-                        }
-
-                        List<Timetable> timetableData = entrySnapshot.data!;
-
-                        if (timetableData.isEmpty) {
-                          return SliverToBoxAdapter(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  spacing: 16,
-                                  children: [
-                                    Text(
-                                      'ไม่มีตารางเรียนสำหรับวันนี้ :>',
-                                      softWrap: true,
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.bodyMedium!.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 30,
-                                      ),
-                                    ),
-                                    LottieBuilder.asset(
-                                      'assets/animations/empty_timetable.json',
-                                      width: 180,
-                                      height: 180,
-                                    ),
-                                  ],
+                      return StreamBuilder(
+                        stream: timetableEntry?.fetchLessons(
+                          timetableEntry.getTimetableDocumentSnapshots(),
+                        ),
+                        builder: (context, entrySnapshot) {
+                          if (entrySnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: LoadingAnimationWidget.fourRotatingDots(
+                                  color: primaryColor,
+                                  size: 80,
                                 ),
                               ),
+                            );
+                          }
+
+                          if (entrySnapshot.hasError) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              ),
+                            );
+                          }
+
+                          List<Timetable> timetableData = entrySnapshot.data!;
+
+                          if (timetableData.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 16,
+                                    children: [
+                                      Text(
+                                        'ไม่มีตารางเรียนสำหรับวันนี้ :>',
+                                        softWrap: true,
+                                        textAlign: TextAlign.center,
+                                        style: textTheme.bodyMedium!.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30,
+                                        ),
+                                      ),
+                                      LottieBuilder.asset(
+                                        'assets/animations/empty_timetable.json',
+                                        width: 180,
+                                        height: 180,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          timetableData.sort((a, b) {
+                            int rank(Timetable entry) {
+                              final start = DateTime(
+                                  now.year,
+                                  now.month,
+                                  now.day,
+                                  entry.startTime.hour,
+                                  entry.startTime.minute);
+                              final end = DateTime(now.year, now.month, now.day,
+                                  entry.endTime.hour, entry.endTime.minute);
+
+                              if (now.isAfter(start) && now.isBefore(end)) {
+                                return 0; // กำลังเรียนอยู่
+                              } else if (now.isBefore(start)) {
+                                return 1; // ยังไม่เริ่ม
+                              } else {
+                                return 2; // เรียนจบแล้ว
+                              }
+                            }
+
+                            final rankA = rank(a);
+                            final rankB = rank(b);
+
+                            if (rankA != rankB) {
+                              return rankA.compareTo(rankB);
+                            }
+
+                            final aStart = DateTime(now.year, now.month,
+                                now.day, a.startTime.hour, a.startTime.minute);
+                            final bStart = DateTime(now.year, now.month,
+                                now.day, b.startTime.hour, b.startTime.minute);
+
+                            return aStart.compareTo(bStart);
+                          });
+
+                          return SliverGrid(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 800,
+                              mainAxisExtent: 200,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              childCount: timetableData.length,
+                              (BuildContext context, int index) {
+                                final details = timetableData[index];
+
+                                return SubjectsGrid(
+                                  title: details.title,
+                                  startTime: details.startTime,
+                                  endTime: details.endTime,
+                                  location: details.location,
+                                  professor: details.professor,
+                                );
+                              },
                             ),
                           );
-                        }
-
-                        timetableData.sort((a, b) {
-                          int rank(Timetable entry) {
-                            final start = DateTime(now.year, now.month, now.day,
-                                entry.startTime.hour, entry.startTime.minute);
-                            final end = DateTime(now.year, now.month, now.day,
-                                entry.endTime.hour, entry.endTime.minute);
-
-                            if (now.isAfter(start) && now.isBefore(end)) {
-                              return 0; // กำลังเรียนอยู่
-                            } else if (now.isBefore(start)) {
-                              return 1; // ยังไม่เริ่ม
-                            } else {
-                              return 2; // เรียนจบแล้ว
-                            }
-                          }
-
-                          final rankA = rank(a);
-                          final rankB = rank(b);
-
-                          if (rankA != rankB) {
-                            return rankA.compareTo(rankB);
-                          }
-
-                          final aStart = DateTime(now.year, now.month, now.day,
-                              a.startTime.hour, a.startTime.minute);
-                          final bStart = DateTime(now.year, now.month, now.day,
-                              b.startTime.hour, b.startTime.minute);
-
-                          return aStart.compareTo(bStart);
-                        });
-
+                        },
+                      );
+                    } else {
+                      if (!kDebugMode) {
+                        return SliverToBoxAdapter(
+                          child: Center(
+                            child: Text(
+                              'Coming Soon...',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
                         return SliverGrid(
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -380,22 +426,14 @@ class _HomePageState extends State<HomePage> {
                             mainAxisSpacing: 16,
                           ),
                           delegate: SliverChildBuilderDelegate(
-                            childCount: timetableData.length,
+                            childCount: 10,
                             (BuildContext context, int index) {
-                              final details = timetableData[index];
-
-                              return SubjectsGrid(
-                                title: details.title,
-                                startTime: details.startTime,
-                                endTime: details.endTime,
-                                location: details.location,
-                                professor: details.professor,
-                              );
+                              return const TasksGrid();
                             },
                           ),
                         );
-                      },
-                    );
+                      }
+                    }
                   },
                 ),
               ),
