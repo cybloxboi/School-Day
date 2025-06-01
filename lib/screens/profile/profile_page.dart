@@ -268,7 +268,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                     ),
                                                   ),
                                                   Text(
-                                                    'เวอร์ชัน 1.3.0',
+                                                    'เวอร์ชัน $appVersion',
                                                     style: textTheme.bodySmall!
                                                         .copyWith(
                                                       fontWeight:
@@ -331,7 +331,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                       applicationName:
                                                           'School Day',
                                                       applicationVersion:
-                                                          '1.3.0',
+                                                          appVersion,
                                                       applicationIcon:
                                                           ClipRRect(
                                                         borderRadius:
@@ -359,7 +359,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     },
                                   ),
                                   Text(
-                                    'เวอร์ชัน 1.3.0',
+                                    'เวอร์ชัน $appVersion',
                                     style: textTheme.bodySmall,
                                   ),
                                 ],

@@ -14,6 +14,8 @@ final TextTheme textTheme = TextTheme(
   ),
 );
 
+const String appVersion = '1.3.1 (1)';
+
 const Color backgroundColor = Color.fromARGB(255, 252, 230, 236);
 const Color primaryColor = Color.fromARGB(255, 255, 129, 120);
 const Color secondaryColor = Color.fromARGB(255, 255, 174, 168);
