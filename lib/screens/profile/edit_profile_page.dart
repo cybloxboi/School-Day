@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/screens/navigation_menu.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/image/image_helper.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -31,6 +33,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _usernameController =
       TextEditingController();
   bool _isChanged = false;
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late final UserDocument userDocument;
 
   Future<User?> getCurrentUser() async {
     await FirebaseAuth.instance.currentUser?.reload();
@@ -41,6 +45,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
+    userDocument = UserDocument(user!.email!);
+
     _usernameController.value = TextEditingValue(text: widget.username);
 
     _usernameController.addListener(() {
@@ -69,7 +75,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: FilledButton.icon(
-              onPressed: _isChanged ? () {} : null,
+              onPressed: _isChanged
+                  ? () async {
+                      if (formKey.currentState!.validate()) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => Center(
+                            child: LoadingAnimationWidget.fourRotatingDots(
+                              color: primaryColor,
+                              size: 80,
+                            ),
+                          ),
+                        );
+
+                        await userDocument
+                            .updateUsername(_usernameController.text.trim());
+
+                        if (!context.mounted) return;
+
+                        Navigator.pop(context);
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NavigationMenu(
+                              screenIndex: 3,
+                            ),
+                          ),
+                          (route) => false,
+                        );
+                      }
+                    }
+                  : null,
               label: const Text('บันทึก'),
               icon: const Icon(
                 Icons.save_rounded,
@@ -157,8 +195,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           style: textTheme.bodySmall,
                         ),
                       ),
-                      const Divider(),
                       Form(
+                        key: formKey,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 16,
@@ -187,6 +225,112 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                      const Divider(),
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text(
+                                  'ไม่สามารถเปลี่ยนอีเมลได้',
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                content: Text(
+                                  'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
+                                  style: textTheme.bodySmall,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('ปิด'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.email_rounded),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              Text(
+                                'อีเมล',
+                                style: textTheme.bodySmall!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                widget.email,
+                                style: textTheme.bodySmall,
+                              ),
+                              const SizedBox(width: 16),
+                              const Icon(Icons.chevron_right_rounded),
+                            ],
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text(
+                                  'ไม่สามารถเปลี่ยนรหัสผ่านได้',
+                                  style: textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                content: Text(
+                                  'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
+                                  style: textTheme.bodySmall,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('ปิด'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.password_rounded),
+                              const SizedBox(
+                                width: 16,
+                              ),
+                              Text(
+                                'รหัสผ่าน',
+                                style: textTheme.bodySmall!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              const Icon(Icons.chevron_right_rounded),
+                            ],
+                          ),
                         ),
                       ),
                     ],

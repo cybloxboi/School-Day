@@ -13,8 +13,12 @@ class UserDocument {
     return firestore.collection('Users').doc(email);
   }
 
-  void updateIsNotifyTimetable(bool value) {
-    userDocument.update({'isNotifyTimetable': value});
+  Future<void> updateIsNotifyTimetable(bool value) async {
+    await userDocument.update({'isNotifyTimetable': value});
+  }
+
+  Future<void> updateUsername(String newUsername) async {
+    await userDocument.update({'username': newUsername});
   }
 
   Stream<DocumentSnapshot> getUserDocumentSnapshots() {

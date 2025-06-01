@@ -31,8 +31,8 @@ class _NotificationSwitchState extends State<NotificationSwitch> {
 
         return SwitchListTile(
           value: isNotify,
-          onChanged: (value) {
-            userDocument.updateIsNotifyTimetable(value);
+          onChanged: (value) async {
+            await userDocument.updateIsNotifyTimetable(value);
           },
           title: Text(
             'เปิด/ปิดการแจ้งเตือนตารางเรียน',
