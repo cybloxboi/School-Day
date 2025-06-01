@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/components/others/web_utils.dart';
 import 'package:school_day/components/profile/notification_switch.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
@@ -30,6 +31,8 @@ class _ProfilePageState extends State<ProfilePage> {
     user = FirebaseAuth.instance.currentUser;
     userDocument = UserDocument(user!.email!);
     _userStream = userDocument.getUserDocumentSnapshots();
+
+    updateProfileImageUrl(user!);
   }
 
   Future logOut(BuildContext context) async {
@@ -133,15 +136,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                         radius: 64,
                                         child: user!.photoURL != null
                                             ? CachedNetworkImage(
-                                                key: ValueKey(
-                                                  user!.photoURL,
-                                                ),
                                                 imageUrl: user!.photoURL!,
                                                 placeholder: (context, url) {
                                                   return LoadingAnimationWidget
                                                       .beat(
                                                     color: primaryColor,
                                                     size: 80,
+                                                  );
+                                                },
+                                                errorWidget:
+                                                    (context, url, error) {
+                                                  return Image.asset(
+                                                    'assets/images/blank_profile.jpg',
                                                   );
                                                 },
                                               )

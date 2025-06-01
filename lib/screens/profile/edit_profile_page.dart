@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/image/image_helper.dart';
@@ -58,6 +59,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         });
       }
     });
+
+    updateProfileImageUrl(user!);
   }
 
   @override
@@ -147,14 +150,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             radius: 64,
                             child: photoUrl != null
                                 ? CachedNetworkImage(
-                                    key: ValueKey(
-                                      photoUrl + UniqueKey().toString(),
-                                    ),
                                     imageUrl: photoUrl,
                                     placeholder: (context, url) {
                                       return LoadingAnimationWidget.beat(
                                         color: primaryColor,
                                         size: 80,
+                                      );
+                                    },
+                                    errorWidget: (context, url, error) {
+                                      return Image.asset(
+                                        'assets/images/blank_profile.jpg',
                                       );
                                     },
                                   )

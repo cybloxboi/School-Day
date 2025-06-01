@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/home/subjects_grid.dart';
 import 'package:school_day/components/home/tasks_grid.dart';
+import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
@@ -47,6 +48,8 @@ class _HomePageState extends State<HomePage> {
     timetableSet = TimetableSetDocument(email: currentUser!.email!);
     _timetableIDStream = timetableSet.getCurrentTimetableID(_userStream);
     dateIndex = DateTime.now().weekday - 1;
+
+    updateProfileImageUrl(currentUser!);
   }
 
   @override
@@ -156,6 +159,12 @@ class _HomePageState extends State<HomePage> {
                                                     .beat(
                                                   color: primaryColor,
                                                   size: 100,
+                                                );
+                                              },
+                                              errorWidget:
+                                                  (context, url, error) {
+                                                return Image.asset(
+                                                  'assets/images/blank_profile.jpg',
                                                 );
                                               },
                                             )

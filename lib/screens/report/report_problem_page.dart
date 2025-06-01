@@ -36,6 +36,7 @@ class _ReportProblemPageState extends State<ReportProblemPage> {
           }
         },
       ))
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(
         Uri.parse('https://forms.gle/ADrcqjmjCb5ocBr48'),
       );
