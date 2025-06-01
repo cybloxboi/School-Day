@@ -13,6 +13,10 @@ class UserDocument {
     return firestore.collection('Users').doc(email);
   }
 
+  void updateIsNotifyTimetable(bool value) {
+    userDocument.update({'isNotifyTimetable': value});
+  }
+
   Stream<DocumentSnapshot> getUserDocumentSnapshots() {
     return userDocument.snapshots();
   }
@@ -21,6 +25,16 @@ class UserDocument {
     return userDocumentSnapshots.map((snapshot) {
       if (snapshot.exists) {
         return snapshot['username'];
+      }
+
+      return null;
+    }).distinct();
+  }
+
+  Stream getIsNotifyTimetable(Stream<DocumentSnapshot> userDocumentSnapshots) {
+    return userDocumentSnapshots.map((snapshot) {
+      if (snapshot.exists) {
+        return snapshot['isNotifyTimetable'];
       }
 
       return null;

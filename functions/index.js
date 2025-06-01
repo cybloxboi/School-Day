@@ -1,9 +1,9 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
-const admin = require("firebase-admin");
 const { DateTime } = require("luxon");
+const { initializeApp } = require("firebase-admin/app");
 
-admin.initializeApp();
+initializeApp();
 
 setGlobalOptions({
   region: "asia-southeast1",
@@ -31,6 +31,7 @@ exports.notifyCurrentTimetable = onSchedule(
     const currentMinutes = now.hour * 60 + now.minute;
 
     const usersSnapshot = await admin.firestore().collection("Users")
+      .where("isNotifyTimetable", "==", true)
       .where("hasTodayNotification", "==", true)
       .where("nextNotificationMinutes", "==", currentMinutes)
       .get();
@@ -38,6 +39,9 @@ exports.notifyCurrentTimetable = onSchedule(
     const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
       const email = userDoc.id;
       const userData = userDoc.data();
+
+      if (userData.isNotifyTimetable === false) return;
+
       const tokens = userData.tokens || [];
       const todaySlots = userData.todaySlots || [];
 
@@ -178,4 +182,4 @@ exports.updateTodayNotificationData = onSchedule(
     await Promise.all(updatePromises);
     return null;
   }
-);  
+);

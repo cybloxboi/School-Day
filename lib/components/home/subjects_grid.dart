@@ -35,13 +35,13 @@ class SubjectsGrid extends StatelessWidget {
     if (remaining.isNegative) {
       remainingText = 'เริ่มไปแล้ว';
     } else {
-      remainingText = 'อีก ';
+      remainingText = 'อีก';
 
       if (remaining.inHours > 0) {
-        remainingText += '${remaining.inHours} ชม.';
+        remainingText += ' ${remaining.inHours} ชม.';
       }
 
-      remainingText += '${remaining.inMinutes % 60} นาที';
+      remainingText += ' ${remaining.inMinutes % 60} นาที';
     }
 
     return Container(

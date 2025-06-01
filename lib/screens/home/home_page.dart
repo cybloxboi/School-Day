@@ -320,7 +320,7 @@ class _HomePageState extends State<HomePage> {
                                   spacing: 16,
                                   children: [
                                     Text(
-                                      'ไม่มีตารางเรียน :>',
+                                      'ไม่มีตารางเรียนสำหรับวันนี้ :>',
                                       softWrap: true,
                                       textAlign: TextAlign.center,
                                       style: textTheme.bodyMedium!.copyWith(
@@ -374,7 +374,7 @@ class _HomePageState extends State<HomePage> {
                         return SliverGrid(
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 500,
+                            maxCrossAxisExtent: 800,
                             mainAxisExtent: 200,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,

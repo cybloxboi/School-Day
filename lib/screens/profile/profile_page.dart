@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/others/web_utils.dart';
+import 'package:school_day/components/profile/notification_switch.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
 import 'package:school_day/screens/report/report_problem_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
@@ -196,14 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     textAlign: TextAlign.start,
                                   ),
-                                  SwitchListTile(
-                                    value: false,
-                                    onChanged: (value) {},
-                                    title: Text(
-                                      'เปิด/ปิดการแจ้งเตือนตารางเรียน',
-                                      style: textTheme.bodySmall,
-                                    ),
-                                  ),
+                                  const NotificationSwitch(),
                                   const Divider(),
                                   TextButton.icon(
                                     onPressed: () {
