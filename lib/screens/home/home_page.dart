@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/home/subjects_grid.dart';
 import 'package:school_day/components/home/tasks_grid.dart';
+import 'package:school_day/components/home/welcome_text.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/ai/chat_page.dart';
@@ -113,26 +114,40 @@ class _HomePageState extends State<HomePage> {
                               stream: userDocument.getUsername(_userStream),
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
-                                  greetingText =
-                                      'สวัสดี, ${snapshot.data}! มาดูกันสิ วันนี้มีอะไรบ้าง';
+                                  greetingText = 'สวัสดี, ${snapshot.data}!';
                                 }
 
                                 return Expanded(
-                                  child: AnimatedTextKit(
-                                    key: ValueKey(snapshot.data),
-                                    isRepeatingAnimation: false,
-                                    totalRepeatCount: 1,
-                                    animatedTexts: [
-                                      TypewriterAnimatedText(
-                                        greetingText,
-                                        textStyle:
-                                            textTheme.bodySmall!.copyWith(
-                                          fontSize: 18,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 8,
+                                    children: [
+                                      AnimatedTextKit(
+                                        key: ValueKey(snapshot.data),
+                                        isRepeatingAnimation: false,
+                                        totalRepeatCount: 1,
+                                        animatedTexts: [
+                                          TypewriterAnimatedText(
+                                            greetingText,
+                                            textStyle:
+                                                textTheme.bodySmall!.copyWith(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            speed: const Duration(
+                                              milliseconds: 20,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      DefaultTextStyle(
+                                        style: textTheme.bodySmall!.copyWith(
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
+                                          color: Colors.black,
                                         ),
-                                        speed: const Duration(
-                                          milliseconds: 20,
-                                        ),
+                                        child: const WelcomeText(),
                                       ),
                                     ],
                                   ),

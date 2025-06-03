@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/components/others/web_utils.dart';
+import 'package:school_day/components/profile/about_developer.dart';
 import 'package:school_day/components/profile/notification_switch.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
 import 'package:school_day/screens/report/report_problem_page.dart';
@@ -240,121 +241,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     onPressed: () {
                                       showDialog(
                                         context: context,
-                                        builder: (context) => AlertDialog(
-                                          scrollable: true,
-                                          title: Row(
-                                            spacing: 16,
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                                child: Image.asset(
-                                                  'assets/images/app_icon.png',
-                                                  width: 50,
-                                                  height: 50,
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                spacing: 8,
-                                                children: [
-                                                  Text(
-                                                    'เกี่ยวกับแอปพลิเคชัน',
-                                                    style: textTheme.bodyMedium!
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'เวอร์ชัน $appVersion',
-                                                    style: textTheme.bodySmall!
-                                                        .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                          content: ConstrainedBox(
-                                            constraints: const BoxConstraints(
-                                              maxWidth: 600,
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              spacing: 16,
-                                              children: [
-                                                Text(
-                                                  'แอปนี้ถูกพัฒนาด้วย Flutter โดย',
-                                                  style: textTheme.bodySmall!
-                                                      .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '1. นายศุกลณัฏฐ์ ถาวรฟัง ม.5/11\n2. นางสาวศุภิสรา ศิริอำนาจ ม.5/6\n3. นายวชิรวิทย์ บุตตะโคตร ม.5/6',
-                                                  style: textTheme.bodySmall,
-                                                ),
-                                                Text(
-                                                  'โรงเรียนอำนาจเจริญ',
-                                                  style: textTheme.bodySmall,
-                                                ),
-                                                const Divider(),
-                                                Text(
-                                                  'จุดประสงค์ของแอปนี้',
-                                                  style: textTheme.bodySmall!
-                                                      .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  'เพื่อสร้างแอปพลิเคชันที่สามารถช่วยให้นักเรียนบริหารจัดการตารางเรียนและงานต่าง ๆ ได้อย่างเป็นระบบ ช่วยลดความสับสนในการจัดสรรเวลา พร้อมทั้งเพิ่มความคล่องตัวในการติดตามงานหรือกิจกรรมที่ต้องทำในแต่ละวัน โดยมุ่งเน้นให้การใช้งานเป็นไปอย่างสะดวก เข้าใจง่าย และสามารถตอบสนองต่อความต้องการของผู้เรียนในยุคดิจิทัลที่เทคโนโลยีเข้ามามีบทบาทในชีวิตประจำวันมากยิ่งขึ้น',
-                                                  style: textTheme.bodySmall,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              child: const Text('แสดงใบอนุญาต'),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LicensePage(
-                                                      applicationName:
-                                                          'School Day',
-                                                      applicationVersion:
-                                                          appVersion,
-                                                      applicationIcon:
-                                                          ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(16),
-                                                        child: Image.asset(
-                                                          'assets/images/app_icon.png',
-                                                          width: 100,
-                                                          height: 100,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            TextButton(
-                                              child: const Text('ปิด'),
-                                              onPressed: () =>
-                                                  Navigator.of(context).pop(),
-                                            ),
-                                          ],
-                                        ),
+                                        builder: (context) =>
+                                            const AboutDeveloper(),
                                       );
                                     },
                                   ),
