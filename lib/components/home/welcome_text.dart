@@ -1,4 +1,3 @@
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +28,7 @@ class _WelcomeTextState extends State<WelcomeText> {
       repeatForever: true,
       pause: const Duration(seconds: 5),
       animatedTexts: messages.map((message) {
-        return TyperAnimatedText(message);
+        return TypewriterAnimatedText(message);
       }).toList(),
     );
   }

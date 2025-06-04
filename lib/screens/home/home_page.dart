@@ -143,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       DefaultTextStyle(
                                         style: textTheme.bodySmall!.copyWith(
-                                          fontSize: 20,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
                                         ),
