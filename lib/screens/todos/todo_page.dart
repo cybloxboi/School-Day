@@ -33,7 +33,58 @@ class _TodoPageState extends State<TodoPage> {
           ),
         ),
         centerTitle: false,
-      ),
+        actions: [
+        IconButton(
+          icon: Icon(Icons.list_rounded),
+          tooltip: 'เปิดรายวิชา',
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (kIsWeb)
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  const Spacer(),
+                                  IconButton.filledTonal(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    icon: const Icon(Icons.cancel_rounded),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        Text(
+                          'รายวิชา',
+                          style: textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Divider(thickness: 1),
+                        const SizedBox(height: 16),
+                        Text('เนื้อหาใน Bottom Sheet'),
+                      ],
+                    )
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
+     ),
       backgroundColor: backgroundColor,
       floatingActionButton: kDebugMode
           ? FloatingActionButton(
@@ -55,21 +106,6 @@ class _TodoPageState extends State<TodoPage> {
               itemBuilder: (context, index) {
                 return Column(
                   children: [
-                    if (index % 5 == 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Column(
-                          children: [
-                            Text(
-                              'หัวข้อ',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Divider(),
-                          ],
-                        ),
-                      ),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: Card(
@@ -89,11 +125,10 @@ class _TodoPageState extends State<TodoPage> {
                                   children: [
                                     const SizedBox(height: 4),
                                     const Text(
-                                      'ชื่อวิชา',
+                                      'ชื่องาน',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: primaryColor,
                                       ),
                                     ),
                                     const SizedBox(height: 10),
@@ -102,7 +137,8 @@ class _TodoPageState extends State<TodoPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Icon(Icons.assignment,
-                                            size: 16, color: Colors.grey[700]),
+                                            size: 16, 
+                                            color: primaryColor),
                                         const SizedBox(width: 4),
                                         const Expanded(
                                           child: Text(
@@ -125,7 +161,8 @@ class _TodoPageState extends State<TodoPage> {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Icon(Icons.schedule,
-                                          size: 16, color: Colors.grey[700]),
+                                          size: 16, 
+                                          color: primaryColor),
                                       const SizedBox(width: 4),
                                       const Text(
                                         'วันครบกำหนด',
@@ -140,13 +177,14 @@ class _TodoPageState extends State<TodoPage> {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Icon(Icons.flag,
-                                          size: 16, color: Colors.redAccent),
+                                          size: 16, color: 
+                                          Colors.redAccent),
                                       SizedBox(width: 4),
                                       Text(
                                         'ความสำคัญ',
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color: Colors.redAccent),
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -156,12 +194,14 @@ class _TodoPageState extends State<TodoPage> {
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.edit,
-                                            size: 18, color: Colors.blue),
+                                            size: 18, 
+                                            color: Colors.blue),
                                         onPressed: () {},
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.delete,
-                                            size: 18, color: Colors.red),
+                                            size: 18, 
+                                            color: primaryColor),
                                         onPressed: () {},
                                       ),
                                     ],
