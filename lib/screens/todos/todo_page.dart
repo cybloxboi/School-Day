@@ -35,7 +35,7 @@ class _TodoPageState extends State<TodoPage> {
         centerTitle: false,
         actions: [
         IconButton(
-          icon: Icon(Icons.list_rounded),
+          icon: const Icon(Icons.list_rounded),
           tooltip: 'เปิดรายวิชา',
           onPressed: () {
             showModalBottomSheet(
@@ -45,7 +45,7 @@ class _TodoPageState extends State<TodoPage> {
                 return SizedBox(
                   height: MediaQuery.of(context).size.height * 0.8,
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -74,7 +74,7 @@ class _TodoPageState extends State<TodoPage> {
                         ),
                         const Divider(thickness: 1),
                         const SizedBox(height: 16),
-                        Text('เนื้อหาใน Bottom Sheet'),
+                        const Text('เนื้อหาใน Bottom Sheet'),
                       ],
                     )
                   ),
@@ -119,19 +119,19 @@ class _TodoPageState extends State<TodoPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
+                              const Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 4),
-                                    const Text(
+                                    SizedBox(height: 4),
+                                    Text(
                                       'ชื่องาน',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 10),
+                                    SizedBox(height: 10),
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -139,8 +139,8 @@ class _TodoPageState extends State<TodoPage> {
                                         Icon(Icons.assignment,
                                             size: 16, 
                                             color: primaryColor),
-                                        const SizedBox(width: 4),
-                                        const Expanded(
+                                        SizedBox(width: 4),
+                                        Expanded(
                                           child: Text(
                                             'รายละเอียด',
                                             style: TextStyle(fontSize: 14),
@@ -155,7 +155,7 @@ class _TodoPageState extends State<TodoPage> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Row(
+                                  const Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.end,
@@ -163,8 +163,8 @@ class _TodoPageState extends State<TodoPage> {
                                       Icon(Icons.schedule,
                                           size: 16, 
                                           color: primaryColor),
-                                      const SizedBox(width: 4),
-                                      const Text(
+                                      SizedBox(width: 4),
+                                      Text(
                                         'วันครบกำหนด',
                                         style: TextStyle(fontSize: 12),
                                       ),

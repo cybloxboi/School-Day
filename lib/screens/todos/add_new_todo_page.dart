@@ -31,8 +31,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
           onPressed: () {
           },
           style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFF874B57),
-          shape: StadiumBorder(),
+          backgroundColor: const Color(0xFF874B57),
+          shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           elevation: 0,
         ),
