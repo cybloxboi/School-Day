@@ -1194,7 +1194,7 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.37):
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Interface (0.0.37)
-  - cloud_firestore (5.6.5):
+  - cloud_firestore (5.6.8):
     - Firebase/Firestore (= 11.10.0)
     - firebase_core
     - Flutter
@@ -1246,18 +1246,18 @@ PODS:
   - Firebase/Storage (11.10.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 11.10.0)
-  - firebase_auth (5.5.1):
+  - firebase_auth (5.5.4):
     - Firebase/Auth (= 11.10.0)
     - firebase_core
     - Flutter
-  - firebase_core (3.13.0):
+  - firebase_core (3.13.1):
     - Firebase/CoreOnly (= 11.10.0)
     - Flutter
-  - firebase_messaging (15.2.5):
+  - firebase_messaging (15.2.6):
     - Firebase/Messaging (= 11.10.0)
     - firebase_core
     - Flutter
-  - firebase_storage (12.4.5):
+  - firebase_storage (12.4.6):
     - Firebase/Storage (= 11.10.0)
     - firebase_core
     - Flutter
@@ -1499,11 +1499,6 @@ PODS:
     - FlutterMacOS
   - SwiftyGif (5.4.5)
   - TOCropViewController (2.7.4)
-  - url_launcher_ios (0.0.1):
-    - Flutter
-  - video_player_avfoundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -1525,8 +1520,6 @@ DEPENDENCIES:
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
-  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
 SPEC REPOS:
@@ -1597,25 +1590,21 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
-  video_player_avfoundation:
-    :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   webview_flutter_wkwebview:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
-  cloud_firestore: 29f85d4548e8fa6eb5774f8580e8263f41c05713
+  cloud_firestore: 18eb885c872cd34af2a59c2a7cdc7aa576d8c315
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Firebase: 1fe1c0a7d9aaea32efe01fbea5f0ebd8d70e53a2
-  firebase_auth: d1c3360eacfba7c85b60a720b2555b762ecfabea
-  firebase_core: 2d4534e7b489907dcede540c835b48981d890943
-  firebase_messaging: 75bc93a4df25faccad67f6662ae872ac9ae69b64
-  firebase_storage: ce9dee18f1cc73129457d861ae3322656ec41a99
+  firebase_auth: 4d9603c196d22f71e80cf518b71939c4f2117088
+  firebase_core: ba71b44041571da878cb624ce0d80250bcbe58ad
+  firebase_messaging: 13129fe2ca166d1ed2d095062d76cee88943d067
+  firebase_storage: c7345d943e1afdf9cb48e5887ed69c1095b3aa1e
   FirebaseAppCheckInterop: f23709c9ce92d810aa53ff4ce12ad3e666a3c7be
   FirebaseAuth: c4146bdfdc87329f9962babd24dae89373f49a32
   FirebaseAuthInterop: ac22ed402c2f4e3a8c63ebd3278af9a06073c1be
@@ -1653,8 +1642,6 @@ SPEC CHECKSUMS:
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
-  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
 PODFILE CHECKSUM: decd37170f2ba36fefda016813e28384f760777f

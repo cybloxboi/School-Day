@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/auth/sign_up_widget.dart';
-import 'package:school_day/screens/auth/email_verification_page.dart';
-import 'package:school_day/services/database/timetable/timetable_document.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -40,27 +39,16 @@ class _SignUpPageState extends State<SignUpPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-
       User? user = userCredential.user;
 
-      TimetableDocument timetableDocument = TimetableDocument(
-        email: user!.email!,
-      );
+      UserDocument userDocument = UserDocument(user!.email!);
 
-      await timetableDocument.createUserDocument(
+      await userDocument.createUserDocument(
         username: _usernameController.text.trim(),
       );
 
       if (!context.mounted) return;
-
-      Navigator.pop(context);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const EmailVerificationPage(),
-        ),
-      );
+      Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) return;
 
@@ -72,6 +60,8 @@ class _SignUpPageState extends State<SignUpPage> {
         errorMessage = 'อีเมลนี้สมัครไปแล้วนะ ลองล็อคอินดูน้า';
       } else {
         errorMessage = 'เกิดข้อผิดพลาดบางอย่างเกิดขึ้น โปรดลองใหม่อีกครั้ง';
+        debugPrint(e.code);
+        debugPrint(e.message);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

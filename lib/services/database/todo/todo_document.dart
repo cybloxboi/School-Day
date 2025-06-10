@@ -1,84 +1,53 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:school_day/data/todo.dart';
-import 'package:school_day/services/database/user/user_document.dart';
 
-// TODO: รื้อทำระบบ TodoDocument ใหม่
-class TodoDocument extends UserDocument {
-  TodoDocument(super.email);
+class TodoDocument {
+  final firestore = FirebaseFirestore.instance;
 
-  Future<List<Map<String, dynamic>>> getTodoListFuture() async {
-    final snapshot = await userDocument.get();
-    final data = snapshot.data() as Map<String, dynamic>?;
+  late DocumentReference userDoc;
+  late CollectionReference categories;
+  late DocumentReference todoDoc;
 
-    if (data == null || data['todoList'] == null) return [];
+  final String email;
 
-    return List<Map<String, dynamic>>.from(data['todoList']);
+  DocumentReference getUserDocument(String email) {
+    return firestore.collection('Users').doc(email);
   }
 
-  Stream getTodoList(Stream<DocumentSnapshot> userDocumentSnapshot) {
+  CollectionReference getUserCategoriesCollection(
+    DocumentReference userDocument,
+  ) {
+    return userDocument.collection('Categories');
+  }
+
+  DocumentReference getUserTodoDoc([String? path]) {
+    return categories.doc(path);
+  }
+
+  TodoDocument({required this.email}) {
+    userDoc = getUserDocument(email);
+    categories = getUserCategoriesCollection(userDoc);
+    todoDoc = getUserTodoDoc();
+  }
+
+  Stream<DocumentSnapshot> getUserDocumentSnapshots() {
+    return userDoc.snapshots();
+  }
+
+  Stream getCurrentCategoriesID(Stream<DocumentSnapshot> userDocumentSnapshot) {
     return userDocumentSnapshot.map((snapshot) {
       if (snapshot.exists) {
-        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-        List<dynamic> todoFirestore = data['todoList'] ?? [];
-        List<Todo> todoList = todoFirestore
-            .map((todo) => Todo.fromJson(todo as Map<String, dynamic>))
-            .toList();
-
-        return todoList;
+        return snapshot['currentCategoriesID'];
+      } else {
+        return null;
       }
-
-      return [];
     }).distinct();
   }
 
-  Future<bool> addTodo({required Todo newTodo}) async {
+  Future<void> updateCurrentCategoriesID(String categoriesID) async {
     try {
-      await userDocument.update({
-        'todoList': FieldValue.arrayUnion([newTodo.toJson()]),
-      });
-
-      return true;
+      await userDoc.update({'currentCategoriesID': categoriesID});
     } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> deleteTodo({required Todo todo}) async {
-    try {
-      await userDocument.update(
-        {
-          'todoList': FieldValue.arrayRemove(
-            [todo.toJson()],
-          )
-        },
-      );
-
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> updateTodo({
-    required Todo oldTodo,
-    required Todo newTodo,
-  }) async {
-    try {
-      await userDocument.update(
-        {
-          'todoList': FieldValue.arrayRemove([oldTodo.toJson()]),
-        },
-      );
-
-      await userDocument.update(
-        {
-          'todoList': FieldValue.arrayUnion([newTodo.toJson()]),
-        },
-      );
-
-      return true;
-    } catch (e) {
-      return false;
+      return;
     }
   }
 }

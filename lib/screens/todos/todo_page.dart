@@ -17,7 +17,6 @@ class _TodoPageState extends State<TodoPage> {
   @override
   void initState() {
     super.initState();
-
     // _todoDocument = TodoDocument(FirebaseAuth.instance.currentUser!.email!);
     // _userStream = _todoDocument.getUserDocumentSnapshots();
   }
@@ -34,57 +33,56 @@ class _TodoPageState extends State<TodoPage> {
         ),
         centerTitle: false,
         actions: [
-        IconButton(
-          icon: const Icon(Icons.list_rounded),
-          tooltip: 'เปิดรายวิชา',
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) {
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (kIsWeb)
-                          Column(
-                            children: [
-                              Row(
+          IconButton(
+            icon: const Icon(Icons.list_rounded),
+            tooltip: 'เปิดรายวิชา',
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) {
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (kIsWeb)
+                              Column(
                                 children: [
-                                  const Spacer(),
-                                  IconButton.filledTonal(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    icon: const Icon(Icons.cancel_rounded),
+                                  Row(
+                                    children: [
+                                      const Spacer(),
+                                      IconButton.filledTonal(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        icon: const Icon(Icons.cancel_rounded),
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 16),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        Text(
-                          'รายวิชา',
-                          style: textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Divider(thickness: 1),
-                        const SizedBox(height: 16),
-                        const Text('เนื้อหาใน Bottom Sheet'),
-                      ],
-                    )
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ],
-     ),
+                            Text(
+                              'รายวิชา',
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Divider(thickness: 1),
+                            const SizedBox(height: 16),
+                            const Text('เนื้อหาใน Bottom Sheet'),
+                          ],
+                        )),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
       backgroundColor: backgroundColor,
       floatingActionButton: kDebugMode
           ? FloatingActionButton(
@@ -137,8 +135,7 @@ class _TodoPageState extends State<TodoPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Icon(Icons.assignment,
-                                            size: 16, 
-                                            color: primaryColor),
+                                            size: 16, color: primaryColor),
                                         SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
@@ -161,8 +158,7 @@ class _TodoPageState extends State<TodoPage> {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Icon(Icons.schedule,
-                                          size: 16, 
-                                          color: primaryColor),
+                                          size: 16, color: primaryColor),
                                       SizedBox(width: 4),
                                       Text(
                                         'วันครบกำหนด',
@@ -177,14 +173,13 @@ class _TodoPageState extends State<TodoPage> {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Icon(Icons.flag,
-                                          size: 16, color: 
-                                          Colors.redAccent),
+                                          size: 16, color: Colors.redAccent),
                                       SizedBox(width: 4),
                                       Text(
                                         'ความสำคัญ',
                                         style: TextStyle(
-                                            fontSize: 12,
-                                            ),
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -194,14 +189,12 @@ class _TodoPageState extends State<TodoPage> {
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.edit,
-                                            size: 18, 
-                                            color: Colors.blue),
+                                            size: 18, color: Colors.blue),
                                         onPressed: () {},
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.delete,
-                                            size: 18, 
-                                            color: primaryColor),
+                                            size: 18, color: primaryColor),
                                         onPressed: () {},
                                       ),
                                     ],
