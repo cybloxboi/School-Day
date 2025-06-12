@@ -36,8 +36,10 @@ class CategoryDocument extends TodoDocument {
   }
 
   Future<void> createNewCategory({required String name}) async {
+    DocumentReference categoryDoc = getUserTodoDoc();
+
     try {
-      await userDoc.set({
+      await categoryDoc.set({
         'name': name,
         'createdAt': Timestamp.now(),
         'todos': [],

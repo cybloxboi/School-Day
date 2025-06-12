@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/todos/categories.dart';
 import 'package:school_day/screens/todos/add_new_todo_page.dart';
 import 'package:school_day/services/database/todo/category.dart';
 import 'package:school_day/services/database/user/user_document.dart';
@@ -88,7 +89,7 @@ class _TodoPageState extends State<TodoPage> {
                                 ],
                               ),
                             Text(
-                              'หมวดหมู่่งาน',
+                              'หมวดหมู่งาน',
                               style: textTheme.bodyMedium!.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -120,10 +121,10 @@ class _TodoPageState extends State<TodoPage> {
                                     );
                                   }
 
-                                  List<CategoryInfo> timetableSets =
+                                  List<CategoryInfo> categories =
                                       snapshot.data!;
 
-                                  timetableSets.sort((a, b) {
+                                  categories.sort((a, b) {
                                     if (a.id == categoryID) {
                                       return -1;
                                     }
@@ -135,7 +136,11 @@ class _TodoPageState extends State<TodoPage> {
                                     return 0;
                                   });
 
-                                  return const Card();
+                                  return Categories(
+                                    currentCategoryID: categoryID!,
+                                    categories: categories,
+                                    categoryDocument: _categoryDocument,
+                                  );
                                 },
                               ),
                             ),

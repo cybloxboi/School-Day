@@ -43,7 +43,7 @@ class TodoDocument {
     }).distinct();
   }
 
-  Future<void> updateCurrenttodosID(String todosID) async {
+  Future<void> updateCurrentTodosID(String todosID) async {
     try {
       await userDoc.update({'currentCategoryID': todosID});
     } catch (e) {
