@@ -23,10 +23,16 @@ class _WelcomeTextState extends State<WelcomeText> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    messages.shuffle();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedTextKit(
       repeatForever: true,
-      pause: const Duration(seconds: 5),
+      pause: const Duration(seconds: 15),
       animatedTexts: messages.map((message) {
         return TypewriterAnimatedText(message);
       }).toList(),

@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/screens/todos/add_new_todo_page.dart';
+import 'package:school_day/services/database/todo/category.dart';
+import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 
 class TodoPage extends StatefulWidget {
@@ -11,14 +16,19 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  // late TodoDocument _todoDocument;
-  // late final Stream<DocumentSnapshot> _userStream;
+  late final User currentUser;
+  late final Stream<DocumentSnapshot> _userStream;
+  late final CategoryDocument _categoryDocument;
+  late final Stream<QuerySnapshot> _categoryStream;
+  late String? categoryID;
 
   @override
   void initState() {
     super.initState();
-    // _todoDocument = TodoDocument(FirebaseAuth.instance.currentUser!.email!);
-    // _userStream = _todoDocument.getUserDocumentSnapshots();
+    currentUser = FirebaseAuth.instance.currentUser!;
+    _userStream = UserDocument(currentUser.email!).getUserDocumentSnapshots();
+    _categoryDocument = CategoryDocument(email: currentUser.email!);
+    _categoryStream = _categoryDocument.getCategoryQuerySnapshots();
   }
 
   @override
@@ -33,18 +43,26 @@ class _TodoPageState extends State<TodoPage> {
         ),
         centerTitle: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.list_rounded),
-            tooltip: 'เปิดรายวิชา',
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (context) {
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.8,
-                    child: Padding(
-                        padding: const EdgeInsets.all(32),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              icon: const Icon(Icons.list_rounded),
+              onPressed: () {
+                if (categoryID == null) return;
+
+                showModalBottomSheet(
+                  context: context,
+                  showDragHandle: !kIsWeb ? true : false,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 32,
+                          top: 32,
+                          right: 32,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -58,28 +76,77 @@ class _TodoPageState extends State<TodoPage> {
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        icon: const Icon(Icons.cancel_rounded),
+                                        icon: const Icon(
+                                          Icons.cancel_rounded,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
                                 ],
                               ),
                             Text(
-                              'รายวิชา',
+                              'หมวดหมู่่งาน',
                               style: textTheme.bodyMedium!.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Divider(thickness: 1),
-                            const SizedBox(height: 16),
-                            const Text('เนื้อหาใน Bottom Sheet'),
+                            const Divider(),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Expanded(
+                              child: StreamBuilder(
+                                stream: _categoryDocument.fetchCategories(
+                                  _categoryStream,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                      child: LoadingAnimationWidget
+                                          .fourRotatingDots(
+                                        color: primaryColor,
+                                        size: 80,
+                                      ),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return Text(
+                                      'เกิดข้อผิดพลาด: ${snapshot.error}',
+                                    );
+                                  }
+
+                                  List<CategoryInfo> timetableSets =
+                                      snapshot.data!;
+
+                                  timetableSets.sort((a, b) {
+                                    if (a.id == categoryID) {
+                                      return -1;
+                                    }
+
+                                    if (b.id == categoryID) {
+                                      return 1;
+                                    }
+
+                                    return 0;
+                                  });
+
+                                  return const Card();
+                                },
+                              ),
+                            ),
                           ],
-                        )),
-                  );
-                },
-              );
-            },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -87,6 +154,8 @@ class _TodoPageState extends State<TodoPage> {
       floatingActionButton: kDebugMode
           ? FloatingActionButton(
               onPressed: () {
+                if (categoryID == null) return;
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -98,118 +167,145 @@ class _TodoPageState extends State<TodoPage> {
             )
           : null,
       body: kDebugMode
-          ? ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 4),
-                                    Text(
-                                      'ชื่องาน',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
+          ? StreamBuilder(
+              stream: _categoryDocument.getCurrentTodosID(_userStream),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: LoadingAnimationWidget.fourRotatingDots(
+                      color: primaryColor,
+                      size: 80,
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+
+                categoryID = snapshot.data!;
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: 10,
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              side: const BorderSide(
+                                  color: Colors.black, width: 1),
+                            ),
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Expanded(
+                                    child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.assignment,
-                                            size: 16, color: primaryColor),
-                                        SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            'รายละเอียด',
-                                            style: TextStyle(fontSize: 14),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'ชื่องาน',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
                                           ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(Icons.assignment,
+                                                size: 16, color: primaryColor),
+                                            SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                'รายละเอียด',
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Icon(Icons.schedule,
-                                          size: 16, color: primaryColor),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'วันครบกำหนด',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Icon(Icons.flag,
-                                          size: 16, color: Colors.redAccent),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'ความสำคัญ',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                        ),
+                                      const Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Icon(Icons.schedule,
+                                              size: 16, color: primaryColor),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'วันครบกำหนด',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit,
-                                            size: 18, color: Colors.blue),
-                                        onPressed: () {},
+                                      const SizedBox(height: 4),
+                                      const Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Icon(Icons.flag,
+                                              size: 16,
+                                              color: Colors.redAccent),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'ความสำคัญ',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            size: 18, color: primaryColor),
-                                        onPressed: () {},
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit,
+                                                size: 18, color: Colors.blue),
+                                            onPressed: () {},
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete,
+                                                size: 18, color: primaryColor),
+                                            onPressed: () {},
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                      ],
+                    );
+                  },
                 );
-              },
-            )
+              })
           : Center(
               child: Text(
                 'Coming Soon...',

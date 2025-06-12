@@ -4,7 +4,7 @@ class TodoDocument {
   final firestore = FirebaseFirestore.instance;
 
   late DocumentReference userDoc;
-  late CollectionReference categories;
+  late CollectionReference todos;
   late DocumentReference todoDoc;
 
   final String email;
@@ -13,19 +13,19 @@ class TodoDocument {
     return firestore.collection('Users').doc(email);
   }
 
-  CollectionReference getUserCategoriesCollection(
+  CollectionReference getUserTodosCollection(
     DocumentReference userDocument,
   ) {
-    return userDocument.collection('Categories');
+    return userDocument.collection('Todos');
   }
 
   DocumentReference getUserTodoDoc([String? path]) {
-    return categories.doc(path);
+    return todos.doc(path);
   }
 
   TodoDocument({required this.email}) {
     userDoc = getUserDocument(email);
-    categories = getUserCategoriesCollection(userDoc);
+    todos = getUserTodosCollection(userDoc);
     todoDoc = getUserTodoDoc();
   }
 
@@ -33,19 +33,19 @@ class TodoDocument {
     return userDoc.snapshots();
   }
 
-  Stream getCurrentCategoriesID(Stream<DocumentSnapshot> userDocumentSnapshot) {
+  Stream getCurrentTodosID(Stream<DocumentSnapshot> userDocumentSnapshot) {
     return userDocumentSnapshot.map((snapshot) {
       if (snapshot.exists) {
-        return snapshot['currentCategoriesID'];
+        return snapshot['currentCategoryID'];
       } else {
         return null;
       }
     }).distinct();
   }
 
-  Future<void> updateCurrentCategoriesID(String categoriesID) async {
+  Future<void> updateCurrenttodosID(String todosID) async {
     try {
-      await userDoc.update({'currentCategoriesID': categoriesID});
+      await userDoc.update({'currentCategoryID': todosID});
     } catch (e) {
       return;
     }
