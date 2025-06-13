@@ -2,6 +2,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { DateTime } = require("luxon");
 const { initializeApp } = require("firebase-admin/app");
+const admin = require("firebase-admin");
 
 initializeApp();
 
