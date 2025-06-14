@@ -10,6 +10,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/screens/navigation_menu.dart';
+import 'package:school_day/screens/profile/change_password_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/image/image_helper.dart';
 import 'package:school_day/styles/styles.dart';
@@ -290,32 +291,43 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       InkWell(
                         onTap: () {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text(
-                                  'ไม่สามารถเปลี่ยนรหัสผ่านได้',
-                                  style: textTheme.bodyMedium!.copyWith(
-                                    fontWeight: FontWeight.bold,
+                          if (!kDebugMode) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text(
+                                    'ไม่สามารถเปลี่ยนรหัสผ่านได้',
+                                    style: textTheme.bodyMedium!.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                content: Text(
-                                  'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
-                                  style: textTheme.bodySmall,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('ปิด'),
+                                  content: Text(
+                                    'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
+                                    style: textTheme.bodySmall,
                                   ),
-                                ],
-                              );
-                            },
-                          );
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('ปิด'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const ChangePasswordPage();
+                                },
+                              ),
+                            );
+                          }
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
