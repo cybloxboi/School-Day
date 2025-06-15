@@ -8,6 +8,7 @@ import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/components/others/web_utils.dart';
 import 'package:school_day/components/profile/about_developer.dart';
 import 'package:school_day/components/profile/notification_switch.dart';
+import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
 import 'package:school_day/screens/report/report_problem_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
@@ -58,6 +59,12 @@ class _ProfilePageState extends State<ProfilePage> {
     await FirebaseAuth.instance.signOut();
 
     if (!context.mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
