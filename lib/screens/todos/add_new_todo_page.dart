@@ -88,7 +88,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                     ],
                   ),
                   const Divider(
-                    height: 32,
+                    height: 100,
                     thickness: 1,
                     color: Colors.black26, 
                   ),
