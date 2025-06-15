@@ -42,6 +42,16 @@ class TimetableSetDocument extends TimetableDocument {
   }) async {
     DocumentReference newTimetableDoc = getUserTimetableDoc();
 
+    final Map<String, dynamic> allDaysData = {
+      "0": [],
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+    };
+
     try {
       // Write
       await newTimetableDoc.set({

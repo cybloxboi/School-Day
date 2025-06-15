@@ -46,9 +46,6 @@ app.*.map.json
 
 .firebase
 
-# Firebase configuration
-android/app/google-services.json
-
 # Android native build artifacts
 android/app/.cxx/
 

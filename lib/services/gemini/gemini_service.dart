@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_day/api_key.dart';
-import 'package:school_day/services/database/todo/todo_document.dart';
 
 class GeminiService {
   static Future<Map<String, dynamic>> ask(
@@ -12,12 +11,12 @@ class GeminiService {
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiKey';
 
-    final todoList = await TodoDocument(email).getTodoListFuture();
-    final todoContext = todoList.isEmpty
-        ? 'ตอนนี้ผู้ใช้ยังไม่มีงานในระบบ'
-        : todoList.map((t) {
-            return "- ${t['title']} (${t['priority'] ?? 'ปกติ'})${t['alarmTime'] != null ? " ตั้งเตือน: ${t['alarmTime']}" : ""} กลุ่มหัวข้อ: ${t['category']}";
-          }).join("\n");
+    // final todoList = await TodoDocument(email).getTodoListFuture();
+    // final todoContext = todoList.isEmpty
+    //     ? 'ตอนนี้ผู้ใช้ยังไม่มีงานในระบบ'
+    //     : todoList.map((t) {
+    //         return "- ${t['title']} (${t['priority'] ?? 'ปกติ'})${t['alarmTime'] != null ? " ตั้งเตือน: ${t['alarmTime']}" : ""} กลุ่มหัวข้อ: ${t['category']}";
+    //       }).join("\n");
 
     final prompt = """
 คุณคือผู้ช่วยจัดการตารางเรียน และงานของผู้ใช้ในแอปชื่อ School Day พัฒนาโดยนักเรียนโรงเรียนอำนาจเจริญ
@@ -33,9 +32,6 @@ class GeminiService {
   "responseText": "ข้อความตอบกลับภาษาไทยเพื่อพูดคุยกับผู้ใช้ เช่น สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ",
   "tasks": [ ... ] // หรือ null หากไม่เกี่ยวข้องกับงาน
 }
-
-ผู้ใช้มีงานในระบบ School Day ดังนี้:
-$todoContext
 
 รูปแบบของ tasks แต่ละรายการ (เฉพาะกรณีที่เกี่ยวข้องกับงาน):
 - เพิ่มงานใหม่:

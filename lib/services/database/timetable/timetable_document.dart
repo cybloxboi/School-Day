@@ -8,15 +8,6 @@ class TimetableDocument {
   late DocumentReference timetableDoc;
 
   final String email;
-  final Map<String, dynamic> allDaysData = {
-    "0": [],
-    "1": [],
-    "2": [],
-    "3": [],
-    "4": [],
-    "5": [],
-    "6": [],
-  };
 
   DocumentReference getUserDocument(String email) {
     return firestore.collection('Users').doc(email);
@@ -57,37 +48,6 @@ class TimetableDocument {
   Future<void> updateCurrentTimetableID(String timetableID) async {
     try {
       await userDoc.update({'currentTimetableID': timetableID});
-    } catch (e) {
-      return;
-    }
-  }
-
-  Future<void> createUserDocument({
-    required String username,
-  }) async {
-    try {
-      CollectionReference timetableCol = getUserTimetablesCollection(userDoc);
-      DocumentReference timetableDoc = timetableCol.doc();
-      String timetableID = timetableDoc.id;
-
-      // Write
-      await userDoc.set({
-        'email': email,
-        'username': username,
-        'createdAt': Timestamp.now(),
-        'currentTimetableID': timetableID,
-        'todaySlots': [],
-        'hasTodayNotification': false,
-        'isNotifyTimetable': true,
-        'nextNotificationMinutes': null,
-      });
-
-      // Write
-      await timetableDoc.set({
-        'name': 'ตารางเรียนเริ่มต้น',
-        'createdAt': Timestamp.now(),
-        'days': allDaysData,
-      });
     } catch (e) {
       return;
     }
