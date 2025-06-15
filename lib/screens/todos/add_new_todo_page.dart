@@ -104,28 +104,6 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
             ),
           ),
         ],
-         centerTitle: false,
-      actions: [
-        
-        Padding(
-    padding: const EdgeInsets.only(right: 16.0, top: 8.0, bottom: 8.0),
-    child: ElevatedButton.icon(
-          onPressed: () {
-          },
-          style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF874B57),
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          elevation: 0,
-        ),
-          icon: const Icon(Icons.save_rounded, color: Colors.white),
-          label: const Text(
-            'บันทึก',
-            style: TextStyle(color: Colors.white),
-          ),
-    ),
-        ),
-      ],
       ),
       backgroundColor: backgroundColor,
       body: SafeArea(
