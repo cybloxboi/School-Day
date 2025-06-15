@@ -5,6 +5,7 @@ import 'package:school_day/data/timetable.dart';
 import 'package:school_day/screens/navigation_menu.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/styles/styles.dart';
+import 'package:school_day/styles/textfield.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewTimetablePage extends StatefulWidget {
@@ -283,12 +284,27 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                             spacing: 16,
                             runSpacing: 32,
                             children: [
-                              textField(_subjectController, 'ชื่อวิชา',
-                                  Icons.book_rounded, 615),
-                              textField(_locationController, 'สถานที่',
-                                  Icons.location_city_rounded, 300),
-                              textField(_professorController, 'ผู้สอน',
-                                  Icons.person_rounded, 300),
+                              textField(
+                                _subjectController,
+                                'ชื่อวิชา',
+                                Icons.book_rounded,
+                                615,
+                                50,
+                              ),
+                              textField(
+                                _locationController,
+                                'สถานที่',
+                                Icons.location_city_rounded,
+                                300,
+                                50,
+                              ),
+                              textField(
+                                _professorController,
+                                'ผู้สอน',
+                                Icons.person_rounded,
+                                300,
+                                50,
+                              ),
                             ],
                           ),
                           const Divider(),
@@ -718,48 +734,5 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
         ),
       ),
     );
-  }
-
-  Widget textField(
-    TextEditingController controller,
-    String hintText,
-    IconData icon,
-    double maxWidth,
-  ) {
-    return LayoutBuilder(builder: (context, snapshot) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: snapshot.maxWidth > 650 ? maxWidth : snapshot.maxWidth,
-        ),
-        child: Row(
-          children: [
-            Icon(icon),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextFormField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 12,
-                  ),
-                ),
-                maxLength: 50,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'โปรดกรอก$hintTextด้วยนะงับ';
-                  }
-
-                  return null;
-                },
-              ),
-            ),
-          ],
-        ),
-      );
-    });
   }
 }
