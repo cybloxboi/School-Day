@@ -9,14 +9,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-const String _channelId = 'notify_class_time_channel';
-const String _channelName = 'แจ้งเตือนการเข้าเรียน';
-const String _channelDescription = 'แจ้งเตือนเข้าเรียนล่วงหน้า';
+const String _classChannelId = 'notify_class_time_channel';
+const String _taskChannelId = 'notify_task_channel';
 
-const AndroidNotificationChannel _channel = AndroidNotificationChannel(
-  _channelId,
-  _channelName,
-  description: _channelDescription,
+const AndroidNotificationChannel _classChannel = AndroidNotificationChannel(
+  _classChannelId,
+  'แจ้งเตือนการเข้าเรียน',
+  description: 'แจ้งเตือนเข้าเรียนล่วงหน้า',
+  importance: Importance.max,
+);
+
+const AndroidNotificationChannel _taskChannel = AndroidNotificationChannel(
+  _taskChannelId,
+  'แจ้งเตือนงาน',
+  description: 'แจ้งเตือนงานที่ต้องทำ',
   importance: Importance.max,
 );
 
@@ -29,12 +35,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class NotificationService {
   final _firebaseMessaging = FirebaseMessaging.instance;
-  final AndroidNotificationChannel channel = const AndroidNotificationChannel(
-    'notify_class_time_channel',
-    'แจ้งเตือนการเข้าเรียน',
-    description: 'แจ้งเตือนเข้าเรียนล่วงหน้า',
-    importance: Importance.max,
-  );
 
   Future<void> initNotifications() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -44,14 +44,17 @@ class NotificationService {
     );
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_channel);
+
+    final androidPlugin =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.createNotificationChannel(_classChannel);
+    await androidPlugin?.createNotificationChannel(_taskChannel);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       if (kDebugMode) {
-        print("🔔 Foreground notification received");
+        print("🔔 Foreground notification received: ${message.data}");
       }
 
       final notification = message.notification;
@@ -59,18 +62,25 @@ class NotificationService {
 
       final title = notification?.title ?? data['title'];
       final body = notification?.body ?? data['body'];
+      final type = data['type'] ?? 'class';
+
+      AndroidNotificationChannel selectedChannel =
+          (type == 'task') ? _taskChannel : _classChannel;
+
+      int notificationId =
+          DateTime.now().millisecondsSinceEpoch.remainder(100000);
 
       if (title != null && body != null) {
         await flutterLocalNotificationsPlugin.show(
-          0,
+          notificationId,
           title,
           body,
           NotificationDetails(
             android: AndroidNotificationDetails(
-              _channel.id,
-              _channel.name,
-              channelDescription: _channel.description,
-              importance: _channel.importance,
+              selectedChannel.id,
+              selectedChannel.name,
+              channelDescription: selectedChannel.description,
+              importance: selectedChannel.importance,
               priority: Priority.high,
               playSound: true,
               enableVibration: true,

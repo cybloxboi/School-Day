@@ -8,7 +8,6 @@ import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/components/others/web_utils.dart';
 import 'package:school_day/components/profile/about_developer.dart';
 import 'package:school_day/components/profile/notification_switch.dart';
-import 'package:school_day/screens/auth/login_page.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
 import 'package:school_day/screens/report/report_problem_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
