@@ -55,6 +55,10 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     }
+
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override

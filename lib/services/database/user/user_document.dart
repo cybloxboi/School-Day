@@ -80,6 +80,7 @@ class UserDocument {
         'hasTodayNotification': false,
         'isNotifyTimetable': true,
         'isNotifyTodos': true,
+        'profileImageVersion': 1,
         'nextNotificationMinutes': null,
       });
 

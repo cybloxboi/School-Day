@@ -189,11 +189,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ),
                 FilledButton.tonal(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    FirebaseAuth.instance.signOut();
+
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const LoginPage(),
                       ),
+                      (route) => false,
                     );
                   },
                   child: const Text('กลับไปหน้าล็อคอิน'),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -426,6 +427,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       await user!.updatePhotoURL(url);
       await user!.reload();
+
+      final userDocRef =
+          FirebaseFirestore.instance.collection('Users').doc(widget.email);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(userDocRef);
+
+        if (!snapshot.exists) {
+          transaction.set(userDocRef, {'profileImageVersion': 1});
+        } else {
+          final currentVersion = snapshot.get('profileImageVersion') ?? 0;
+          transaction.update(userDocRef, {
+            'profileImageVersion': currentVersion + 1,
+          });
+        }
+      });
 
       setState(() {
         user = FirebaseAuth.instance.currentUser;

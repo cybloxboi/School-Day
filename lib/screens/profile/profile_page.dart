@@ -60,12 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!context.mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (route) => false,
-    );
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('ล็อคเอาท์สำเร็จ'),
