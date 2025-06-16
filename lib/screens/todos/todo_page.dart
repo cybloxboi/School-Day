@@ -164,10 +164,17 @@ class _TodoPageState extends State<TodoPage> {
               onPressed: () {
                 if (categoryID == null) return;
 
+                TodoEntry todoEntry = TodoEntry(
+                  email: currentUser.email!,
+                  categoryID: categoryID!,
+                );
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AddNewTodoPage(),
+                    builder: (context) => AddNewTodoPage(
+                      todoEntry: todoEntry,
+                    ),
                   ),
                 );
               },
@@ -202,7 +209,7 @@ class _TodoPageState extends State<TodoPage> {
 
                 return StreamBuilder(
                   stream: todoEntry.fetchTodos(
-                    todoEntry.getTodoDocumentSnapshots(),
+                    todoEntry.getUserTodoDoc(categoryID).snapshots(),
                   ),
                   builder: (context, entrySnapshot) {
                     if (entrySnapshot.connectionState ==
@@ -285,14 +292,14 @@ class _TodoPageState extends State<TodoPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Expanded(
+                                          Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 SizedBox(height: 4),
                                                 Text(
-                                                  'ชื่องาน',
+                                                  todoData[index].title,
                                                   style: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.bold,
@@ -311,7 +318,8 @@ class _TodoPageState extends State<TodoPage> {
                                                       child: Text(
                                                         'รายละเอียด',
                                                         style: TextStyle(
-                                                            fontSize: 14),
+                                                          fontSize: 14,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],

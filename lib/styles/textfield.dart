@@ -7,6 +7,7 @@ Widget textField(
   double maxWidth,
   int maxLength, {
   bool isMultipleLine = false,
+  bool isRequired = true,
 }) {
   return LayoutBuilder(
     builder: (context, snapshot) {
@@ -33,7 +34,7 @@ Widget textField(
                 maxLength: maxLength,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value!.isEmpty && isRequired) {
                     return 'โปรดกรอก$hintTextด้วยนะงับ';
                   }
 

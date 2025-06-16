@@ -48,7 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       if (!context.mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) return;
 

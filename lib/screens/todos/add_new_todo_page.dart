@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/data/time.dart';
 import 'package:school_day/data/todo.dart';
+import 'package:school_day/screens/navigation_menu.dart';
+import 'package:school_day/services/database/todo/todo_entry.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:school_day/styles/textfield.dart';
 
 class AddNewTodoPage extends StatefulWidget {
-  const AddNewTodoPage({super.key});
+  const AddNewTodoPage({
+    super.key,
+    required this.todoEntry,
+    this.todoData,
+  });
+
+  final TodoEntry todoEntry;
+  final Todo? todoData;
 
   @override
   State<AddNewTodoPage> createState() => _AddNewTodoPageState();
@@ -26,19 +37,15 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
   };
   late String _priority;
 
-  String _reminderOption = '1 วันก่อน';
-  final List<String> _reminderOptions = [
-    '1 วันก่อน',
-    '2 วันก่อน',
-    '1 สัปดาห์ก่อน',
-    'กำหนดเอง',
-  ];
-  int _customDaysBefore = 1;
+  late String _reminderOption;
+  late final Map<String, DateTime?> _reminderOptions;
+
+  late Time? _alarmTime;
 
   Future<void> _pickDate() async {
     final DateTime now = DateTime.now();
 
-    final DateTime? picked = await showDatePicker(
+    DateTime? picked = await showDatePicker(
       context: context,
       helpText: 'เลือกวันที่',
       cancelText: 'ยกเลิก',
@@ -51,6 +58,13 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        _reminderOptions = {
+          '30 นาที': _selectedDate?.subtract(const Duration(minutes: 30)),
+          '1 ชั่วโมง': _selectedDate?.subtract(const Duration(hours: 1)),
+          '1 วัน': _selectedDate?.subtract(const Duration(days: 1)),
+          '2 วัน': _selectedDate?.subtract(const Duration(days: 2)),
+          '1 สัปดาห์': _selectedDate?.subtract(const Duration(days: 7)),
+        };
       });
     }
   }
@@ -60,6 +74,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
     super.initState();
 
     _priority = 'ไม่มี';
+    _reminderOption = '30 นาที';
+    _alarmTime = null;
   }
 
   @override
@@ -111,7 +127,82 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
               right: 16,
             ),
             child: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => Center(
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: primaryColor,
+                        size: 80,
+                      ),
+                    ),
+                  );
+
+                  Todo newTodo = Todo(
+                    title: _titleController.text.trim(),
+                    description: _descriptionController.text.trim() == ''
+                        ? null
+                        : _descriptionController.text.trim(),
+                    alarmTime: _selectedDate?.add(
+                      Duration(
+                        hours: _alarmTime?.hour ?? 8,
+                        minutes: _alarmTime?.minute ?? 0,
+                      ),
+                    ),
+                    priority: _priorityOptions[_priority],
+                  );
+
+                  bool success;
+
+                  if (widget.todoData != null) {
+                    success = false;
+                  } else {
+                    success = await widget.todoEntry.addTodo(
+                      newTodo: newTodo,
+                      categoryID: widget.todoEntry.categoryID,
+                    );
+                  }
+
+                  if (!context.mounted) return;
+
+                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NavigationMenu(
+                        screenIndex: 2,
+                      ),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          widget.todoData == null
+                              ? 'เพิ่มงานเรียบร้อยคับ!'
+                              : 'แก้ไขงานเรียบร้อย',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          widget.todoData == null
+                              ? 'ดูเหมือนจะมีปัญหาการเพิ่มงานนะ :('
+                              : 'ดูเหมือนจะมีปัญหาการแก้ไขงานนะ :(',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF874B57),
                 shape: const StadiumBorder(),
@@ -156,6 +247,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                       615,
                       100,
                       isMultipleLine: true,
+                      isRequired: false,
                     ),
                     const Divider(),
                     Wrap(
@@ -198,9 +290,103 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                   ),
                                 ),
                               ),
+                              if (_selectedDate != null)
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedDate = null;
+                                      _notificationEnabled = false;
+                                    });
+                                  },
+                                  icon: Icon(Icons.cancel_rounded),
+                                ),
                             ],
                           ),
                         ),
+                        if (_selectedDate != null)
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: 600,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.alarm_rounded),
+                                const SizedBox(width: 16),
+                                const Text(
+                                  'เวลา',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                const Spacer(),
+                                InkWell(
+                                  onTap: () async {
+                                    final TimeOfDay? time =
+                                        await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay(
+                                        hour: _alarmTime?.hour ?? 8,
+                                        minute: _alarmTime?.minute ?? 0,
+                                      ),
+                                      cancelText: 'ยกเลิก',
+                                      confirmText: 'ตกลง',
+                                      hourLabelText: 'ชั่วโมง',
+                                      minuteLabelText: 'นาที',
+                                      helpText: 'เลือกเวลาแจ้งเตือน',
+                                      builder: (BuildContext context,
+                                          Widget? child) {
+                                        return MediaQuery(
+                                          data: MediaQuery.of(context).copyWith(
+                                            alwaysUse24HourFormat: true,
+                                            textScaler:
+                                                const TextScaler.linear(1),
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                    );
+
+                                    setState(() {
+                                      if (time == null) {
+                                        return;
+                                      }
+
+                                      _alarmTime = Time(
+                                        time.hour,
+                                        time.minute,
+                                      );
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 4.0),
+                                    child: Text(
+                                      _alarmTime == null
+                                          ? 'ยังไม่ได้เลือกเวลา'
+                                          : '$_alarmTime',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: _alarmTime == null
+                                            ? Colors.grey.shade600
+                                            : const Color(0xFF874B57),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (_alarmTime != null)
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _alarmTime = null;
+                                      });
+                                    },
+                                    icon: Icon(Icons.cancel_rounded),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 600),
                           child: Row(
@@ -299,15 +485,13 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                   const Spacer(),
                                   Switch(
                                     value: _notificationEnabled,
-                                    onChanged: (bool newValue) {
-                                      setState(() {
-                                        _notificationEnabled = newValue;
-                                        if (!newValue) {
-                                          _reminderOption = '1 วันก่อน';
-                                          _customDaysBefore = 1;
-                                        }
-                                      });
-                                    },
+                                    onChanged: _selectedDate == null
+                                        ? null
+                                        : (bool newValue) {
+                                            setState(() {
+                                              _notificationEnabled = newValue;
+                                            });
+                                          },
                                   ),
                                 ],
                               ),
@@ -322,7 +506,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const Text(
-                                      'แจ้งเตือนเมื่อ',
+                                      'แจ้งเตือนก่อน',
                                       style: TextStyle(fontSize: 16),
                                     ),
                                     const Spacer(),
@@ -334,34 +518,44 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                           context: context,
                                           builder: (context) {
                                             return AlertDialog(
-                                              title: const Text(
-                                                  'เลือกเวลาการแจ้งเตือน'),
-                                              content: SizedBox(
-                                                width: double.minPositive,
+                                              title: Text(
+                                                'เลือกเวลาแจ้งเตือน',
+                                                style: textTheme.bodyMedium!
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              content: SingleChildScrollView(
                                                 child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
                                                   children: _reminderOptions
-                                                      .map((option) {
-                                                    return ListTile(
-                                                      title: Center(
-                                                          child: Text(option)),
-                                                      onTap: () =>
+                                                      .entries
+                                                      .map(
+                                                    (entry) {
+                                                      return RadioListTile(
+                                                        title: Text(
+                                                          entry.key,
+                                                        ),
+                                                        value: entry.key,
+                                                        groupValue:
+                                                            _reminderOption,
+                                                        onChanged: (value) {
                                                           Navigator.pop(
-                                                              context, option),
-                                                    );
-                                                  }).toList(),
+                                                            context,
+                                                            entry.key,
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  ).toList(),
                                                 ),
                                               ),
                                             );
                                           },
                                         );
+
                                         if (selected != null) {
                                           setState(() {
                                             _reminderOption = selected;
-                                            if (selected != 'กำหนดเอง') {
-                                              _customDaysBefore = 1;
-                                            }
                                           });
                                         }
                                       },
@@ -380,44 +574,6 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                   ],
                                 ),
                               ),
-                              if (_reminderOption == 'กำหนดเอง') ...[
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: 600,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Text('ก่อนส่งงานกี่วัน',
-                                          style: TextStyle(fontSize: 16)),
-                                      const Spacer(),
-                                      SizedBox(
-                                        width: 60,
-                                        child: TextFormField(
-                                          initialValue:
-                                              _customDaysBefore.toString(),
-                                          keyboardType: TextInputType.number,
-                                          onChanged: (value) {
-                                            final int? val =
-                                                int.tryParse(value);
-                                            if (val != null && val >= 0) {
-                                              setState(() {
-                                                _customDaysBefore = val;
-                                              });
-                                            }
-                                          },
-                                          decoration: const InputDecoration(
-                                            isDense: true,
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                    horizontal: 8, vertical: 8),
-                                          ),
-                                        ),
-                                      ),
-                                      const Text(' วัน'),
-                                    ],
-                                  ),
-                                ),
-                              ],
                             ],
                           ],
                         ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:school_day/data/todo.dart';
 import 'package:school_day/services/database/todo/todo_document.dart';
 
@@ -18,16 +19,10 @@ class TodoEntry extends TodoDocument {
       if (!snapshot.exists) return <Todo>[];
 
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-      List<dynamic> todosData = data['todos'] ?? [];
 
+      List<dynamic> todosData = data['todos'] ?? [];
       List<Todo> todos = todosData
-          .map((todo) {
-            if (todo is Map<String, dynamic>) {
-              return Todo.fromJson(todo);
-            }
-            return null;
-          })
-          .whereType<Todo>()
+          .map((todo) => Todo.fromJson(todo as Map<String, dynamic>))
           .toList();
 
       return todos;
@@ -40,7 +35,7 @@ class TodoEntry extends TodoDocument {
 
       await todoDoc.set({
         'todos': FieldValue.arrayUnion([newTodo.toJson()])
-      });
+      }, SetOptions(merge: true));
 
       return true;
     } catch (e) {
@@ -58,13 +53,23 @@ class TodoEntry extends TodoDocument {
       final oldTodoDoc = getUserTodoDoc(oldCategoryID);
       final newTodoDoc = getUserTodoDoc(newCategoryID);
 
-      await oldTodoDoc.update({
-        'todos': FieldValue.arrayRemove([oldTodo.toJson()]),
-      });
+      if (oldCategoryID == newCategoryID) {
+        await oldTodoDoc.update({
+          'todos': FieldValue.arrayRemove([oldTodo.toJson()]),
+        });
 
-      await newTodoDoc.update({
-        'todos': FieldValue.arrayUnion([newTodo.toJson()]),
-      });
+        await oldTodoDoc.update({
+          'todos': FieldValue.arrayUnion([newTodo.toJson()]),
+        });
+      } else {
+        await oldTodoDoc.update({
+          'todos': FieldValue.arrayRemove([oldTodo.toJson()]),
+        });
+
+        await newTodoDoc.set({
+          'todos': FieldValue.arrayUnion([newTodo.toJson()]),
+        }, SetOptions(merge: true));
+      }
 
       return true;
     } catch (e) {
