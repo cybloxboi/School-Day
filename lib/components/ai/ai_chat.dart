@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/ai/action_display.dart';
+import 'package:school_day/data/chat_message.dart';
+import 'package:school_day/services/gemini/gemini_service.dart';
 import 'package:school_day/styles/styles.dart';
 
 class AiChat extends StatefulWidget {
@@ -9,13 +11,15 @@ class AiChat extends StatefulWidget {
     required this.promptAnimation,
     required this.userInput,
     required this.userEmail,
-    required this.geminiResponse,
+    required this.chatHistory,
+    required this.onAddMessage,
   });
 
   final AnimationController promptAnimation;
   final String? userInput;
   final String userEmail;
-  final Future<Map<String, dynamic>>? geminiResponse;
+  final List<ChatMessage> chatHistory;
+  final void Function(ChatMessage) onAddMessage;
 
   @override
   State<AiChat> createState() => _AiChatState();
@@ -24,6 +28,8 @@ class AiChat extends StatefulWidget {
 class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
+
+  Future<Map<String, dynamic>>? _geminiResponse;
 
   @override
   void initState() {
@@ -44,6 +50,26 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
       parent: widget.promptAnimation,
       curve: Curves.easeIn,
     ));
+
+    if (widget.userInput != null) {
+      final updatedHistory = [
+        ...widget.chatHistory,
+        ChatMessage(role: 'user', content: widget.userInput!),
+      ];
+
+      _geminiResponse = GeminiService.ask(
+        userMessage: widget.userInput!,
+        email: widget.userEmail,
+        chatHistory: updatedHistory,
+      );
+
+      widget.chatHistory.add(
+        ChatMessage(
+          role: 'user',
+          content: widget.userInput!,
+        ),
+      );
+    }
   }
 
   @override
@@ -74,9 +100,9 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
                   ),
                 ),
                 const Divider(),
-                if (widget.geminiResponse != null)
+                if (_geminiResponse != null)
                   FutureBuilder<Map<String, dynamic>>(
-                    future: widget.geminiResponse,
+                    future: _geminiResponse,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Row(
@@ -104,9 +130,16 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
                       }
 
                       final data = snapshot.data!;
-                      final responseText = data['responseText'] ?? '';
+                      final responseText = data['replyText'] ?? '';
                       final originalTasks =
                           List<Map<String, dynamic>>.from(data['tasks'] ?? []);
+
+                      if (data['type'] ?? '' == 'error') {
+                        return Text(
+                          responseText,
+                          style: textTheme.bodySmall,
+                        );
+                      }
 
                       return AiProcessCard(
                         userEmail: widget.userEmail,
@@ -177,7 +210,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
               final index = entry.key;
               final task = entry.value;
 
-              String action = task['action'];
+              String action = task['type'];
               String title = task['title'] ?? 'ไม่ระบุชื่อ';
               String due = task['due'] ?? 'ไม่มี';
               String priority = task['priority'] ?? 'ไม่มี';

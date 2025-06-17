@@ -1,113 +1,78 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_day/api_key.dart';
+import 'package:school_day/data/chat_message.dart';
 
 class GeminiService {
-  static Future<Map<String, dynamic>> ask(
-      String userMessage, String email) async {
-    const model = 'gemini-1.5-flash';
+  static Future<Map<String, dynamic>> ask({
+    required String userMessage,
+    required String email,
+    required List<ChatMessage> chatHistory,
+  }) async {
     const url =
-        'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$geminiKey';
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$geminiKey';
 
-    // final todoList = await TodoDocument(email).getTodoListFuture();
-    // final todoContext = todoList.isEmpty
-    //     ? 'ตอนนี้ผู้ใช้ยังไม่มีงานในระบบ'
-    //     : todoList.map((t) {
-    //         return "- ${t['title']} (${t['priority'] ?? 'ปกติ'})${t['alarmTime'] != null ? " ตั้งเตือน: ${t['alarmTime']}" : ""} กลุ่มหัวข้อ: ${t['category']}";
-    //       }).join("\n");
+    // TODO: รับข้อมูลงาน กับข้อมูลตารางเรียน
 
     final prompt = """
 คุณคือผู้ช่วยจัดการตารางเรียน และงานของผู้ใช้ในแอปชื่อ School Day พัฒนาโดยนักเรียนโรงเรียนอำนาจเจริญ
 
 หน้าที่ของคุณคือ:
-- วิเคราะห์คำสั่งของผู้ใช้ที่เกี่ยวข้องกับการจัดการงาน หรือคาบเรียน
-- ตอบกลับเป็น **JSON มาตรฐาน** หากเป็นคำสั่งเกี่ยวกับการเพิ่ม / แก้ไข / ลบงาน
-- ตอบกลับเป็นข้อความภาษาไทยปกติ หากเป็นคำถามทั่วไป
+- วิเคราะห์คำสั่งของผู้ใช้ที่เกี่ยวข้องกับการจัดการ "งาน" (Todo) หรือ "ตารางเรียน" (Timetable)
+- ตอบกลับเป็น JSON มาตรฐานเท่านั้น (ไม่ต้องอธิบายหรือสนทนา)
+- ทำความเข้าใจภาษาไทยแบบธรรมชาติ เช่น "พรุ่งนี้มีสอบคณิตตอน 8 โมงที่ห้อง 302"
+- อย่าตอบเกินกว่าที่ระบบร้องขอ เช่น ห้ามพูดคุยอธิบายเพิ่ม
+- ให้ใส่ฟิลด์ "replyText" เพื่อใช้แสดงข้อความตอบกลับผู้ใช้ โดยสรุปสิ่งที่ระบบได้เข้าใจ เช่น "เพิ่มคาบเรียนวิทยาศาสตร์แล้ว" หรือ "เพิ่มงานสอบชีวะตอน 9 โมงแล้ว"
 
-คำตอบต้องอยู่ในรูปแบบ JSON เสมอ และมีโครงสร้างแบบนี้:
+ตัวอย่างรูปแบบ JSON ที่คุณต้องตอบกลับ มี 2 แบบ:
 
+หากเป็นงาน (Todo):
 {
-  "responseText": "ข้อความตอบกลับภาษาไทยเพื่อพูดคุยกับผู้ใช้ เช่น สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ",
-  "tasks": [ ... ] // หรือ null หากไม่เกี่ยวข้องกับงาน
+  "type": "todo",
+  "action": "add" || "update" || "delete",
+  "title": String,
+  "priority": "high" || "medium" || "low" || null,
+  "description": String || null,
+  "alarmTime": ISO8601 Date || null
 }
 
-รูปแบบของ tasks แต่ละรายการ (เฉพาะกรณีที่เกี่ยวข้องกับงาน):
-- เพิ่มงานใหม่:
-  {
-    "action": "add",
-    "title": "ชื่อของงาน",
-    "due": "ISO8601 datetime หรือ null",
-    "priority": "low" | "medium" | "high" หรือ null,
-    "note": "รายละเอียดเพิ่มเติม" หรือ null
-  }
-
-- แก้ไขงาน (**งานนั้นต้องมีในระบบ):
-  {
-    "action": "update",
-    "title": "ชื่อของงานที่จะแก้ไข",
-    "updates": {
-      "title": "ชื่อของงานใหม่ หากไม่มีการแก้ไขส่วนนี้ ให้ใช้ชื่อเดิม",
-      "due": "...",
-      "priority": "...",
-      "note": "..."
-    }
-  }
-
-- ลบงาน (**งานนั้นต้องมีในระบบ):
-  {
-    "action": "delete",
-    "title": "ชื่อของงานที่ต้องการลบ"
-  }
-
-ข้อบังคับสำคัญ:
-- ต้องมี `responseText` เสมอ
-- `tasks` ต้องเป็น array หรือ `null` เท่านั้น
-- ห้ามส่งข้อความนอก JSON
-- ตอบกลับเป็น **JSON เท่านั้น** โดยไม่มีเครื่องหมาย ``` หรือ markdown ใด ๆ
-- ห้ามใส่ ```json, ``` หรือข้อความนอก JSON เด็ดขาด
-- ให้ส่งแค่ JSON บริสุทธิ์ (pure JSON string) เท่านั้น
-- โครงสร้างต้องเริ่มต้นที่ `{` และจบที่ `}` เท่านั้น
-- ห้ามใส่ข้อความอื่นนอกจากใน `responseText`
-- วันที่วันนี้: "${DateTime.now().toIso8601String()}"
-
-ตัวอย่าง:
-หากผู้ใช้พิมพ์ "ช่วยเพิ่มงานอ่านหนังสือตอนสองทุ่มวันนี้"
-→ ให้ตอบ:
+หากเป็นตารางเรียน (Timetable):
 {
-  "responseText": "เพิ่มงานอ่านหนังสือให้แล้วค่ะ กำหนดเวลา 20:00 วันนี้",
-  "tasks": [
-    {
-      "action": "add",
-      "title": "อ่านหนังสือ",
-      "due": "2025-05-04T20:00:00",
-      "priority": null,
-      "note": null
-    }
-  ]
+  "type": "timetable",
+  "action": "add" || "update" || "delete",
+  "title": String,
+  "startTime": ISO8601 Date || null,
+  "endTime": ISO8601 Date || null,
+  "location": String,
+  "professor": String,
+  "isNotify": true || false,
+  "notifyTime": ISO8601 Date || null
 }
 
-หากผู้ใช้พิมพ์ "สวัสดี"
-→ ให้ตอบ:
+ให้ใส่งานทั้งหมดไว้ใน "tasks" แบบนี้ แต่ถ้าไม่มีการเกี่ยวข้องกับงาน หรือตารางเรียนให้ "tasks" เป็น null:
 {
-  "responseText": "สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ",
-  "tasks": null
+  "type": "normal",
+  "replyText": String // ให้ตอบกลับคำขอของผู้ใช้งาน,
+  "tasks": [...] || null,
 }
 
-เริ่มต้นวิเคราะห์คำพูดของผู้ใช้จากบรรทัดนี้:
-"$userMessage"
+วันนี้คือ:
+${DateTime.now().toIso8601String()}
+
+คำสั่งของผู้ใช้:
+$userMessage
+
+กรุณาตอบกลับเฉพาะ JSON ตามที่กำหนดด้านบนเท่านั้น
 """;
 
+    final List<Map<String, dynamic>> history = [
+      ...chatHistory.map((msg) => msg.toMap()),
+      ChatMessage(role: 'user', content: prompt).toMap(),
+    ];
+
     final body = jsonEncode({
-      "contents": [
-        {
-          "role": "user",
-          "parts": [
-            {"text": prompt}
-          ]
-        }
-      ]
+      "contents": history,
     });
 
     final response = await http.post(
@@ -116,43 +81,57 @@ class GeminiService {
       body: body,
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      try {
-        final rawText = data['candidates'][0]['content']['parts'][0]['text'];
-        final parsed = jsonDecode(rawText);
-
-        if (parsed is Map &&
-            parsed.containsKey('responseText') &&
-            parsed.containsKey('tasks')) {
-          return {
-            "responseText": parsed['responseText'],
-            "tasks": parsed['tasks'],
-          };
-        } else {
-          debugPrint("⚠️ JSON ไม่ถูกต้อง ไม่มี key ที่ต้องการ");
-
-          return {
-            "responseText": "รูปแบบคำตอบจาก AI ไม่ถูกต้อง",
-            "tasks": null,
-          };
-        }
-      } catch (e) {
-        debugPrint("❌ JSON Decode Error: $e");
-
-        return {
-          "responseText": "เกิดข้อผิดพลาดในการแปลงข้อมูลจาก AI",
-          "tasks": null,
-        };
+    try {
+      if (response.statusCode != 200) {
+        throw Exception('เกิดข้อผิดพลาดจาก Gemini API: ${response.body}');
       }
-    } else {
-      debugPrint("❌ Gemini error: ${response.statusCode}");
 
+      final decoded = jsonDecode(response.body);
+      final content =
+          decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+      final jsonStart = content.indexOf('{');
+      final jsonEnd = content.lastIndexOf('}');
+      if (jsonStart == -1 || jsonEnd == -1) {
+        throw Exception('ไม่พบ JSON ในคำตอบของ AI');
+      }
+
+      final jsonString = content.substring(jsonStart, jsonEnd + 1);
+      final jsonData = jsonDecode(jsonString);
+
+      if (!isValidResponse(jsonData)) {
+        throw Exception('รูปแบบ JSON ไม่ถูกต้อง: $jsonData');
+      }
+
+      return jsonData;
+    } catch (e) {
       return {
-        "responseText": "เกิดข้อผิดพลาดจากฝั่ง AI",
-        "tasks": null,
+        'type': 'error',
+        'replyText': 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+        'tasks': null,
       };
+    }
+  }
+
+  static bool isValidResponse(Map<String, dynamic> json) {
+    if (!json.containsKey('type') || !json.containsKey('replyText')) {
+      return false;
+    }
+
+    final type = json['type'];
+    if (type == 'todo') {
+      return json.containsKey('title') &&
+          json.containsKey('priority') &&
+          json.containsKey('alarmTime');
+    } else if (type == 'timetable') {
+      return json.containsKey('title') &&
+          json.containsKey('startTime') &&
+          json.containsKey('endTime') &&
+          json.containsKey('location') &&
+          json.containsKey('professor') &&
+          json.containsKey('notifyTime');
+    } else {
+      return false;
     }
   }
 }
