@@ -1,14 +1,13 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:school_day/api_key.dart';
-import 'package:school_day/data/chat_message.dart';
 
 class GeminiService {
   static Future<Map<String, dynamic>> ask({
     required String userMessage,
     required String email,
-    required List<ChatMessage> chatHistory,
   }) async {
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$geminiKey';
@@ -20,7 +19,7 @@ class GeminiService {
 
 หน้าที่ของคุณคือ:
 - วิเคราะห์คำสั่งของผู้ใช้ที่เกี่ยวข้องกับการจัดการ "งาน" (Todo) หรือ "ตารางเรียน" (Timetable)
-- ตอบกลับเป็น JSON มาตรฐานเท่านั้น (ไม่ต้องอธิบายหรือสนทนา)
+- ตอบกลับเป็น JSON แบบ plain text เท่านั้น ห้ามมีส่วนอื่นประกอบ (ไม่ต้องอธิบายหรือสนทนา)
 - ทำความเข้าใจภาษาไทยแบบธรรมชาติ เช่น "พรุ่งนี้มีสอบคณิตตอน 8 โมงที่ห้อง 302"
 - อย่าตอบเกินกว่าที่ระบบร้องขอ เช่น ห้ามพูดคุยอธิบายเพิ่ม
 - ให้ใส่ฟิลด์ "replyText" เพื่อใช้แสดงข้อความตอบกลับผู้ใช้ โดยสรุปสิ่งที่ระบบได้เข้าใจ เช่น "เพิ่มคาบเรียนวิทยาศาสตร์แล้ว" หรือ "เพิ่มงานสอบชีวะตอน 9 โมงแล้ว"
@@ -63,16 +62,18 @@ ${DateTime.now().toIso8601String()}
 คำสั่งของผู้ใช้:
 $userMessage
 
-กรุณาตอบกลับเฉพาะ JSON ตามที่กำหนดด้านบนเท่านั้น
+กรุณาตอบกลับเฉพาะ JSON ตามที่กำหนดด้านบนเท่านั้น และเป็น null ได้เฉพาะที่กำหนดเท่านั้น
 """;
 
-    final List<Map<String, dynamic>> history = [
-      ...chatHistory.map((msg) => msg.toMap()),
-      ChatMessage(role: 'user', content: prompt).toMap(),
-    ];
-
     final body = jsonEncode({
-      "contents": history,
+      "contents": [
+        {
+          "role": "user",
+          "parts": [
+            {"text": prompt}
+          ]
+        }
+      ]
     });
 
     final response = await http.post(
@@ -105,6 +106,8 @@ $userMessage
 
       return jsonData;
     } catch (e) {
+      debugPrint(e.toString());
+
       return {
         'type': 'error',
         'replyText': 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
@@ -130,6 +133,9 @@ $userMessage
           json.containsKey('location') &&
           json.containsKey('professor') &&
           json.containsKey('notifyTime');
+    } else if (type == 'normal') {
+      return json.containsKey('tasks') &&
+          (json['tasks'] == null || json['tasks'] is List);
     } else {
       return false;
     }
