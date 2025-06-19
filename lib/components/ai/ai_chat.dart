@@ -104,7 +104,7 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
                       }
 
                       final data = snapshot.data!;
-                      final responseText = data['responseText'] ?? '';
+                      final responseText = data['replyText'] ?? '';
                       final originalTasks =
                           List<Map<String, dynamic>>.from(data['tasks'] ?? []);
 
@@ -177,164 +177,332 @@ class _AiProcessCardState extends State<AiProcessCard> {
               final index = entry.key;
               final task = entry.value;
 
+              String type = task['type'];
               String action = task['action'];
-              String title = task['title'] ?? 'ไม่ระบุชื่อ';
-              String due = task['due'] ?? 'ไม่มี';
-              String priority = task['priority'] ?? 'ไม่มี';
-              String note = task['note'] ?? 'ไม่มี';
 
-              if (due != 'ไม่มี') {
-                due = due.toString().replaceFirst('T', ' ').split('.').first;
-              }
+              if (type == 'todo') {
+                String title = task['title'] ?? 'ไม่ระบุชื่อ';
+                String priority = task['priority'] ?? 'ไม่มี';
+                String description = task['description'] ?? 'ไม่มี';
+                String alarmTime = task['alarmTime'] ?? 'ไม่มี';
 
-              return AnimatedSize(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-                alignment: Alignment.topCenter,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 16,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          spacing: 8,
-                          children: [
-                            Icon(actionMap[action]!.icon),
-                            Text(actionMap[action]!.label),
-                          ],
-                        ),
-                        const Divider(),
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          "⏰ กำหนดส่ง: $due",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          "⭐ ความสำคัญ: $priority",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          "📝 หมายเหตุ: $note",
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const Divider(),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            transitionBuilder: (child, animation) =>
-                                FadeTransition(
-                              opacity: animation,
-                              child: SizeTransition(
-                                sizeFactor: animation,
-                                axisAlignment: -1.0,
-                                child: child,
-                              ),
-                            ),
-                            child: confirmed[index]
-                                ? Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    alignment: WrapAlignment.start,
-                                    crossAxisAlignment: WrapCrossAlignment.end,
-                                    children: [
-                                      Icon(
-                                        confirmationStatus[index]
-                                            ? Icons.check_circle_rounded
-                                            : Icons.cancel_rounded,
-                                        color: confirmationStatus[index]
-                                            ? primaryColor
-                                            : null,
-                                      ),
-                                      Text(
-                                        confirmationStatus[index]
-                                            ? '${actionMap[action]!.label}เรียบร้อย :3'
-                                            : 'ปัดทิ้ง :<',
-                                        style: textTheme.bodySmall!.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Wrap(
-                                    key: ValueKey('buttons-$index'),
-                                    alignment: WrapAlignment.start,
-                                    crossAxisAlignment: WrapCrossAlignment.end,
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: loading[index]
-                                        ? [
-                                            LoadingAnimationWidget
-                                                .threeArchedCircle(
-                                              color: primaryColor,
-                                              size: 20,
-                                            ),
-                                            Text(
-                                              'กำลัง${actionMap[action]!.label}...',
-                                              style: textTheme.bodySmall,
-                                            ),
-                                          ]
-                                        : [
-                                            FilledButton.icon(
-                                              icon: const Icon(
-                                                Icons.check_rounded,
-                                              ),
-                                              label: const Text("ยืนยัน"),
-                                              onPressed: () async {
-                                                setState(() {
-                                                  loading[index] = true;
-                                                });
-
-                                                await onConfirmTask(task);
-
-                                                setState(() {
-                                                  confirmed[index] = true;
-                                                  confirmationStatus[index] =
-                                                      true;
-                                                  loading[index] = false;
-                                                });
-                                              },
-                                            ),
-                                            FilledButton.tonalIcon(
-                                              icon: const Icon(
-                                                Icons.edit_rounded,
-                                              ),
-                                              label: const Text("แก้ไข"),
-                                              onPressed: () {},
-                                            ),
-                                            TextButton.icon(
-                                              icon: const Icon(
-                                                  Icons.cancel_rounded),
-                                              label: const Text("ปัดทิ้ง"),
-                                              onPressed: () {
-                                                setState(() {
-                                                  confirmed[index] = true;
-                                                });
-                                              },
-                                            ),
-                                          ],
-                                  ),
+                return AnimatedSize(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 8,
+                            children: [
+                              Icon(actionMap[action]!.icon),
+                              Text(actionMap[action]!.label),
+                            ],
                           ),
-                        ),
-                      ],
+                          const Divider(),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            "⏰ กำหนดส่ง: $alarmTime",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            "⭐ ความสำคัญ: $priority",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            "📝 หมายเหตุ: $description",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const Divider(),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                opacity: animation,
+                                child: SizeTransition(
+                                  sizeFactor: animation,
+                                  axisAlignment: -1.0,
+                                  child: child,
+                                ),
+                              ),
+                              child: confirmed[index]
+                                  ? Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.end,
+                                      children: [
+                                        Icon(
+                                          confirmationStatus[index]
+                                              ? Icons.check_circle_rounded
+                                              : Icons.cancel_rounded,
+                                          color: confirmationStatus[index]
+                                              ? primaryColor
+                                              : null,
+                                        ),
+                                        Text(
+                                          confirmationStatus[index]
+                                              ? '${actionMap[action]!.label}เรียบร้อย :3'
+                                              : 'ปัดทิ้ง :<',
+                                          style: textTheme.bodySmall!.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Wrap(
+                                      key: ValueKey('buttons-$index'),
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.end,
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: loading[index]
+                                          ? [
+                                              LoadingAnimationWidget
+                                                  .threeArchedCircle(
+                                                color: primaryColor,
+                                                size: 20,
+                                              ),
+                                              Text(
+                                                'กำลัง${actionMap[action]!.label}...',
+                                                style: textTheme.bodySmall,
+                                              ),
+                                            ]
+                                          : [
+                                              FilledButton.icon(
+                                                icon: const Icon(
+                                                  Icons.check_rounded,
+                                                ),
+                                                label: const Text("ยืนยัน"),
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    loading[index] = true;
+                                                  });
+
+                                                  await onConfirmTask(task);
+
+                                                  setState(() {
+                                                    confirmed[index] = true;
+                                                    confirmationStatus[index] =
+                                                        true;
+                                                    loading[index] = false;
+                                                  });
+                                                },
+                                              ),
+                                              FilledButton.tonalIcon(
+                                                icon: const Icon(
+                                                  Icons.edit_rounded,
+                                                ),
+                                                label: const Text("แก้ไข"),
+                                                onPressed: () {},
+                                              ),
+                                              TextButton.icon(
+                                                icon: const Icon(
+                                                    Icons.cancel_rounded),
+                                                label: const Text("ปัดทิ้ง"),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    confirmed[index] = true;
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
+                );
+              } else if (type == 'timetable') {
+                String title = task['title'] ?? 'ไม่ระบุชื่อ';
+                String startTime = task['startTime'] ?? 'ไม่มี';
+                String endTime = task['endTime'] ?? 'ไม่มี';
+                String location = task['location'] ?? 'ไม่มี';
+                String professor = task['professor'] ?? 'ไม่มี';
+                bool isNotify = task['isNotify'];
+                String notifyTime = task['notifyTime'] ?? 'ไม่มี';
+
+                return AnimatedSize(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 8,
+                            children: [
+                              Icon(actionMap[action]!.icon),
+                              Text(actionMap[action]!.label),
+                            ],
+                          ),
+                          const Divider(),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            "⏰ เวลาเริ่ม - สิ้นสุด: $startTime - $endTime",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            "⭐ สถานที่: $location",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            "⭐ ผู้สอน: $professor",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (isNotify)
+                            Text(
+                              "📝 แจ้งเตือน: $notifyTime",
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          const Divider(),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                opacity: animation,
+                                child: SizeTransition(
+                                  sizeFactor: animation,
+                                  axisAlignment: -1.0,
+                                  child: child,
+                                ),
+                              ),
+                              child: confirmed[index]
+                                  ? Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.end,
+                                      children: [
+                                        Icon(
+                                          confirmationStatus[index]
+                                              ? Icons.check_circle_rounded
+                                              : Icons.cancel_rounded,
+                                          color: confirmationStatus[index]
+                                              ? primaryColor
+                                              : null,
+                                        ),
+                                        Text(
+                                          confirmationStatus[index]
+                                              ? '${actionMap[action]!.label}เรียบร้อย :3'
+                                              : 'ปัดทิ้ง :<',
+                                          style: textTheme.bodySmall!.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Wrap(
+                                      key: ValueKey('buttons-$index'),
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.end,
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: loading[index]
+                                          ? [
+                                              LoadingAnimationWidget
+                                                  .threeArchedCircle(
+                                                color: primaryColor,
+                                                size: 20,
+                                              ),
+                                              Text(
+                                                'กำลัง${actionMap[action]!.label}...',
+                                                style: textTheme.bodySmall,
+                                              ),
+                                            ]
+                                          : [
+                                              FilledButton.icon(
+                                                icon: const Icon(
+                                                  Icons.check_rounded,
+                                                ),
+                                                label: const Text("ยืนยัน"),
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    loading[index] = true;
+                                                  });
+
+                                                  await onConfirmTask(task);
+
+                                                  setState(() {
+                                                    confirmed[index] = true;
+                                                    confirmationStatus[index] =
+                                                        true;
+                                                    loading[index] = false;
+                                                  });
+                                                },
+                                              ),
+                                              FilledButton.tonalIcon(
+                                                icon: const Icon(
+                                                  Icons.edit_rounded,
+                                                ),
+                                                label: const Text("แก้ไข"),
+                                                onPressed: () {},
+                                              ),
+                                              TextButton.icon(
+                                                icon: const Icon(
+                                                    Icons.cancel_rounded),
+                                                label: const Text("ปัดทิ้ง"),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    confirmed[index] = true;
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return Text('Error');
+              }
             },
           ),
       ],
