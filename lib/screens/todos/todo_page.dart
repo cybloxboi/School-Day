@@ -271,131 +271,145 @@ class _TodoPageState extends State<TodoPage> {
                           );
                         }
 
-                        return ListView.builder(
-                          padding: const EdgeInsets.all(8),
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 700,
+                            mainAxisExtent: 150,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                           itemCount: todoData.length,
-                          itemBuilder: (context, index) {
-                            return Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      side: const BorderSide(
-                                          color: Colors.black, width: 1),
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                side: const BorderSide(
+                                  color: Colors.black, 
+                                  width: 1
+                                ),
+                              ),
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Checkbox(
+                                      value: todoData[index].isDone,
+                                      onChanged: (bool? value) {
+                                      },
+                                      activeColor: primaryColor,
+                                      checkColor: Colors.white,
                                     ),
-                                    color: Colors.white,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  todoData[index].title,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10),
-                                                Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Icon(Icons.assignment,
-                                                        size: 16,
-                                                        color: primaryColor),
-                                                    SizedBox(width: 4),
-                                                    Expanded(
-                                                      child: Text(
-                                                        'รายละเอียด',
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            todoData[index].title,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              decoration: todoData[index].isDone
+                                                  ? TextDecoration.lineThrough
+                                                  : TextDecoration.none,
+                                              color: todoData[index].isDone
+                                                  ? Colors.grey
+                                                  : Colors.black,
                                             ),
                                           ),
-                                          const SizedBox(width: 10),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              const Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Icon(Icons.schedule,
-                                                      size: 16,
-                                                      color: primaryColor),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    'วันครบกำหนด',
-                                                    style:
-                                                        TextStyle(fontSize: 12),
-                                                  ),
-                                                ],
+                                              const Icon(
+                                                Icons.assignment,
+                                                size: 16,
+                                                color: primaryColor
                                               ),
-                                              const SizedBox(height: 4),
-                                              const Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Icon(Icons.flag,
-                                                      size: 16,
-                                                      color: Colors.redAccent),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    'ความสำคัญ',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
+                                              const SizedBox(width: 4),
+                                              Expanded(
+                                                child: Text(
+                                                  'รายละเอียด',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
                                                   ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  IconButton(
-                                                    icon: const Icon(Icons.edit,
-                                                        size: 18,
-                                                        color: Colors.blue),
-                                                    onPressed: () {},
-                                                  ),
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                        Icons.delete,
-                                                        size: 18,
-                                                        color: primaryColor),
-                                                    onPressed: () {},
-                                                  ),
-                                                ],
+                                                ),
                                               ),
                                             ],
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        const Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Icon(
+                                              Icons.schedule,
+                                              size: 16,
+                                              color: primaryColor
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'วันครบกำหนด',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Icon(
+                                              Icons.flag,
+                                              size: 16,
+                                              color: Colors.redAccent
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'ความสำคัญ',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                size: 18,
+                                                color: Colors.blue
+                                              ),
+                                              onPressed: () {},
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                size: 18,
+                                                color: primaryColor
+                                              ),
+                                              onPressed: () {},
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             );
                           },
                         );
