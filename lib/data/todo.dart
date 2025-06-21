@@ -7,6 +7,19 @@ enum Priority {
   high,
 }
 
+extension PriorityExtension on Priority {
+  String toLocalizedString() {
+    switch (this) {
+      case Priority.low:
+        return 'น้อย';
+      case Priority.medium:
+        return 'กลาง';
+      case Priority.high:
+        return 'มาก';
+    }
+  }
+}
+
 class Todo {
   String id;
   Priority? priority;
@@ -63,5 +76,25 @@ class Todo {
       'createdTime': createdTime,
       'isDone': isDone,
     };
+  }
+
+  Todo copyWith({
+    String? id,
+    String? title,
+    String? description,
+    DateTime? alarmTime,
+    Priority? priority,
+    bool? isDone,
+    Timestamp? createdTime,
+  }) {
+    return Todo(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      alarmTime: alarmTime ?? this.alarmTime,
+      priority: priority ?? this.priority,
+      isDone: isDone ?? this.isDone,
+      createdTime: createdTime ?? this.createdTime,
+    );
   }
 }

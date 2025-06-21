@@ -33,7 +33,7 @@ class GeminiService {
   "title": String,
   "priority": "high" || "medium" || "low" || null,
   "description": String || null,
-  "alarmTime": ISO8601 Date || null
+  "alarmTime": ISO8601 Date || null // หากผู้ใช้ไม่ได้บอกเวลาที่ชัดเจน ให้ถือว่าเป็น 8:00
 }
 
 หากเป็นตารางเรียน (Timetable):

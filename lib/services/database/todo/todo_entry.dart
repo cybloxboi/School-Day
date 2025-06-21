@@ -44,31 +44,34 @@ class TodoEntry extends TodoDocument {
 
   Future<bool> updateTodo({
     required Todo oldTodo,
-    required oldCategoryID,
     required Todo newTodo,
-    required newCategoryID,
   }) async {
     try {
-      final oldTodoDoc = getUserTodoDoc(oldCategoryID);
-      final newTodoDoc = getUserTodoDoc(newCategoryID);
+      final todoDoc = getUserTodoDoc(categoryID);
+      final snapshot = await todoDoc.get();
 
-      if (oldCategoryID == newCategoryID) {
-        await oldTodoDoc.update({
-          'todos': FieldValue.arrayRemove([oldTodo.toJson()]),
-        });
-
-        await oldTodoDoc.update({
-          'todos': FieldValue.arrayUnion([newTodo.toJson()]),
-        });
-      } else {
-        await oldTodoDoc.update({
-          'todos': FieldValue.arrayRemove([oldTodo.toJson()]),
-        });
-
-        await newTodoDoc.set({
-          'todos': FieldValue.arrayUnion([newTodo.toJson()]),
-        }, SetOptions(merge: true));
+      if (!snapshot.exists) {
+        return false;
       }
+
+      final data = snapshot.data() as Map<String, dynamic>;
+      final List<dynamic> todosRaw = data['todos'] ?? [];
+
+      List<Todo> todos = todosRaw
+          .map((e) => Todo.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final index = todos.indexWhere((todo) => todo.id == oldTodo.id);
+
+      if (index == -1) {
+        return false;
+      }
+
+      todos[index] = newTodo;
+
+      await todoDoc.update({
+        'todos': todos.map((t) => t.toJson()).toList(),
+      });
 
       return true;
     } catch (e) {

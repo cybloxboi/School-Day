@@ -12,10 +12,14 @@ class AddNewTodoPage extends StatefulWidget {
     super.key,
     required this.todoEntry,
     this.todoData,
+    this.onDone,
+    required this.isEdited,
   });
 
   final TodoEntry todoEntry;
   final Todo? todoData;
+  final bool isEdited;
+  final Function()? onDone;
 
   @override
   State<AddNewTodoPage> createState() => _AddNewTodoPageState();
@@ -73,9 +77,21 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
   void initState() {
     super.initState();
 
-    _priority = 'ไม่มี';
+    _priority = widget.todoData?.priority?.toLocalizedString() ?? 'ไม่มี';
     _reminderOption = '30 นาที';
     _alarmTime = null;
+
+    if (widget.todoData != null) {
+      _titleController.value = TextEditingValue(text: widget.todoData!.title);
+      _descriptionController.value = widget.todoData!.description == null
+          ? TextEditingValue.empty
+          : TextEditingValue(text: widget.todoData!.description!);
+      _selectedDate = widget.todoData!.alarmTime;
+      _alarmTime = Time(
+        widget.todoData!.alarmTime!.hour,
+        widget.todoData!.alarmTime!.minute,
+      );
+    }
   }
 
   @override
@@ -96,9 +112,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).popUntil(
-                          (route) => route.isFirst,
-                        );
+                        Navigator.pop(context);
+                        Navigator.pop(context);
                       },
                       child: const Text('ยกเลิก'),
                     ),
@@ -156,8 +171,11 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
 
                   bool success;
 
-                  if (widget.todoData != null) {
-                    success = false;
+                  if (widget.isEdited) {
+                    success = await widget.todoEntry.updateTodo(
+                      oldTodo: widget.todoData!,
+                      newTodo: newTodo,
+                    );
                   } else {
                     success = await widget.todoEntry.addTodo(
                       newTodo: newTodo,
@@ -168,21 +186,26 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                   if (!context.mounted) return;
 
                   Navigator.pop(context);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NavigationMenu(
-                        screenIndex: 2,
+
+                  if (widget.onDone == null) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NavigationMenu(
+                          screenIndex: 2,
+                        ),
                       ),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
+                      (Route<dynamic> route) => false,
+                    );
+                  } else {
+                    widget.onDone!();
+                  }
 
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.todoData == null
+                          !widget.isEdited
                               ? 'เพิ่มงานเรียบร้อยคับ!'
                               : 'แก้ไขงานเรียบร้อย',
                         ),
@@ -193,7 +216,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.todoData == null
+                          !widget.isEdited
                               ? 'ดูเหมือนจะมีปัญหาการเพิ่มงานนะ :('
                               : 'ดูเหมือนจะมีปัญหาการแก้ไขงานนะ :(',
                         ),

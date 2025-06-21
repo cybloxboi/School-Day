@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/ai/action_display.dart';
+import 'package:school_day/components/others/format_alarm_time.dart';
+import 'package:school_day/data/todo.dart';
+import 'package:school_day/screens/todos/add_new_todo_page.dart';
+import 'package:school_day/services/database/todo/todo_entry.dart';
 import 'package:school_day/styles/styles.dart';
 
 class AiChat extends StatefulWidget {
@@ -25,9 +30,35 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
 
+  late String timetableId;
+  late String categoryId;
+
+  Future<void> fetchTimetableInfo(String userEmail) async {
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('Users').doc(userEmail);
+      final snapshot = await docRef.get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        timetableId = data?['currentTimetableID'];
+        categoryId = data?['currentCategoryID'];
+
+        debugPrint('currentTimetableID: $timetableId');
+        debugPrint('currentCategoryID: $categoryId');
+      } else {
+        debugPrint('User document does not exist');
+      }
+    } catch (e) {
+      debugPrint('Error fetching document: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    fetchTimetableInfo(widget.userEmail);
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
@@ -112,6 +143,8 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
                         userEmail: widget.userEmail,
                         responseText: responseText,
                         tasks: originalTasks,
+                        timetableId: timetableId,
+                        categoryId: categoryId,
                       );
                     },
                   ),
@@ -130,11 +163,15 @@ class AiProcessCard extends StatefulWidget {
     required this.userEmail,
     required this.responseText,
     required this.tasks,
+    required this.timetableId,
+    required this.categoryId,
   });
 
   final String userEmail;
   final String responseText;
   final List<Map<String, dynamic>> tasks;
+  final String timetableId;
+  final String categoryId;
 
   @override
   State<AiProcessCard> createState() => _AiProcessCardState();
@@ -147,7 +184,6 @@ class _AiProcessCardState extends State<AiProcessCard> {
   late List<bool> loading;
 
   Future<void> onConfirmTask(Map<String, dynamic> task) async {
-    // await applyTasksToTodoList(widget.userEmail, [task]);
     await Future.delayed(const Duration(seconds: 3));
   }
 
@@ -179,12 +215,36 @@ class _AiProcessCardState extends State<AiProcessCard> {
 
               String type = task['type'];
               String action = task['action'];
+              ActionDisplay actionDisplay = getActionDisplay(action, type);
 
               if (type == 'todo') {
                 String title = task['title'] ?? 'ไม่ระบุชื่อ';
                 String priority = task['priority'] ?? 'ไม่มี';
                 String description = task['description'] ?? 'ไม่มี';
-                String alarmTime = task['alarmTime'] ?? 'ไม่มี';
+                String alarmTime = formatAlarmTime(task['alarmTime']);
+
+                final Map<String, Priority?> priorityOptions = {
+                  'มาก': Priority.high,
+                  'กลาง': Priority.medium,
+                  'น้อย': Priority.low,
+                  'ไม่มี': null,
+                };
+
+                TodoEntry todoEntry = TodoEntry(
+                  email: widget.userEmail,
+                  categoryID: widget.categoryId,
+                );
+
+                Todo newTodo = Todo(
+                  title: title,
+                  description: task['description'],
+                  alarmTime: task['alarmTime'] != null
+                      ? DateTime.parse(
+                          task['alarmTime'],
+                        )
+                      : null,
+                  priority: priorityOptions[priority],
+                );
 
                 return AnimatedSize(
                   duration: const Duration(milliseconds: 400),
@@ -208,8 +268,8 @@ class _AiProcessCardState extends State<AiProcessCard> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             spacing: 8,
                             children: [
-                              Icon(actionMap[action]!.icon),
-                              Text(actionMap[action]!.label),
+                              Icon(actionDisplay.icon),
+                              Text(actionDisplay.label),
                             ],
                           ),
                           const Divider(),
@@ -250,7 +310,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                       runSpacing: 8,
                                       alignment: WrapAlignment.start,
                                       crossAxisAlignment:
-                                          WrapCrossAlignment.end,
+                                          WrapCrossAlignment.center,
                                       children: [
                                         Icon(
                                           confirmationStatus[index]
@@ -262,7 +322,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                         ),
                                         Text(
                                           confirmationStatus[index]
-                                              ? '${actionMap[action]!.label}เรียบร้อย :3'
+                                              ? '${actionDisplay.label}เรียบร้อย :3'
                                               : 'ปัดทิ้ง :<',
                                           style: textTheme.bodySmall!.copyWith(
                                             fontWeight: FontWeight.bold,
@@ -274,7 +334,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                       key: ValueKey('buttons-$index'),
                                       alignment: WrapAlignment.start,
                                       crossAxisAlignment:
-                                          WrapCrossAlignment.end,
+                                          WrapCrossAlignment.center,
                                       spacing: 8,
                                       runSpacing: 8,
                                       children: loading[index]
@@ -285,7 +345,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                 size: 20,
                                               ),
                                               Text(
-                                                'กำลัง${actionMap[action]!.label}...',
+                                                'กำลัง${actionDisplay.label}...',
                                                 style: textTheme.bodySmall,
                                               ),
                                             ]
@@ -300,14 +360,23 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                     loading[index] = true;
                                                   });
 
-                                                  await onConfirmTask(task);
+                                                  if (action == 'add') {
+                                                    bool success =
+                                                        await todoEntry.addTodo(
+                                                      newTodo: newTodo,
+                                                      categoryID:
+                                                          todoEntry.categoryID,
+                                                    );
 
-                                                  setState(() {
-                                                    confirmed[index] = true;
-                                                    confirmationStatus[index] =
-                                                        true;
-                                                    loading[index] = false;
-                                                  });
+                                                    if (success) {
+                                                      setState(() {
+                                                        confirmed[index] = true;
+                                                        confirmationStatus[
+                                                            index] = true;
+                                                        loading[index] = false;
+                                                      });
+                                                    }
+                                                  }
                                                 },
                                               ),
                                               FilledButton.tonalIcon(
@@ -315,7 +384,33 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                   Icons.edit_rounded,
                                                 ),
                                                 label: const Text("แก้ไข"),
-                                                onPressed: () {},
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          AddNewTodoPage(
+                                                        todoEntry: todoEntry,
+                                                        todoData: newTodo,
+                                                        isEdited: false,
+                                                        onDone: () {
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+
+                                                          setState(() {
+                                                            confirmed[index] =
+                                                                true;
+                                                            confirmationStatus[
+                                                                index] = true;
+                                                            loading[index] =
+                                                                false;
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
                                               ),
                                               TextButton.icon(
                                                 icon: const Icon(
@@ -367,8 +462,8 @@ class _AiProcessCardState extends State<AiProcessCard> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             spacing: 8,
                             children: [
-                              Icon(actionMap[action]!.icon),
-                              Text(actionMap[action]!.label),
+                              Icon(actionDisplay.icon),
+                              Text(actionDisplay.label),
                             ],
                           ),
                           const Divider(),
@@ -381,16 +476,16 @@ class _AiProcessCardState extends State<AiProcessCard> {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           Text(
-                            "⭐ สถานที่: $location",
+                            "🏫 สถานที่: $location",
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           Text(
-                            "⭐ ผู้สอน: $professor",
+                            "👩‍🏫 ผู้สอน: $professor",
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           if (isNotify)
                             Text(
-                              "📝 แจ้งเตือน: $notifyTime",
+                              "⏰ แจ้งเตือน: $notifyTime",
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           const Divider(),
@@ -414,7 +509,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                       runSpacing: 8,
                                       alignment: WrapAlignment.start,
                                       crossAxisAlignment:
-                                          WrapCrossAlignment.end,
+                                          WrapCrossAlignment.center,
                                       children: [
                                         Icon(
                                           confirmationStatus[index]
@@ -426,7 +521,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                         ),
                                         Text(
                                           confirmationStatus[index]
-                                              ? '${actionMap[action]!.label}เรียบร้อย :3'
+                                              ? '${actionDisplay.label}เรียบร้อย :3'
                                               : 'ปัดทิ้ง :<',
                                           style: textTheme.bodySmall!.copyWith(
                                             fontWeight: FontWeight.bold,
@@ -438,7 +533,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                       key: ValueKey('buttons-$index'),
                                       alignment: WrapAlignment.start,
                                       crossAxisAlignment:
-                                          WrapCrossAlignment.end,
+                                          WrapCrossAlignment.center,
                                       spacing: 8,
                                       runSpacing: 8,
                                       children: loading[index]
@@ -449,7 +544,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                 size: 20,
                                               ),
                                               Text(
-                                                'กำลัง${actionMap[action]!.label}...',
+                                                'กำลัง${actionDisplay.label}...',
                                                 style: textTheme.bodySmall,
                                               ),
                                             ]
