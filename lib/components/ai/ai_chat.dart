@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/ai/action_display.dart';
 import 'package:school_day/components/others/format_alarm_time.dart';
+import 'package:school_day/data/time.dart';
 import 'package:school_day/data/todo.dart';
 import 'package:school_day/screens/todos/add_new_todo_page.dart';
 import 'package:school_day/services/database/todo/todo_entry.dart';
@@ -238,10 +239,11 @@ class _AiProcessCardState extends State<AiProcessCard> {
                 Todo newTodo = Todo(
                   title: title,
                   description: task['description'],
+                  selectedDate: task['selectedDate'] != null
+                      ? DateTime.tryParse(task['selectedDate'])
+                      : null,
                   alarmTime: task['alarmTime'] != null
-                      ? DateTime.parse(
-                          task['alarmTime'],
-                        )
+                      ? Time.fromJson(task['alarmTime'])
                       : null,
                   priority: priorityOptions[priority],
                 );

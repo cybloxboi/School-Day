@@ -55,8 +55,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
       cancelText: 'ยกเลิก',
       confirmText: 'ยืนยัน',
       initialDate: _selectedDate ?? now,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(now.year + 5),
+      firstDate: DateTime(now.year - 2000),
+      lastDate: DateTime(now.year + 2000),
     );
 
     if (picked != null && picked != _selectedDate) {
@@ -86,11 +86,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
       _descriptionController.value = widget.todoData!.description == null
           ? TextEditingValue.empty
           : TextEditingValue(text: widget.todoData!.description!);
-      _selectedDate = widget.todoData!.alarmTime;
-      _alarmTime = Time(
-        widget.todoData!.alarmTime!.hour,
-        widget.todoData!.alarmTime!.minute,
-      );
+      _selectedDate = widget.todoData?.selectedDate;
+      _alarmTime = widget.todoData?.alarmTime;
     }
   }
 
@@ -130,7 +127,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
           },
         ),
         title: Text(
-          'เพิ่มงานใหม่',
+          widget.isEdited ? 'แก้ไขงาน' : 'เพิ่มงานใหม่',
           style: textTheme.bodyMedium!.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -160,14 +157,14 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                     description: _descriptionController.text.trim() == ''
                         ? null
                         : _descriptionController.text.trim(),
-                    alarmTime: _selectedDate?.add(
-                      Duration(
-                        hours: _alarmTime?.hour ?? 8,
-                        minutes: _alarmTime?.minute ?? 0,
-                      ),
-                    ),
+                    selectedDate: _selectedDate,
+                    alarmTime: _alarmTime,
                     priority: _priorityOptions[_priority],
                   );
+
+                  debugPrint(
+                      'selectedDate: ${_selectedDate?.toIso8601String()}');
+                  debugPrint('alarmTime: ${_alarmTime?.toString()}');
 
                   bool success;
 

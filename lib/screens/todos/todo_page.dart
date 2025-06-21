@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:school_day/components/todos/categories.dart';
@@ -276,154 +277,247 @@ class _TodoPageState extends State<TodoPage> {
                           padding: const EdgeInsets.all(16),
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 700,
+                            maxCrossAxisExtent: 800,
                             mainAxisExtent: 150,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                           ),
                           itemCount: todoData.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return Card(
+                            return Slidable(
                               key: ValueKey(todoData[index].id),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                side: const BorderSide(
-                                    color: Colors.black, width: 1),
-                              ),
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Checkbox(
-                                      value: todoData[index].isDone,
-                                      onChanged: (bool? value) async {
-                                        if (value == null) return;
+                              endActionPane: ActionPane(
+                                motion: const DrawerMotion(),
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      if (categoryID == null) return;
 
-                                        final todo = todoData[index];
-                                        final updatedTodo = todo.copyWith(
-                                          isDone: value,
-                                        );
+                                      TodoEntry todoEntry = TodoEntry(
+                                        email: currentUser.email!,
+                                        categoryID: categoryID!,
+                                      );
 
-                                        setState(() {
-                                          todoData = List.from(todoData);
-                                          todoData[index] = updatedTodo;
-                                        });
-
-                                        await TodoEntry(
-                                          email: currentUser.email!,
-                                          categoryID: categoryID!,
-                                        ).updateTodo(
-                                          oldTodo: todo,
-                                          newTodo: updatedTodo,
-                                        );
-                                      },
-                                      activeColor: primaryColor,
-                                      checkColor: Colors.white,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            todoData[index].title,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              decoration: todoData[index].isDone
-                                                  ? TextDecoration.lineThrough
-                                                  : TextDecoration.none,
-                                              color: todoData[index].isDone
-                                                  ? Colors.grey
-                                                  : Colors.black,
-                                            ),
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AddNewTodoPage(
+                                            todoEntry: todoEntry,
+                                            isEdited: true,
+                                            todoData: todoData[index],
                                           ),
-                                          const SizedBox(height: 10),
-                                          Row(
+                                        ),
+                                      );
+                                    },
+                                    backgroundColor: backgroundColor,
+                                    foregroundColor: Colors.blue,
+                                    spacing: 8,
+                                    icon: Icons.edit,
+                                    label: 'แก้ไข',
+                                  ),
+                                  SlidableAction(
+                                    onPressed: (context) async {
+                                      if (categoryID == null) return;
+
+                                      TodoEntry todoEntry = TodoEntry(
+                                        email: currentUser.email!,
+                                        categoryID: categoryID!,
+                                      );
+
+                                      await todoEntry.deleteTodo(
+                                        todo: todoData[index],
+                                      );
+                                    },
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(20),
+                                      bottomRight: Radius.circular(20),
+                                    ),
+                                    icon: Icons.delete,
+                                    spacing: 8,
+                                    label: 'ลบ',
+                                  ),
+                                ],
+                              ),
+                              child: Card(
+                                key: ValueKey(todoData[index].id),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  side: const BorderSide(
+                                      color: Colors.black, width: 1),
+                                ),
+                                color: Colors.white,
+                                clipBehavior: Clip.antiAliasWithSaveLayer,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (categoryID == null) return;
+
+                                    TodoEntry todoEntry = TodoEntry(
+                                      email: currentUser.email!,
+                                      categoryID: categoryID!,
+                                    );
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddNewTodoPage(
+                                          todoEntry: todoEntry,
+                                          isEdited: true,
+                                          todoData: todoData[index],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Checkbox(
+                                          value: todoData[index].isDone,
+                                          onChanged: (bool? value) async {
+                                            if (value == null) return;
+
+                                            final todo = todoData[index];
+                                            final updatedTodo = todo.copyWith(
+                                              isDone: value,
+                                            );
+
+                                            setState(() {
+                                              todoData = List.from(todoData);
+                                              todoData[index] = updatedTodo;
+                                            });
+
+                                            await TodoEntry(
+                                              email: currentUser.email!,
+                                              categoryID: categoryID!,
+                                            ).updateTodo(
+                                              oldTodo: todo,
+                                              newTodo: updatedTodo,
+                                            );
+                                          },
+                                          activeColor: primaryColor,
+                                          checkColor: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              const Icon(Icons.assignment,
-                                                  size: 16,
-                                                  color: primaryColor),
-                                              const SizedBox(width: 4),
-                                              Expanded(
-                                                child: Text(
-                                                  'รายละเอียด',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                todoData[index].title,
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      todoData[index].isDone
+                                                          ? TextDecoration
+                                                              .lineThrough
+                                                          : TextDecoration.none,
+                                                  color: todoData[index].isDone
+                                                      ? Colors.grey
+                                                      : Colors.black,
                                                 ),
                                               ),
+                                              const SizedBox(height: 10),
+                                              if (todoData[index].description !=
+                                                  null)
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Icon(Icons.assignment,
+                                                        size: 16,
+                                                        color: primaryColor),
+                                                    const SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Text(
+                                                        todoData[index]
+                                                            .description!,
+                                                        softWrap: true,
+                                                        maxLines: 4,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        const Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Icon(Icons.schedule,
-                                                size: 16, color: primaryColor),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              'วันครบกำหนด',
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                          ],
                                         ),
-                                        const SizedBox(height: 4),
-                                        const Row(
+                                        const SizedBox(width: 10),
+                                        Column(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                              CrossAxisAlignment.end,
+                                          spacing: 8,
                                           children: [
-                                            Icon(Icons.flag,
-                                                size: 16,
-                                                color: Colors.redAccent),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              'ความสำคัญ',
-                                              style: TextStyle(
-                                                fontSize: 12,
+                                            if (todoData[index].selectedDate !=
+                                                null)
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                spacing: 8,
+                                                children: [
+                                                  Icon(Icons.date_range_rounded,
+                                                      size: 16,
+                                                      color: primaryColor),
+                                                  Text(
+                                                    '${todoData[index].selectedDate!.day}/${todoData[index].selectedDate!.month}/${todoData[index].selectedDate!.year + 543}',
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit,
-                                                  size: 18, color: Colors.blue),
-                                              onPressed: () {},
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete,
-                                                  size: 18,
-                                                  color: primaryColor),
-                                              onPressed: () {},
-                                            ),
+                                            if (todoData[index].alarmTime !=
+                                                null)
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                spacing: 8,
+                                                children: [
+                                                  Icon(Icons.schedule,
+                                                      size: 16,
+                                                      color: primaryColor),
+                                                  Text(
+                                                    todoData[index]
+                                                        .alarmTime
+                                                        .toString(),
+                                                  ),
+                                                ],
+                                              ),
+                                            if (todoData[index].priority !=
+                                                null)
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                spacing: 8,
+                                                children: [
+                                                  Icon(Icons.flag,
+                                                      size: 16,
+                                                      color: Colors.redAccent),
+                                                  Text(
+                                                    todoData[index]
+                                                        .priority!
+                                                        .toLocalizedString(),
+                                                  ),
+                                                ],
+                                              ),
                                           ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             );

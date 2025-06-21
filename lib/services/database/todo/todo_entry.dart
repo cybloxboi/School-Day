@@ -78,4 +78,32 @@ class TodoEntry extends TodoDocument {
       return false;
     }
   }
+
+  Future<bool> deleteTodo({
+    required Todo todo,
+  }) async {
+    try {
+      final todoDoc = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(email)
+          .collection('Todos')
+          .doc(categoryID);
+      final docSnap = await todoDoc.get();
+
+      if (!docSnap.exists) return false;
+
+      final data = docSnap.data() as Map<String, dynamic>;
+      final todosRaw = data['todos'] as List<dynamic>? ?? [];
+
+      List<Map<String, dynamic>> todos =
+          todosRaw.map((item) => Map<String, dynamic>.from(item)).toList();
+
+      todos.removeWhere((t) => t['id'] == todo.id);
+
+      await todoDoc.update({'todos': todos});
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

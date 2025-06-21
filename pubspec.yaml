@@ -37,6 +37,7 @@ dependencies:
   flutter_image_compress: ^2.4.0
   flutter_localizations:
     sdk: flutter
+  flutter_slidable: ^4.0.0
 
 dev_dependencies:
   flutter_test:
