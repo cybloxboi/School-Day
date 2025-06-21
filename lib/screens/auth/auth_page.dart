@@ -16,6 +16,10 @@ class AuthPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+
             if (!snapshot.data!.emailVerified) {
               snapshot.data!.sendEmailVerification();
               return const EmailVerificationPage();

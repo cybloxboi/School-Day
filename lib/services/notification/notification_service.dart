@@ -38,9 +38,14 @@ class NotificationService {
 
   Future<void> initNotifications() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iOSInit = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     const initSettings = InitializationSettings(
       android: androidInit,
-      iOS: DarwinInitializationSettings(),
+      iOS: iOSInit,
     );
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
@@ -85,15 +90,25 @@ class NotificationService {
               playSound: true,
               enableVibration: true,
             ),
-            iOS: const DarwinNotificationDetails(),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
           ),
         );
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (kDebugMode) {
+        print("📲 Notification opened: ${message.data}");
       }
     });
   }
 
   Future<void> initTokenManagement(String email) async {
-    if (!Platform.isAndroid) {
+    if (!kDebugMode) {
       return;
     }
 

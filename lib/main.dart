@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +24,7 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  if (!kIsWeb && Platform.isAndroid) {
+  if (!kIsWeb) {
     final notificationService = NotificationService();
     await notificationService.initNotifications();
 
@@ -59,7 +57,7 @@ class _MainAppState extends State<MainApp> {
           data: MediaQuery.of(context).copyWith(
             textScaler: MediaQuery.of(context).textScaler.clamp(
                   minScaleFactor: 0,
-                  maxScaleFactor: 0.8,
+                  maxScaleFactor: 0.5,
                 ),
           ),
           child: child!,
