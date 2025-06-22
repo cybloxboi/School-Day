@@ -2,7 +2,6 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -11,9 +10,12 @@ import 'package:school_day/components/home/tasks_grid.dart';
 import 'package:school_day/components/home/welcome_text.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/data/timetable.dart';
+import 'package:school_day/data/todo.dart';
 import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/services/database/timetable/timetable_set.dart';
+import 'package:school_day/services/database/todo/get_today_todos_stream.dart';
+import 'package:school_day/services/database/todo/todo_entry.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';
@@ -428,20 +430,81 @@ class _HomePageState extends State<HomePage> {
                         },
                       );
                     } else {
-                      return SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 800,
-                          mainAxisExtent: 200,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          childCount: 10,
-                          (BuildContext context, int index) {
-                            return const TasksGrid();
-                          },
-                        ),
+                      return StreamBuilder<List<Todo>>(
+                        stream: getTodayTodosStream(currentUser!.email!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: LoadingAnimationWidget.fourRotatingDots(
+                                  color: primaryColor,
+                                  size: 80,
+                                ),
+                              ),
+                            );
+                          }
+
+                          if (snapshot.hasError) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: Text(
+                                  'เกิดข้อผิดพลาด: ${snapshot.error}',
+                                ),
+                              ),
+                            );
+                          }
+
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 16,
+                                    children: [
+                                      Text(
+                                        'ไม่มีงานสำหรับวันนี้ :>',
+                                        softWrap: true,
+                                        textAlign: TextAlign.center,
+                                        style: textTheme.bodyMedium!.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30,
+                                        ),
+                                      ),
+                                      LottieBuilder.asset(
+                                        'assets/animations/empty_timetable.json',
+                                        width: 180,
+                                        height: 180,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          final todayTodos = snapshot.data!;
+
+                          return SliverGrid(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 800,
+                              mainAxisExtent: 270,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              childCount: todayTodos.length,
+                              (BuildContext context, int index) {
+                                return TasksGrid(
+                                  todoData: todayTodos[index],
+                                );
+                              },
+                            ),
+                          );
+                        },
                       );
                     }
                   },

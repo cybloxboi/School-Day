@@ -30,6 +30,7 @@ class Todo {
   late final Timestamp createdTime;
   DateTime? selectedDate;
   Time? alarmTime;
+  final String? categoryName;
 
   static const Uuid _uuid = Uuid();
 
@@ -40,6 +41,7 @@ class Todo {
     this.description,
     this.selectedDate,
     this.alarmTime,
+    this.categoryName,
     Timestamp? createdTime,
     bool? isDone,
   })  : id = id ?? _uuid.v4(),
@@ -70,6 +72,7 @@ class Todo {
         _ => Timestamp.now(),
       },
       isDone: json['isDone'] is bool ? json['isDone'] : false,
+      categoryName: json['name'] as String?,
     );
   }
 
@@ -83,6 +86,7 @@ class Todo {
       'priority': priority?.name,
       'createdTime': createdTime,
       'isDone': isDone,
+      'name': categoryName,
     };
   }
 
