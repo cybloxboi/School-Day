@@ -428,35 +428,21 @@ class _HomePageState extends State<HomePage> {
                         },
                       );
                     } else {
-                      if (!kDebugMode) {
-                        return SliverToBoxAdapter(
-                          child: Center(
-                            child: Text(
-                              'Coming Soon...',
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30,
-                              ),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 800,
-                            mainAxisExtent: 200,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            childCount: 10,
-                            (BuildContext context, int index) {
-                              return const TasksGrid();
-                            },
-                          ),
-                        );
-                      }
+                      return SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 800,
+                          mainAxisExtent: 200,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          childCount: 10,
+                          (BuildContext context, int index) {
+                            return const TasksGrid();
+                          },
+                        ),
+                      );
                     }
                   },
                 ),

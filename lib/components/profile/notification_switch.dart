@@ -18,7 +18,7 @@ class _NotificationSwitchState extends State<NotificationSwitch> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: userDocument
-          .getIsNotifyTimetable(userDocument.getUserDocumentSnapshots()),
+          .getNotificationSettings(userDocument.getUserDocumentSnapshots()),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return LoadingAnimationWidget.fourRotatingDots(
@@ -27,17 +27,33 @@ class _NotificationSwitchState extends State<NotificationSwitch> {
           );
         }
 
-        final bool isNotify = snapshot.data ?? false;
+        final data = snapshot.data!;
+        final bool isNotifyTimetable = data['isNotifyTimetable'] ?? false;
+        final bool isNotifyTodos = data['isNotifyTodos'] ?? false;
 
-        return SwitchListTile(
-          value: isNotify,
-          onChanged: (value) async {
-            await userDocument.updateIsNotifyTimetable(value);
-          },
-          title: Text(
-            'เปิด/ปิดการแจ้งเตือนตารางเรียน',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+        return Column(
+          children: [
+            SwitchListTile(
+              value: isNotifyTimetable,
+              onChanged: (value) async {
+                await userDocument.updateIsNotifyTimetable(value);
+              },
+              title: Text(
+                'เปิด/ปิดการแจ้งเตือนตารางเรียน',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            SwitchListTile(
+              value: isNotifyTodos,
+              onChanged: (value) async {
+                await userDocument.updateIsNotifyTodos(value);
+              },
+              title: Text(
+                'เปิด/ปิดการแจ้งเตือนงาน',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
         );
       },
     );

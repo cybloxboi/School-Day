@@ -22,6 +22,103 @@ const NOTIFICATION_BODY = (slot) =>
   )} ที่ ${slot.location} โดย ${slot.professor}`;
 const SCHEDULE_DATA_TYPE = "schedule";
 
+const TODO_NOTIFICATION_TITLE = "📌 ถึงกำหนดการแล้ว!";
+const TODO_NOTIFICATION_BODY = (title) => `${title || "มีงานที่ต้องทำ"}`;
+const TODO_DATA_TYPE = "todo";
+
+exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok" }, async () => {
+  const now = DateTime.now().setZone("Asia/Bangkok");
+
+  const usersSnapshot = await admin.firestore().collection("Users")
+    .where("isNotifyTodos", "==", true)
+    .get();
+
+  const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
+    const email = userDoc.email;
+    const tokens = userData.tokens || [];
+
+    if (tokens.length === 0) return;
+
+    const todosSnapshot = await admin.firestore().collection("Users").doc(email).collection("Todos").get();
+
+    for (const categoryDoc of todosSnapshot.docs) {
+      const todos = categoryDoc.data().todos || [];
+
+      for (const todo of todos) {
+        if (!todo.selectedDate || todo.isDone) continue;
+
+        const selectedDate = DateTime.fromISO(todo.selectedDate, { zone: "Asia/Bangkok" });
+
+        let shouldNotify = false;
+
+        if (todo.alarmTime) {
+          const { hour, minute } = todo.alarmTime;
+          if (
+            selectedDate.hasSame(now, "day") &&
+            now.hour === hour &&
+            now.minute === minute
+          ) {
+            shouldNotify = true;
+          }
+        } else {
+          if (
+            selectedDate.hasSame(now, "day") &&
+            now.hour === 8 &&
+            now.minute === 0
+          ) {
+            shouldNotify = true;
+          }
+        }
+
+        if (shouldNotify) {
+          const message = {
+            notification: {
+              title: TODO_NOTIFICATION_TITLE,
+              body: TODO_NOTIFICATION_BODY(todo.title),
+            },
+            android: {
+              notification: {
+                channelId: "notify_task_channel",
+                priority: "high",
+              },
+            },
+            apns: {
+              payload: {
+                aps: {
+                  alert: {
+                    title: TODO_NOTIFICATION_TITLE,
+                    body: TODO_NOTIFICATION_BODY(todo.title),
+                  },
+                  sound: "default",
+                },
+              },
+            },
+            data: {
+              type: TODO_DATA_TYPE,
+              todoId: todo.id,
+              categoryId: categoryDoc.id,
+            },
+          };
+
+          for (const token of tokens) {
+            try {
+              await admin.messaging().send({
+                token,
+                ...message,
+              });
+            } catch (err) {
+              console.error(`❌ แจ้งเตือนงานล้มเหลว: ${token}`, err);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  await Promise.all(userProcessingPromises);
+  return null;
+});
+
 exports.notifyCurrentTimetable = onSchedule(
   {
     schedule: "* * * * *",

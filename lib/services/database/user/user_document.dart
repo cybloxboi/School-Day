@@ -19,6 +19,10 @@ class UserDocument {
     await userDocument.update({'isNotifyTimetable': value});
   }
 
+  Future<void> updateIsNotifyTodos(bool value) async {
+    await userDocument.update({'isNotifyTodos': value});
+  }
+
   Future<void> updateUsername(String newUsername) async {
     await userDocument.update({'username': newUsername});
   }
@@ -37,14 +41,21 @@ class UserDocument {
     }).distinct();
   }
 
-  Stream getIsNotifyTimetable(Stream<DocumentSnapshot> userDocumentSnapshots) {
+  Stream<Map<String, bool?>> getNotificationSettings(
+      Stream<DocumentSnapshot> userDocumentSnapshots) {
     return userDocumentSnapshots.map((snapshot) {
-      if (snapshot.exists) {
-        return snapshot['isNotifyTimetable'];
+      if (!snapshot.exists) {
+        return {
+          'isNotifyTimetable': null,
+          'isNotifyTodos': null,
+        };
       }
 
-      return null;
-    }).distinct();
+      return {
+        'isNotifyTimetable': snapshot.get('isNotifyTimetable') as bool?,
+        'isNotifyTodos': snapshot.get('isNotifyTodos') as bool?,
+      };
+    }).distinct((prev, next) => mapEquals(prev, next));
   }
 
   Future<void> createUserDocument({
