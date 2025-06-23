@@ -483,120 +483,120 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                             ],
                           ),
                         ),
-                        Wrap(
-                          spacing: 32,
-                          runSpacing: 32,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          runAlignment: WrapAlignment.center,
-                          children: [
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 600),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                      Icons.notifications_active_rounded),
-                                  const SizedBox(width: 16),
-                                  const Text(
-                                    'แจ้งเตือนล่วงหน้า',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  const Spacer(),
-                                  Switch(
-                                    value: _notificationEnabled,
-                                    onChanged: _selectedDate == null
-                                        ? null
-                                        : (bool newValue) {
-                                            setState(() {
-                                              _notificationEnabled = newValue;
-                                            });
-                                          },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (_notificationEnabled) ...[
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 600,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'แจ้งเตือนก่อน',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    const Spacer(),
-                                    InkWell(
-                                      borderRadius: BorderRadius.circular(4),
-                                      onTap: () async {
-                                        final selected =
-                                            await showDialog<String>(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              title: Text(
-                                                'เลือกเวลาแจ้งเตือน',
-                                                style: textTheme.bodyMedium!
-                                                    .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              content: SingleChildScrollView(
-                                                child: Column(
-                                                  children: _reminderOptions
-                                                      .entries
-                                                      .map(
-                                                    (entry) {
-                                                      return RadioListTile(
-                                                        title: Text(
-                                                          entry.key,
-                                                        ),
-                                                        value: entry.key,
-                                                        groupValue:
-                                                            _reminderOption,
-                                                        onChanged: (value) {
-                                                          Navigator.pop(
-                                                            context,
-                                                            entry.key,
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  ).toList(),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
+                        // Wrap(
+                        //   spacing: 32,
+                        //   runSpacing: 32,
+                        //   crossAxisAlignment: WrapCrossAlignment.center,
+                        //   runAlignment: WrapAlignment.center,
+                        //   children: [
+                        //     ConstrainedBox(
+                        //       constraints: const BoxConstraints(maxWidth: 600),
+                        //       child: Row(
+                        //         mainAxisAlignment: MainAxisAlignment.center,
+                        //         crossAxisAlignment: CrossAxisAlignment.center,
+                        //         children: [
+                        //           const Icon(
+                        //               Icons.notifications_active_rounded),
+                        //           const SizedBox(width: 16),
+                        //           const Text(
+                        //             'แจ้งเตือนล่วงหน้า',
+                        //             style: TextStyle(fontSize: 16),
+                        //           ),
+                        //           const Spacer(),
+                        //           Switch(
+                        //             value: _notificationEnabled,
+                        //             onChanged: _selectedDate == null
+                        //                 ? null
+                        //                 : (bool newValue) {
+                        //                     setState(() {
+                        //                       _notificationEnabled = newValue;
+                        //                     });
+                        //                   },
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //     if (_notificationEnabled) ...[
+                        //       ConstrainedBox(
+                        //         constraints: const BoxConstraints(
+                        //           maxWidth: 600,
+                        //         ),
+                        //         child: Row(
+                        //           crossAxisAlignment: CrossAxisAlignment.center,
+                        //           mainAxisAlignment: MainAxisAlignment.center,
+                        //           children: [
+                        //             const Text(
+                        //               'แจ้งเตือนก่อน',
+                        //               style: TextStyle(fontSize: 16),
+                        //             ),
+                        //             const Spacer(),
+                        //             InkWell(
+                        //               borderRadius: BorderRadius.circular(4),
+                        //               onTap: () async {
+                        //                 final selected =
+                        //                     await showDialog<String>(
+                        //                   context: context,
+                        //                   builder: (context) {
+                        //                     return AlertDialog(
+                        //                       title: Text(
+                        //                         'เลือกเวลาแจ้งเตือน',
+                        //                         style: textTheme.bodyMedium!
+                        //                             .copyWith(
+                        //                           fontWeight: FontWeight.bold,
+                        //                         ),
+                        //                       ),
+                        //                       content: SingleChildScrollView(
+                        //                         child: Column(
+                        //                           children: _reminderOptions
+                        //                               .entries
+                        //                               .map(
+                        //                             (entry) {
+                        //                               return RadioListTile(
+                        //                                 title: Text(
+                        //                                   entry.key,
+                        //                                 ),
+                        //                                 value: entry.key,
+                        //                                 groupValue:
+                        //                                     _reminderOption,
+                        //                                 onChanged: (value) {
+                        //                                   Navigator.pop(
+                        //                                     context,
+                        //                                     entry.key,
+                        //                                   );
+                        //                                 },
+                        //                               );
+                        //                             },
+                        //                           ).toList(),
+                        //                         ),
+                        //                       ),
+                        //                     );
+                        //                   },
+                        //                 );
 
-                                        if (selected != null) {
-                                          setState(() {
-                                            _reminderOption = selected;
-                                          });
-                                        }
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 8.0),
-                                        child: Text(
-                                          _reminderOption,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: const Color(0xFF874B57),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                        //                 if (selected != null) {
+                        //                   setState(() {
+                        //                     _reminderOption = selected;
+                        //                   });
+                        //                 }
+                        //               },
+                        //               child: Padding(
+                        //                 padding: const EdgeInsets.symmetric(
+                        //                     vertical: 8.0, horizontal: 8.0),
+                        //                 child: Text(
+                        //                   _reminderOption,
+                        //                   style: TextStyle(
+                        //                     fontSize: 16,
+                        //                     color: const Color(0xFF874B57),
+                        //                   ),
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ],
+                        // ),
                       ],
                     ),
                   ],
