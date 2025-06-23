@@ -15,7 +15,6 @@ import 'package:school_day/screens/ai/chat_page.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/services/database/todo/get_today_todos_stream.dart';
-import 'package:school_day/services/database/todo/todo_entry.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:intl/intl.dart';

@@ -31,7 +31,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
   final _formKey = GlobalKey<FormState>();
 
   DateTime? _selectedDate;
-  bool _notificationEnabled = false;
+  // bool _notificationEnabled = false;
 
   final Map<String, Priority?> _priorityOptions = {
     'มาก': Priority.high,
@@ -41,8 +41,8 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
   };
   late String _priority;
 
-  late String _reminderOption;
-  late final Map<String, DateTime?> _reminderOptions;
+  // late String _reminderOption;
+  // late final Map<String, DateTime?> _reminderOptions;
 
   late Time? _alarmTime;
 
@@ -62,13 +62,13 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _reminderOptions = {
-          '30 นาที': _selectedDate?.subtract(const Duration(minutes: 30)),
-          '1 ชั่วโมง': _selectedDate?.subtract(const Duration(hours: 1)),
-          '1 วัน': _selectedDate?.subtract(const Duration(days: 1)),
-          '2 วัน': _selectedDate?.subtract(const Duration(days: 2)),
-          '1 สัปดาห์': _selectedDate?.subtract(const Duration(days: 7)),
-        };
+        // _reminderOptions = {
+        //   '30 นาที': _selectedDate?.subtract(const Duration(minutes: 30)),
+        //   '1 ชั่วโมง': _selectedDate?.subtract(const Duration(hours: 1)),
+        //   '1 วัน': _selectedDate?.subtract(const Duration(days: 1)),
+        //   '2 วัน': _selectedDate?.subtract(const Duration(days: 2)),
+        //   '1 สัปดาห์': _selectedDate?.subtract(const Duration(days: 7)),
+        // };
       });
     }
   }
@@ -78,7 +78,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
     super.initState();
 
     _priority = widget.todoData?.priority?.toLocalizedString() ?? 'ไม่มี';
-    _reminderOption = '30 นาที';
+    // _reminderOption = '30 นาที';
     _alarmTime = null;
 
     if (widget.todoData != null) {
@@ -315,7 +315,7 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                                   onPressed: () {
                                     setState(() {
                                       _selectedDate = null;
-                                      _notificationEnabled = false;
+                                      // _notificationEnabled = false;
                                     });
                                   },
                                   icon: Icon(Icons.cancel_rounded),

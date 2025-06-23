@@ -219,15 +219,18 @@ class _AiProcessCardState extends State<AiProcessCard> {
               ActionDisplay actionDisplay = getActionDisplay(action, type);
 
               if (type == 'todo') {
-                String title = task['title'] ?? 'ไม่ระบุชื่อ';
-                String priority = task['priority'] ?? 'ไม่มี';
-                String description = task['description'] ?? 'ไม่มี';
-                String alarmTime = formatAlarmTime(task['alarmTime']);
+                final newTodo = task['newTodo'];
+                final oldTodo = task['oldTodo'];
+
+                String title = newTodo['title'] ?? 'ไม่ระบุชื่อ';
+                String priority = newTodo['priority'] ?? 'ไม่มี';
+                String description = newTodo['description'] ?? 'ไม่มี';
+                String alarmTime = formatAlarmTime(newTodo['alarmTime']);
 
                 final Map<String, Priority?> priorityOptions = {
-                  'มาก': Priority.high,
-                  'กลาง': Priority.medium,
-                  'น้อย': Priority.low,
+                  'high': Priority.high,
+                  'medium': Priority.medium,
+                  'low': Priority.low,
                   'ไม่มี': null,
                 };
 
@@ -236,14 +239,15 @@ class _AiProcessCardState extends State<AiProcessCard> {
                   categoryID: widget.categoryId,
                 );
 
-                Todo newTodo = Todo(
+                Todo todo = Todo(
+                  id: newTodo['id'],
                   title: title,
-                  description: task['description'],
-                  selectedDate: task['selectedDate'] != null
-                      ? DateTime.tryParse(task['selectedDate'])
+                  description: newTodo['description'],
+                  selectedDate: newTodo['selectedDate'] != null
+                      ? DateTime.tryParse(newTodo['selectedDate'])
                       : null,
-                  alarmTime: task['alarmTime'] != null
-                      ? Time.fromJson(task['alarmTime'])
+                  alarmTime: newTodo['alarmTime'] != null
+                      ? Time.fromJson(newTodo['alarmTime'])
                       : null,
                   priority: priorityOptions[priority],
                 );
@@ -275,21 +279,110 @@ class _AiProcessCardState extends State<AiProcessCard> {
                             ],
                           ),
                           const Divider(),
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (oldTodo != null && oldTodo['title'] != title)
+                                Text(
+                                  oldTodo['title'],
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                ),
+                              Text(
+                                title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
                           ),
-                          Text(
-                            "⏰ กำหนดส่ง: $alarmTime",
-                            style: Theme.of(context).textTheme.bodySmall,
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child:
+                                      Icon(Icons.description_rounded, size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " รายละเอียด: "),
+                                if (oldTodo != null &&
+                                    oldTodo['description'] != description)
+                                  TextSpan(
+                                    text: '${oldTodo['description']} ',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: description,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          Text(
-                            "⭐ ความสำคัญ: $priority",
-                            style: Theme.of(context).textTheme.bodySmall,
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child: Icon(Icons.access_alarm, size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " กำหนดส่ง: "),
+                                if (oldTodo != null &&
+                                    formatAlarmTime(oldTodo['alarmTime']) !=
+                                        alarmTime)
+                                  TextSpan(
+                                    text:
+                                        '${formatAlarmTime(oldTodo['alarmTime'])} ',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: alarmTime,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          Text(
-                            "📝 หมายเหตุ: $description",
-                            style: Theme.of(context).textTheme.bodySmall,
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child: Icon(Icons.star,
+                                      size: 18, color: Colors.amber),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " ความสำคัญ: "),
+                                if (oldTodo != null &&
+                                    oldTodo['priority'] != priority)
+                                  TextSpan(
+                                    text: '${oldTodo['priority']}',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: priority,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                           ),
                           const Divider(),
                           AnimatedSize(
@@ -362,58 +455,78 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                     loading[index] = true;
                                                   });
 
+                                                  bool success = false;
+
                                                   if (action == 'add') {
-                                                    bool success =
+                                                    success =
                                                         await todoEntry.addTodo(
-                                                      newTodo: newTodo,
+                                                      newTodo: todo,
                                                       categoryID:
                                                           todoEntry.categoryID,
                                                     );
+                                                  } else if (action ==
+                                                      'update') {
+                                                    success = await todoEntry
+                                                        .updateTodo(
+                                                      oldTodo: Todo.fromJson(
+                                                          oldTodo),
+                                                      newTodo: todo,
+                                                    );
+                                                  } else if (action ==
+                                                      'delete') {
+                                                    success = await todoEntry
+                                                        .deleteTodo(
+                                                      todo: todo,
+                                                    );
+                                                  }
 
-                                                    if (success) {
-                                                      setState(() {
-                                                        confirmed[index] = true;
-                                                        confirmationStatus[
-                                                            index] = true;
-                                                        loading[index] = false;
-                                                      });
-                                                    }
+                                                  if (success) {
+                                                    setState(() {
+                                                      confirmed[index] = true;
+                                                      confirmationStatus[
+                                                          index] = true;
+                                                      loading[index] = false;
+                                                    });
                                                   }
                                                 },
                                               ),
-                                              FilledButton.tonalIcon(
-                                                icon: const Icon(
-                                                  Icons.edit_rounded,
-                                                ),
-                                                label: const Text("แก้ไข"),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          AddNewTodoPage(
-                                                        todoEntry: todoEntry,
-                                                        todoData: newTodo,
-                                                        isEdited: false,
-                                                        onDone: () {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
+                                              if (action != 'delete')
+                                                FilledButton.tonalIcon(
+                                                  icon: const Icon(
+                                                    Icons.edit_rounded,
+                                                  ),
+                                                  label: const Text("แก้ไข"),
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            AddNewTodoPage(
+                                                          todoEntry: todoEntry,
+                                                          todoData: todo,
+                                                          isEdited:
+                                                              action == 'add'
+                                                                  ? false
+                                                                  : true,
+                                                          onDone: () {
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
 
-                                                          setState(() {
-                                                            confirmed[index] =
-                                                                true;
-                                                            confirmationStatus[
-                                                                index] = true;
-                                                            loading[index] =
-                                                                false;
-                                                          });
-                                                        },
+                                                            setState(() {
+                                                              confirmed[index] =
+                                                                  true;
+                                                              confirmationStatus[
+                                                                  index] = true;
+                                                              loading[index] =
+                                                                  false;
+                                                            });
+                                                          },
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
+                                                    );
+                                                  },
+                                                ),
                                               TextButton.icon(
                                                 icon: const Icon(
                                                     Icons.cancel_rounded),
