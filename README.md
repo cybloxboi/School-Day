@@ -22,3 +22,5 @@ This research and activity is funded by the National Research Council of Thailan
 - นายวชิรวิทย์ บุตตะโคตร [(@viyawcrx)](https://github.com/viyawcrx)
 
 โดยมี นางสาวอารีรัตน์ ธานี เป็นอาจารย์ที่ปรึกษาโครงการ
+
+โรงเรียนอำนาจเจริญ
