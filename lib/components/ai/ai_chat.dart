@@ -1,11 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/ai/action_display.dart';
 import 'package:school_day/components/others/format_alarm_time.dart';
 import 'package:school_day/data/time.dart';
+import 'package:school_day/data/timetable.dart';
 import 'package:school_day/data/todo.dart';
 import 'package:school_day/screens/todos/add_new_todo_page.dart';
+import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/services/database/todo/todo_entry.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -16,12 +17,16 @@ class AiChat extends StatefulWidget {
     required this.userInput,
     required this.userEmail,
     required this.geminiResponse,
+    required this.timetableId,
+    required this.categoryId,
   });
 
   final AnimationController promptAnimation;
   final String? userInput;
   final String userEmail;
   final Future<Map<String, dynamic>>? geminiResponse;
+  final String timetableId;
+  final String categoryId;
 
   @override
   State<AiChat> createState() => _AiChatState();
@@ -31,35 +36,9 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
 
-  late String timetableId;
-  late String categoryId;
-
-  Future<void> fetchTimetableInfo(String userEmail) async {
-    try {
-      final docRef =
-          FirebaseFirestore.instance.collection('Users').doc(userEmail);
-      final snapshot = await docRef.get();
-
-      if (snapshot.exists) {
-        final data = snapshot.data();
-        timetableId = data?['currentTimetableID'];
-        categoryId = data?['currentCategoryID'];
-
-        debugPrint('currentTimetableID: $timetableId');
-        debugPrint('currentCategoryID: $categoryId');
-      } else {
-        debugPrint('User document does not exist');
-      }
-    } catch (e) {
-      debugPrint('Error fetching document: $e');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-
-    fetchTimetableInfo(widget.userEmail);
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.2),
@@ -144,8 +123,8 @@ class _AiChatState extends State<AiChat> with TickerProviderStateMixin {
                         userEmail: widget.userEmail,
                         responseText: responseText,
                         tasks: originalTasks,
-                        timetableId: timetableId,
-                        categoryId: categoryId,
+                        timetableId: widget.timetableId,
+                        categoryId: widget.categoryId,
                       );
                     },
                   ),
@@ -183,10 +162,6 @@ class _AiProcessCardState extends State<AiProcessCard> {
   late List<bool> confirmed;
   late List<bool> confirmationStatus;
   late List<bool> loading;
-
-  Future<void> onConfirmTask(Map<String, dynamic> task) async {
-    await Future.delayed(const Duration(seconds: 3));
-  }
 
   @override
   void initState() {
@@ -370,14 +345,16 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                 if (oldTodo != null &&
                                     oldTodo['priority'] != priority)
                                   TextSpan(
-                                    text: '${oldTodo['priority']}',
+                                    text: priorityOptions[oldTodo['priority']]!
+                                        .toLocalizedString(),
                                     style: const TextStyle(
                                       decoration: TextDecoration.lineThrough,
                                       color: Colors.grey,
                                     ),
                                   ),
                                 TextSpan(
-                                  text: priority,
+                                  text: priorityOptions[priority]!
+                                      .toLocalizedString(),
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -547,13 +524,36 @@ class _AiProcessCardState extends State<AiProcessCard> {
                   ),
                 );
               } else if (type == 'timetable') {
-                String title = task['title'] ?? 'ไม่ระบุชื่อ';
-                String startTime = task['startTime'] ?? 'ไม่มี';
-                String endTime = task['endTime'] ?? 'ไม่มี';
-                String location = task['location'] ?? 'ไม่มี';
-                String professor = task['professor'] ?? 'ไม่มี';
-                bool isNotify = task['isNotify'];
-                String notifyTime = task['notifyTime'] ?? 'ไม่มี';
+                final newTimetable = task['newTimetable'];
+                final oldTimetable = task['oldTimetable'];
+
+                String title = newTimetable['title'] ?? 'ไม่ระบุชื่อ';
+                Time startTime = newTimetable['startTime'] != null
+                    ? Time.fromJson(newTimetable['startTime'])
+                    : Time(0, 0);
+                Time endTime = newTimetable['endTime'] != null
+                    ? Time.fromJson(newTimetable['endTime'])
+                    : Time(1, 0);
+                String location = newTimetable['location'] ?? 'ไม่มี';
+                String professor = newTimetable['professor'] ?? 'ไม่มี';
+                int dayIndex = newTimetable['dateIndex'] ?? 0;
+
+                TimetableEntry timetableEntry = TimetableEntry(
+                  email: widget.userEmail,
+                  timetableID: widget.timetableId,
+                  dayIndex: dayIndex,
+                );
+
+                Timetable timetable = Timetable(
+                  id: newTimetable['id'],
+                  title: title,
+                  professor: professor,
+                  location: location,
+                  startTime: startTime,
+                  endTime: endTime,
+                  isNotify: true,
+                  notifyTime: Time(0, 0),
+                );
 
                 return AnimatedSize(
                   duration: const Duration(milliseconds: 400),
@@ -582,27 +582,114 @@ class _AiProcessCardState extends State<AiProcessCard> {
                             ],
                           ),
                           const Divider(),
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (oldTimetable != null &&
+                                  oldTimetable['title'] != title)
+                                Text(
+                                  oldTimetable['title'],
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                ),
+                              Text(
+                                title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
                           ),
-                          Text(
-                            "⏰ เวลาเริ่ม - สิ้นสุด: $startTime - $endTime",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          Text(
-                            "🏫 สถานที่: $location",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          Text(
-                            "👩‍🏫 ผู้สอน: $professor",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          if (isNotify)
-                            Text(
-                              "⏰ แจ้งเตือน: $notifyTime",
+                          RichText(
+                            text: TextSpan(
                               style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child: Icon(Icons.access_alarm, size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " เวลาเริ่ม - สิ้นสุด: "),
+                                if (oldTimetable != null &&
+                                    Time.fromJson(oldTimetable['startTime']) !=
+                                        startTime &&
+                                    Time.fromJson(oldTimetable['endTime']) !=
+                                        endTime)
+                                  TextSpan(
+                                    text:
+                                        '${Time.fromJson(oldTimetable['startTime'])} - ${Time.fromJson(oldTimetable['endTime'])}',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: '$startTime - $endTime',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child: Icon(Icons.location_city_rounded,
+                                      size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " สถานที่: "),
+                                if (oldTimetable != null &&
+                                    oldTimetable['location'] != location)
+                                  TextSpan(
+                                    text: '${oldTimetable['location']}',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: location,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
+                                  child: Icon(Icons.person_rounded, size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " สถานที่: "),
+                                if (oldTimetable != null &&
+                                    oldTimetable['professor'] != professor)
+                                  TextSpan(
+                                    text: '${oldTimetable['professor']}',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: professor,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           const Divider(),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 400),
@@ -674,14 +761,44 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                     loading[index] = true;
                                                   });
 
-                                                  await onConfirmTask(task);
+                                                  bool success = false;
 
-                                                  setState(() {
-                                                    confirmed[index] = true;
-                                                    confirmationStatus[index] =
-                                                        true;
-                                                    loading[index] = false;
-                                                  });
+                                                  if (action == 'add') {
+                                                    success =
+                                                        await timetableEntry
+                                                            .addLesson(
+                                                      selectedDayIndex:
+                                                          dayIndex,
+                                                      newLesson: timetable,
+                                                    );
+                                                  } else if (action ==
+                                                      'update') {
+                                                    success =
+                                                        await timetableEntry
+                                                            .updateLesson(
+                                                      newDayIndex: dayIndex,
+                                                      oldLesson:
+                                                          Timetable.fromJson(
+                                                              oldTimetable),
+                                                      updatedLesson: timetable,
+                                                    );
+                                                  } else if (action ==
+                                                      'delete') {
+                                                    success =
+                                                        await timetableEntry
+                                                            .deleteLesson(
+                                                      lesson: timetable,
+                                                    );
+                                                  }
+
+                                                  if (success) {
+                                                    setState(() {
+                                                      confirmed[index] = true;
+                                                      confirmationStatus[
+                                                          index] = true;
+                                                      loading[index] = false;
+                                                    });
+                                                  }
                                                 },
                                               ),
                                               FilledButton.tonalIcon(

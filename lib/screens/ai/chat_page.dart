@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   bool _isLoading = false;
   String? _userInput;
 
+  late String timetableId;
+  late String categoryId;
+
   void sendPrompt() async {
     FocusScope.of(context).unfocus();
 
@@ -39,6 +43,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       _geminiResponse = GeminiService.ask(
         userMessage: input,
         email: _currentUser!.email!,
+        categoryId: categoryId,
+        timetableId: timetableId,
       );
     });
 
@@ -57,9 +63,32 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> fetchTimetableInfo(String userEmail) async {
+    try {
+      final docRef =
+          FirebaseFirestore.instance.collection('Users').doc(userEmail);
+      final snapshot = await docRef.get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        timetableId = data?['currentTimetableID'];
+        categoryId = data?['currentCategoryID'];
+
+        debugPrint('currentTimetableID: $timetableId');
+        debugPrint('currentCategoryID: $categoryId');
+      } else {
+        debugPrint('User document does not exist');
+      }
+    } catch (e) {
+      debugPrint('Error fetching document: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    fetchTimetableInfo(_currentUser!.email!);
 
     _promptAnimation = AnimationController(
       vsync: this,
@@ -143,6 +172,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                   geminiResponse: _geminiResponse,
                                   promptAnimation: _promptAnimation,
                                   userEmail: _currentUser!.email!,
+                                  timetableId: timetableId,
+                                  categoryId: categoryId,
                                 ),
                         ),
                       ),

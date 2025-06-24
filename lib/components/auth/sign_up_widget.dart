@@ -1,4 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:school_day/components/app_details/privacy_policy.dart';
+import 'package:school_day/components/app_details/terms_and_condition.dart';
 import 'package:school_day/components/auth/validate.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -26,6 +29,9 @@ class SignUpWidget extends StatefulWidget {
 
 class _SignUpWidgetState extends State<SignUpWidget> {
   String _password = '';
+
+  bool _isTermsAndConditionAccepted = false;
+  bool _isPrivacyPolicyAccpted = false;
 
   @override
   void initState() {
@@ -189,13 +195,85 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isTermsAndConditionAccepted,
+                      onChanged: (value) {
+                        setState(() {
+                          _isTermsAndConditionAccepted = value ?? false;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'ฉันยอมรับ ',
+                          children: [
+                            TextSpan(
+                              text: 'ข้อตกลงและเงื่อนไขการใช้งาน',
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
+                                color: Colors.red,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => TermsAndCondition(),
+                                  );
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isPrivacyPolicyAccpted,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrivacyPolicyAccpted = value ?? false;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'ฉันยอมรับ ',
+                          children: [
+                            TextSpan(
+                              text: 'นโยบายความเป็นส่วนตัว',
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
+                                color: Colors.red,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => PrivacyPolicy(),
+                                  );
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 FilledButton(
-                  onPressed: () {
-                    if (widget.formKey.currentState!.validate()) {
-                      widget.onSignUp(context);
-                    }
-                  },
+                  onPressed:
+                      !_isPrivacyPolicyAccpted || !_isTermsAndConditionAccepted
+                          ? null
+                          : () {
+                              if (widget.formKey.currentState!.validate()) {
+                                widget.onSignUp(context);
+                              }
+                            },
                   child: Text(
                     'สมัคร',
                     style: textTheme.bodySmall,

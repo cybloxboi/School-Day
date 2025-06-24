@@ -20,21 +20,39 @@ class GeminiService {
   static Future<Map<String, dynamic>> ask({
     required String userMessage,
     required String email,
+    required String categoryId,
+    required String timetableId,
   }) async {
     const url =
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$geminiKey';
 
-    // TODO: รับข้อมูลตารางเรียน
     final firestore = FirebaseFirestore.instance;
     final todosSnapshot = await firestore
         .collection('Users')
         .doc(email)
         .collection('Todos')
+        .doc(categoryId)
         .get();
 
-    final rawTodos = todosSnapshot.docs.map((doc) => doc.data()).toList();
+    dynamic todo;
 
-    final todos = makeEncodable(rawTodos);
+    if (todosSnapshot.exists) {
+      final rawTodo = todosSnapshot.data();
+      todo = makeEncodable(rawTodo);
+    }
+
+    final timetableSnapshot = await firestore
+        .collection('Users')
+        .doc(email)
+        .collection('Timetables')
+        .doc(timetableId)
+        .get();
+
+    dynamic timetable;
+    if (timetableSnapshot.exists) {
+      final rawTimetable = timetableSnapshot.data();
+      timetable = makeEncodable(rawTimetable);
+    }
 
     final prompt = """
 คุณคือผู้ช่วยจัดการตารางเรียน และงานของผู้ใช้ในแอปชื่อ School Day พัฒนาโดยนักเรียนโรงเรียนอำนาจเจริญ
@@ -73,13 +91,18 @@ class GeminiService {
   } || null, // หากเป็นการ update ให้แนบค่า oldTodo ในนี้
   "newTimetable": { // หากเป็น add ให้เอามาจากคำสั่งผู้ใช้ แต่ถ้าเป็น delete ให้แนบมาได้เลย
     "id": String || null, // ให้แนบมาหากเป็น delete
+    "dateIndex": // ให้ใส่เลข 0 - 6 หมายถึงวันจันทร์ ถึงวันอาทิตย์
     "title": String,
-    "startTime": ISO8601 Date || null,
-    "endTime": ISO8601 Date || null,
+    "startTime": {
+      "hour": int,
+      "minute": int,
+    } || null,
+    "endTime": {
+      "hour": int,
+      "minute": int,
+    } || null,
     "location": String,
-    "professor": String,
-    "isNotify": true || false,
-    "notifyTime": ISO8601 Date || null
+    "professor": String
   }
 }
 
@@ -94,7 +117,10 @@ class GeminiService {
 ${DateTime.now().toIso8601String()}
 
 ข้อมูลงาน (todos) ปัจจุบันของผู้ใช้:
-${jsonEncode(todos)}
+${todo != null ? jsonEncode(todo) : "ไม่มีงาน"}
+
+ข้อมูลตารางเรียน (timetable) ปัจจุบันของผู้ใช้:
+${timetable != null ? jsonEncode(timetable) : "ไม่มีตารางเรียน"}
 
 คำสั่งของผู้ใช้:
 $userMessage
@@ -193,8 +219,7 @@ $userMessage
               !newTimetable.containsKey('endTime') ||
               !newTimetable.containsKey('location') ||
               !newTimetable.containsKey('professor') ||
-              !newTimetable.containsKey('isNotify') ||
-              !newTimetable.containsKey('notifyTime')) {
+              !newTimetable.containsKey('dateIndex')) {
             return false;
           }
         } else {

@@ -11,8 +11,6 @@ class AboutDeveloper extends StatefulWidget {
 
 class _AboutDeveloperState extends State<AboutDeveloper> {
   String _licenseAgreementText = '';
-  String _purposeText = '';
-
   @override
   void initState() {
     super.initState();
@@ -22,15 +20,6 @@ class _AboutDeveloperState extends State<AboutDeveloper> {
       (text) => setState(
         () {
           _licenseAgreementText = text;
-        },
-      ),
-    );
-
-    loadTextFromFile(
-      'assets/texts/app_purpose.txt',
-      (text) => setState(
-        () {
-          _purposeText = text;
         },
       ),
     );
@@ -87,7 +76,7 @@ class _AboutDeveloperState extends State<AboutDeveloper> {
           spacing: 16,
           children: [
             Text(
-              'แอปนี้ถูกพัฒนาด้วย Flutter โดย',
+              'แอปนี้ถูกพัฒนาด้วย Flutter & Firebase & Gemini โดย',
               style: textTheme.bodySmall!.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -97,24 +86,7 @@ class _AboutDeveloperState extends State<AboutDeveloper> {
               style: textTheme.bodySmall,
             ),
             Text(
-              'โรงเรียนอำนาจเจริญ',
-              style: textTheme.bodySmall,
-            ),
-            const Divider(),
-            Text(
-              'จุดประสงค์ของแอปนี้',
-              style: textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: '     '),
-                  TextSpan(text: _purposeText),
-                ],
-              ),
-              textAlign: TextAlign.start,
+              'โรงเรียนอำนาจเจริญ โดยมี นางสาว อารีรัตน์ ธานี เป็นคุณครูที่ปรึกษาโครงการ',
               style: textTheme.bodySmall,
             ),
             const Divider(),

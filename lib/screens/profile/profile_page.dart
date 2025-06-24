@@ -1,15 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/app_details/privacy_policy.dart';
+import 'package:school_day/components/app_details/terms_and_condition.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
-import 'package:school_day/components/others/web_utils.dart';
-import 'package:school_day/components/profile/about_developer.dart';
+import 'package:school_day/components/app_details/about_developer.dart';
 import 'package:school_day/components/profile/notification_switch.dart';
 import 'package:school_day/screens/profile/edit_profile_page.dart';
-import 'package:school_day/screens/report/report_problem_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -207,31 +206,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const NotificationSwitch(),
                                   const Divider(),
                                   TextButton.icon(
-                                    onPressed: () {
-                                      if (kIsWeb) {
-                                        openNewTab(
-                                          'https://forms.gle/ADrcqjmjCb5ocBr48',
-                                          '_blank',
-                                        );
-                                      } else {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const ReportProblemPage(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    label: Text(
-                                      'รายงานปัญหาที่พบ',
-                                      style: textTheme.bodySmall!.copyWith(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    icon: const Icon(
-                                        Icons.report_problem_rounded),
-                                  ),
-                                  TextButton.icon(
                                     icon: const Icon(Icons.groups_rounded),
                                     label: Text(
                                       'เกี่ยวกับผู้พัฒนา และแอปพลิเคชัน',
@@ -246,6 +220,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       );
                                     },
                                   ),
+                                  TermsAndConditionButton(),
+                                  PrivacyPolicyButton(),
                                   Text(
                                     'เวอร์ชัน $appVersion',
                                     style: textTheme.bodySmall,
