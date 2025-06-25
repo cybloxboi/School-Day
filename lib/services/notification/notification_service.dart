@@ -108,10 +108,6 @@ class NotificationService {
   }
 
   Future<void> initTokenManagement(String email) async {
-    if (!kDebugMode) {
-      return;
-    }
-
     final prefs = await SharedPreferences.getInstance();
     final currentToken = await _firebaseMessaging.getToken();
     final lastToken = prefs.getString('fcm_token');
