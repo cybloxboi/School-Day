@@ -160,29 +160,27 @@ class _TodoPageState extends State<TodoPage> {
         ],
       ),
       backgroundColor: backgroundColor,
-      floatingActionButton: kDebugMode
-          ? FloatingActionButton(
-              onPressed: () {
-                if (categoryID == null) return;
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (categoryID == null) return;
 
-                TodoEntry todoEntry = TodoEntry(
-                  email: currentUser.email!,
-                  categoryID: categoryID!,
-                );
+          TodoEntry todoEntry = TodoEntry(
+            email: currentUser.email!,
+            categoryID: categoryID!,
+          );
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddNewTodoPage(
-                      isEdited: false,
-                      todoEntry: todoEntry,
-                    ),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add_rounded),
-            )
-          : null,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddNewTodoPage(
+                isEdited: false,
+                todoEntry: todoEntry,
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.add_rounded),
+      ),
       body: StreamBuilder(
         stream: _categoryDocument.getCurrentTodosID(_userStream),
         builder: (context, snapshot) {
