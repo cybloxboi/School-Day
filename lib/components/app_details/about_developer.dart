@@ -1,35 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:school_day/styles/styles.dart';
 
-class AboutDeveloper extends StatefulWidget {
+class AboutDeveloper extends StatelessWidget {
   const AboutDeveloper({super.key});
-
-  @override
-  State<AboutDeveloper> createState() => _AboutDeveloperState();
-}
-
-class _AboutDeveloperState extends State<AboutDeveloper> {
-  String _licenseAgreementText = '';
-  @override
-  void initState() {
-    super.initState();
-
-    loadTextFromFile(
-      'assets/texts/license_agreement.txt',
-      (text) => setState(
-        () {
-          _licenseAgreementText = text;
-        },
-      ),
-    );
-  }
-
-  Future<void> loadTextFromFile(
-      String path, void Function(String) onLoad) async {
-    final text = await rootBundle.loadString(path);
-    onLoad(text);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,22 +63,6 @@ class _AboutDeveloperState extends State<AboutDeveloper> {
               style: textTheme.bodySmall,
             ),
             const Divider(),
-            Text(
-              'ข้อตกลงในการใช้งานซอฟต์แวร์',
-              style: textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: '     '),
-                  TextSpan(text: _licenseAgreementText),
-                ],
-              ),
-              textAlign: TextAlign.start,
-              style: textTheme.bodySmall,
-            ),
           ],
         ),
       ),

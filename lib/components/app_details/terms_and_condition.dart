@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_day/styles/styles.dart';
 
 class TermsAndConditionButton extends StatelessWidget {
@@ -21,8 +22,35 @@ class TermsAndConditionButton extends StatelessWidget {
   }
 }
 
-class TermsAndCondition extends StatelessWidget {
+class TermsAndCondition extends StatefulWidget {
   const TermsAndCondition({super.key});
+
+  @override
+  State<TermsAndCondition> createState() => _TermsAndConditionState();
+}
+
+class _TermsAndConditionState extends State<TermsAndCondition> {
+  String _licenseAgreementText = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadTextFromFile(
+      'assets/texts/license_agreement.txt',
+      (text) => setState(
+        () {
+          _licenseAgreementText = text;
+        },
+      ),
+    );
+  }
+
+  Future<void> loadTextFromFile(
+      String path, void Function(String) onLoad) async {
+    final text = await rootBundle.loadString(path);
+    onLoad(text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +70,27 @@ class TermsAndCondition extends StatelessWidget {
           spacing: 16,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ปรับปรุงล่าสุด: 23 มิถุนายน 2568'),
+            Text('ปรับปรุงล่าสุด: 24 มิถุนายน 2568'),
             Text(
                 'โปรดอ่านข้อตกลงและเงื่อนไขการใช้งานนี้อย่างละเอียดก่อนเริ่มใช้งานแอปพลิเคชัน "School Day" (ต่อไปนี้เรียกว่า "แอปฯ")'),
             Text(
                 'เมื่อผู้ใช้งานให้ความยินยอมข้อตกลงและเงื่อนไขในการใช้งานในขั้นตอนการสมัครสมาชิกของแอปฯ จะถือว่าผู้ใช้งานได้อ่าน เข้าใจ และยอมรับข้อกำหนดต่าง ๆ ที่ระบุไว้ในข้อตกลงนี้แล้วโดยสมบูรณ์'),
+            Text(
+              'ข้อตกลงในการใช้งานซอฟต์แวร์',
+              style: textTheme.bodySmall!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(text: '     '),
+                  TextSpan(text: _licenseAgreementText),
+                ],
+              ),
+              textAlign: TextAlign.start,
+              style: textTheme.bodySmall,
+            ),
             Text(
               '1. วัตถุประสงค์ของแอปพลิเคชัน',
               style: TextStyle(
