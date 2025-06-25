@@ -47,12 +47,11 @@ class _SignUpPageState extends State<SignUpPage> {
         username: _usernameController.text.trim(),
       );
 
-      if (!context.mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (context.mounted) Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
-      if (!context.mounted) return;
+      if (context.mounted) Navigator.of(context).pop();
 
-      Navigator.pop(context);
+      if (!context.mounted) return;
 
       String errorMessage;
 

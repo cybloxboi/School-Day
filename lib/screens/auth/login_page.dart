@@ -35,9 +35,11 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      if (context.mounted) Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
 
         String errorMessage;
 
@@ -54,10 +56,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
-    }
-
-    if (context.mounted) {
-      Navigator.pop(context);
     }
   }
 

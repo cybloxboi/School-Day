@@ -30,12 +30,19 @@ class _WelcomeTextState extends State<WelcomeText> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedTextKit(
-      repeatForever: true,
-      pause: const Duration(seconds: 15),
-      animatedTexts: messages.map((message) {
-        return TypewriterAnimatedText(message);
-      }).toList(),
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        alignment: Alignment.centerLeft,
+        fit: BoxFit.scaleDown,
+        child: AnimatedTextKit(
+          repeatForever: true,
+          pause: const Duration(seconds: 15),
+          animatedTexts: messages.map((message) {
+            return TypewriterAnimatedText(message);
+          }).toList(),
+        ),
+      ),
     );
   }
 }
