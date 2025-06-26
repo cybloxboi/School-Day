@@ -80,6 +80,7 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
               notification: {
                 channelId: "notify_task_channel",
                 priority: "high",
+                sound: "default",
               },
             },
             apns: {

@@ -78,7 +78,11 @@ class GeminiService {
     "title": String,
     "priority": "high" || "medium" || "low" || "none",
     "description": String || null,
-    "alarmTime": ISO8601 Date || null // หากผู้ใช้ไม่ได้บอกเวลาที่ชัดเจน เช่นแค่วันที่ ให้ถือว่าเป็น 8:00
+    "selectedDate": ISO8601 Date || null,
+    "alarmTime": {
+      "hour": int,
+      "minute": int,
+    } || null, // จะมีข้อมูลได้ก็ต่อเมื่อ selectedDate != null
   }
 }
 
@@ -100,7 +104,7 @@ class GeminiService {
     "endTime": {
       "hour": int,
       "minute": int,
-    } || null,
+    } || null, // startTime และ endTime ต้องไม่เป็นเวลาเดียวกัน
     "location": String,
     "professor": String
   }
@@ -127,15 +131,13 @@ $userMessage
 
 กรุณาตอบกลับเฉพาะ JSON ตามที่กำหนดด้านบนเท่านั้น และเป็น null ได้เฉพาะที่กำหนดเท่านั้น
 
-แต่ถ้าไม่พบข้อมูลที่ผู้ใช้ต้องการ ให้คืนค่า
+แต่ถ้าไม่พบข้อมูลที่ผู้ใช้ต้องการ หรือค่าไม่สามารถเป็น null ได้ ให้คืนค่า
 {
   "status": "error",
   "replyText": // บอกเหตุผลผู้ใช้งาน,
   "tasks": null,
 }
 """;
-
-    debugPrint(prompt);
 
     final body = jsonEncode({
       "contents": [
@@ -170,6 +172,9 @@ $userMessage
       }
 
       final jsonString = content.substring(jsonStart, jsonEnd + 1);
+
+      debugPrint(jsonString);
+
       final jsonData = jsonDecode(jsonString);
 
       if (!isValidTask(jsonData)) {

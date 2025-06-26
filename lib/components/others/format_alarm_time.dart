@@ -8,7 +8,7 @@ String formatAlarmTime(String? rawAlarmTime) {
   try {
     DateTime alarmDateTime = DateTime.parse(rawAlarmTime).toLocal();
 
-    final thaiDateFormat = DateFormat("d MMM y 'เวลา' H:mm", 'th_TH');
+    final thaiDateFormat = DateFormat("d MMM y", 'th_TH');
 
     final buddhistYear = alarmDateTime.year + 543;
     final formattedDate = thaiDateFormat

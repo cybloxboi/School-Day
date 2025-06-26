@@ -197,17 +197,27 @@ class _AiProcessCardState extends State<AiProcessCard> {
                 final newTodo = task['newTodo'];
                 final oldTodo = task['oldTodo'];
 
-                String title = newTodo['title'] ?? 'ไม่ระบุชื่อ';
-                String priority = newTodo['priority'] ?? 'ไม่มี';
-                String description = newTodo['description'] ?? 'ไม่มี';
-                String alarmTime = formatAlarmTime(newTodo['alarmTime']);
+                String? id = newTodo['id'];
+                String title = newTodo['title'];
+                String priority = newTodo['priority'];
+                String? description = newTodo['description'];
+                DateTime? selectedDate = newTodo['selectedDate'] != null
+                    ? DateTime.tryParse(newTodo['selectedDate'])
+                    : null;
+                Time? alarmTime = newTodo['alarmTime'] != null
+                    ? Time.fromJson(newTodo['alarmTime'])
+                    : null;
 
                 final Map<String, Priority?> priorityOptions = {
                   'high': Priority.high,
                   'medium': Priority.medium,
                   'low': Priority.low,
-                  'ไม่มี': null,
+                  'none': null,
                 };
+
+                final oldPriorityKey = oldTodo?['priority'];
+                final Priority? currentPriority = priorityOptions[priority];
+                final Priority? oldPriority = priorityOptions[oldPriorityKey];
 
                 TodoEntry todoEntry = TodoEntry(
                   email: widget.userEmail,
@@ -215,15 +225,11 @@ class _AiProcessCardState extends State<AiProcessCard> {
                 );
 
                 Todo todo = Todo(
-                  id: newTodo['id'],
+                  id: id,
                   title: title,
-                  description: newTodo['description'],
-                  selectedDate: newTodo['selectedDate'] != null
-                      ? DateTime.tryParse(newTodo['selectedDate'])
-                      : null,
-                  alarmTime: newTodo['alarmTime'] != null
-                      ? Time.fromJson(newTodo['alarmTime'])
-                      : null,
+                  description: description,
+                  selectedDate: selectedDate,
+                  alarmTime: alarmTime,
                   priority: priorityOptions[priority],
                 );
 
@@ -275,92 +281,110 @@ class _AiProcessCardState extends State<AiProcessCard> {
                               ),
                             ],
                           ),
-                          RichText(
-                            text: TextSpan(
-                              style: Theme.of(context).textTheme.bodySmall,
-                              children: [
-                                const WidgetSpan(
-                                  child:
-                                      Icon(Icons.description_rounded, size: 18),
-                                  alignment: PlaceholderAlignment.middle,
-                                ),
-                                const TextSpan(text: " รายละเอียด: "),
-                                if (oldTodo != null &&
-                                    oldTodo['description'] != description)
+                          if (description != null)
+                            RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodySmall,
+                                children: [
+                                  const WidgetSpan(
+                                    child: Icon(Icons.description_rounded,
+                                        size: 18),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  const TextSpan(text: " รายละเอียด: "),
+                                  if (oldTodo != null &&
+                                      oldTodo['description'] != description)
+                                    TextSpan(
+                                      text: '${oldTodo['description']} ',
+                                      style: const TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                                   TextSpan(
-                                    text: '${oldTodo['description']} ',
+                                    text: description,
                                     style: const TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                TextSpan(
-                                  text: description,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              style: Theme.of(context).textTheme.bodySmall,
-                              children: [
-                                const WidgetSpan(
-                                  child: Icon(Icons.access_alarm, size: 18),
-                                  alignment: PlaceholderAlignment.middle,
-                                ),
-                                const TextSpan(text: " กำหนดส่ง: "),
-                                if (oldTodo != null &&
-                                    formatAlarmTime(oldTodo['alarmTime']) !=
-                                        alarmTime)
+                          if (selectedDate != null)
+                            RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodySmall,
+                                children: [
+                                  const WidgetSpan(
+                                    child: Icon(Icons.access_alarm, size: 18),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  const TextSpan(text: " กำหนดส่ง: "),
                                   TextSpan(
                                     text:
-                                        '${formatAlarmTime(oldTodo['alarmTime'])} ',
+                                        '${formatAlarmTime(selectedDate.toIso8601String())} ',
                                     style: const TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                TextSpan(
-                                  text: alarmTime,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              style: Theme.of(context).textTheme.bodySmall,
-                              children: [
-                                const WidgetSpan(
-                                  child: Icon(Icons.star,
-                                      size: 18, color: Colors.amber),
-                                  alignment: PlaceholderAlignment.middle,
-                                ),
-                                const TextSpan(text: " ความสำคัญ: "),
-                                if (oldTodo != null &&
-                                    oldTodo['priority'] != priority)
-                                  TextSpan(
-                                    text: priorityOptions[oldTodo['priority']]!
-                                        .toLocalizedString(),
-                                    style: const TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Colors.grey,
+                                  if (alarmTime != null)
+                                    TextSpan(
+                                      text: 'เวลา: ',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                TextSpan(
-                                  text: priorityOptions[priority]!
-                                      .toLocalizedString(),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                                  if (oldTodo != null &&
+                                      alarmTime != null &&
+                                      Time.fromJson(oldTodo['alarmTime']) !=
+                                          alarmTime)
+                                    TextSpan(
+                                      text: Time.fromJson(oldTodo['alarmTime'])
+                                          .toString(),
+                                      style: const TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  if (alarmTime != null)
+                                    TextSpan(
+                                      text: alarmTime.toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
+                          if (priority != 'none')
+                            RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.bodySmall,
+                                children: [
+                                  const WidgetSpan(
+                                    child: Icon(Icons.star,
+                                        size: 18, color: Colors.amber),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  const TextSpan(text: " ความสำคัญ: "),
+                                  if (oldPriority != null &&
+                                      oldPriority != currentPriority)
+                                    TextSpan(
+                                      text: oldPriority.toLocalizedString(),
+                                      style: const TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  if (currentPriority != null)
+                                    TextSpan(
+                                      text: currentPriority.toLocalizedString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                ],
+                              ),
+                            ),
                           const Divider(),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 400),

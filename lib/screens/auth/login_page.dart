@@ -78,32 +78,40 @@ class _LoginPageState extends State<LoginPage> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 820) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    return Column(
                       children: [
-                        const SizedBox(
-                          width: 34,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 34,
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: LottieBuilder.asset(
+                                'assets/animations/login.json',
+                                width: 600,
+                                height: 600,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 34,
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: LoginWidget(
+                                formKey: _formKey,
+                                emailController: _emailController,
+                                passwordController: _passwordController,
+                                onLogin: (context) => logIn(context),
+                              ),
+                            ),
+                          ],
                         ),
-                        Flexible(
-                          flex: 1,
-                          child: LottieBuilder.asset(
-                            'assets/animations/login.json',
-                            width: 600,
-                            height: 600,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 34,
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: LoginWidget(
-                            formKey: _formKey,
-                            emailController: _emailController,
-                            passwordController: _passwordController,
-                            onLogin: (context) => logIn(context),
-                          ),
+                        Text(
+                          'เวอร์ชัน $appVersion',
+                          style: textTheme.bodySmall,
                         ),
                       ],
                     );
@@ -124,6 +132,13 @@ class _LoginPageState extends State<LoginPage> {
                             passwordController: _passwordController,
                             onLogin: (context) => logIn(context),
                           ),
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        Text(
+                          'เวอร์ชัน $appVersion',
+                          style: textTheme.bodySmall,
                         ),
                         const SizedBox(height: 48),
                       ],

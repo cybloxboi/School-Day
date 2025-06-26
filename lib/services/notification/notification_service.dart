@@ -85,7 +85,7 @@ class NotificationService {
               selectedChannel.id,
               selectedChannel.name,
               channelDescription: selectedChannel.description,
-              importance: selectedChannel.importance,
+              importance: Importance.max,
               priority: Priority.high,
               playSound: true,
               enableVibration: true,
