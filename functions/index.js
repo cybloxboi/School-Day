@@ -28,18 +28,28 @@ const TODO_DATA_TYPE = "todo";
 
 exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok" }, async () => {
   const now = DateTime.now().setZone("Asia/Bangkok");
+  console.log(`🕒 Running notifyTodo at: ${now.toISOTime()}`);
 
   const usersSnapshot = await admin.firestore().collection("Users")
     .where("isNotifyTodos", "==", true)
     .get();
 
+  console.log(`👥 Users to notify: ${usersSnapshot.size}`);
+
   const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
-    const email = userDoc.email;
+    const email = userDoc.id;
+    const userData = userDoc.data();
     const tokens = userData.tokens || [];
 
-    if (tokens.length === 0) return;
+    console.log(`📧 Processing user: ${email}, Tokens: ${tokens.length}`);
+
+    if (tokens.length === 0) {
+      console.log(`⚠️ No tokens for user: ${email}, skipping...`);
+      return;
+    }
 
     const todosSnapshot = await admin.firestore().collection("Users").doc(email).collection("Todos").get();
+    console.log(`📂 Fetched ${todosSnapshot.size} todo categories for ${email}`);
 
     for (const categoryDoc of todosSnapshot.docs) {
       const todos = categoryDoc.data().todos || [];
@@ -71,6 +81,8 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
         }
 
         if (shouldNotify) {
+          console.log(`🔔 Sending notification for "${todo.title}" to ${email}`);
+
           const message = {
             notification: {
               title: TODO_NOTIFICATION_TITLE,
@@ -107,6 +119,7 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
                 token,
                 ...message,
               });
+              console.log(`✅ Notification sent to ${token}`);
             } catch (err) {
               console.error(`❌ แจ้งเตือนงานล้มเหลว: ${token}`, err);
             }
@@ -183,6 +196,7 @@ exports.notifyCurrentTimetable = onSchedule(
             notification: {
               channelId: "notify_class_time_channel",
               priority: "high",
+              sound: "default",
             },
           },
           apns: {

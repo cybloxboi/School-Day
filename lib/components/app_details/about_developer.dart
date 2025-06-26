@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_day/styles/styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutDeveloper extends StatelessWidget {
   const AboutDeveloper({super.key});
@@ -63,6 +64,34 @@ class AboutDeveloper extends StatelessWidget {
               style: textTheme.bodySmall,
             ),
             const Divider(),
+            Text(
+              'Open-source Project',
+              style: textTheme.bodySmall!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () async {
+                final url = Uri.parse(
+                  'https://github.com/cybloxboi/School-Day',
+                );
+
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  throw 'Could not launch $url';
+                }
+              },
+              icon: ClipOval(
+                child: Image.network(
+                  'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              label: Text('GitHub'),
+            ),
           ],
         ),
       ),

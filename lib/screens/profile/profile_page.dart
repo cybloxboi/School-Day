@@ -222,6 +222,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   TermsAndConditionButton(),
                                   PrivacyPolicyButton(),
+                                  const Divider(),
                                   Text(
                                     'เวอร์ชัน $appVersion',
                                     style: textTheme.bodySmall,
