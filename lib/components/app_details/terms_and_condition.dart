@@ -9,7 +9,7 @@ class TermsAndConditionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       child: Text(
-        'ข้กตกลงและเงื่อนไขการใช้งาน',
+        'ข้อตกลงและเงื่อนไขการใช้งาน',
         style: textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold),
       ),
       onPressed: () {
@@ -31,6 +31,7 @@ class TermsAndCondition extends StatefulWidget {
 
 class _TermsAndConditionState extends State<TermsAndCondition> {
   String _licenseAgreementText = '';
+  String _licenseAgreementEnglishText = '';
 
   @override
   void initState() {
@@ -41,6 +42,15 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
       (text) => setState(
         () {
           _licenseAgreementText = text;
+        },
+      ),
+    );
+
+    loadTextFromFile(
+      'assets/texts/license_agreement_english.txt',
+      (text) => setState(
+        () {
+          _licenseAgreementEnglishText = text;
         },
       ),
     );
@@ -70,13 +80,13 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
           spacing: 16,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ปรับปรุงล่าสุด: 24 มิถุนายน 2568'),
+            Text('ปรับปรุงล่าสุด: 26 มิถุนายน 2568'),
             Text(
                 'โปรดอ่านข้อตกลงและเงื่อนไขการใช้งานนี้อย่างละเอียดก่อนเริ่มใช้งานแอปพลิเคชัน "School Day" (ต่อไปนี้เรียกว่า "แอปฯ")'),
             Text(
                 'เมื่อผู้ใช้งานให้ความยินยอมข้อตกลงและเงื่อนไขในการใช้งานในขั้นตอนการสมัครสมาชิกของแอปฯ จะถือว่าผู้ใช้งานได้อ่าน เข้าใจ และยอมรับข้อกำหนดต่าง ๆ ที่ระบุไว้ในข้อตกลงนี้แล้วโดยสมบูรณ์'),
             Text(
-              'ข้อตกลงในการใช้งานซอฟต์แวร์',
+              'ข้อตกลงในการใช้ซอฟต์แวร์',
               style: textTheme.bodySmall!.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -86,6 +96,22 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
                 children: [
                   const TextSpan(text: '     '),
                   TextSpan(text: _licenseAgreementText),
+                ],
+              ),
+              textAlign: TextAlign.start,
+              style: textTheme.bodySmall,
+            ),
+            Text(
+              'License Agreement',
+              style: textTheme.bodySmall!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(text: '     '),
+                  TextSpan(text: _licenseAgreementEnglishText),
                 ],
               ),
               textAlign: TextAlign.start,

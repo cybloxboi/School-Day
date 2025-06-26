@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:school_day/styles/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -83,8 +84,9 @@ class AboutDeveloper extends StatelessWidget {
                 }
               },
               icon: ClipOval(
-                child: Image.network(
-                  'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+                child: CachedNetworkImage(
+                  imageUrl:
+                      'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
                   width: 32,
                   height: 32,
                   fit: BoxFit.cover,
