@@ -1,11 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:school_day/data/time.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 enum Priority {
   low,
   medium,
   high,
+}
+
+enum SortOption {
+  createdTime,
+  priority,
+  dueDate,
+}
+
+extension SortOptionExtension on SortOption {
+  String get displayName {
+    switch (this) {
+      case SortOption.createdTime:
+        return 'วันที่สร้าง';
+      case SortOption.priority:
+        return 'ความสำคัญ';
+      case SortOption.dueDate:
+        return 'วันครบกำหนด';
+    }
+  }
+
+  String get key => name;
+}
+
+Future<void> saveSortOption(SortOption option) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('sortOption', option.key);
+}
+
+Future<SortOption> loadSortOption() async {
+  final prefs = await SharedPreferences.getInstance();
+  final key = prefs.getString('sortOption');
+
+  return SortOption.values.firstWhere(
+    (e) => e.key == key,
+    orElse: () => SortOption.createdTime,
+  );
 }
 
 extension PriorityExtension on Priority {

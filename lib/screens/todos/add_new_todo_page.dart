@@ -160,11 +160,10 @@ class _AddNewTodoPageState extends State<AddNewTodoPage> {
                     selectedDate: _selectedDate,
                     alarmTime: _alarmTime,
                     priority: _priorityOptions[_priority],
+                    isDone: widget.todoData != null
+                        ? widget.todoData!.isDone
+                        : false,
                   );
-
-                  debugPrint(
-                      'selectedDate: ${_selectedDate?.toIso8601String()}');
-                  debugPrint('alarmTime: ${_alarmTime?.toString()}');
 
                   bool success;
 
