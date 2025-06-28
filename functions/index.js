@@ -51,6 +51,8 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
     const todosSnapshot = await admin.firestore().collection("Users").doc(email).collection("Todos").get();
     console.log(`📂 Fetched ${todosSnapshot.size} todo categories for ${email}`);
 
+    const notifications = [];
+
     for (const categoryDoc of todosSnapshot.docs) {
       const todos = categoryDoc.data().todos || [];
 
@@ -58,27 +60,19 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
         if (!todo.selectedDate || todo.isDone) continue;
 
         const selectedDate = DateTime.fromISO(todo.selectedDate, { zone: "Asia/Bangkok" });
-
-        let shouldNotify = false;
+        let targetDateTime;
 
         if (todo.alarmTime) {
-          const { hour, minute } = todo.alarmTime;
-          if (
-            selectedDate.hasSame(now, "day") &&
-            now.hour === hour &&
-            now.minute === minute
-          ) {
-            shouldNotify = true;
-          }
+          targetDateTime = selectedDate.set({
+            hour: todo.alarmTime.hour,
+            minute: todo.alarmTime.minute,
+          });
         } else {
-          if (
-            selectedDate.hasSame(now, "day") &&
-            now.hour === 8 &&
-            now.minute === 0
-          ) {
-            shouldNotify = true;
-          }
+          targetDateTime = selectedDate.set({ hour: 8, minute: 0 });
         }
+
+        const diffInMinutes = Math.abs(now.diff(targetDateTime, "minutes").minutes);
+        const shouldNotify = diffInMinutes < 1;
 
         if (shouldNotify) {
           console.log(`🔔 Sending notification for "${todo.title}" to ${email}`);
@@ -113,20 +107,20 @@ exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok
             },
           };
 
-          for (const token of tokens) {
-            try {
-              await admin.messaging().send({
-                token,
-                ...message,
-              });
-              console.log(`✅ Notification sent to ${token}`);
-            } catch (err) {
-              console.error(`❌ แจ้งเตือนงานล้มเหลว: ${token}`, err);
-            }
-          }
+          notifications.push({ message, tokens });
         }
       }
     }
+
+    const sendPromises = notifications.flatMap(({ message, tokens }) =>
+      tokens.map((token) =>
+        admin.messaging().send({ token, ...message })
+          .then(() => console.log(`✅ Notification sent to ${token}`))
+          .catch((err) => console.error(`❌ แจ้งเตือนงานล้มเหลว: ${token}`, err))
+      )
+    );
+
+    await Promise.all(sendPromises);
   });
 
   await Promise.all(userProcessingPromises);
