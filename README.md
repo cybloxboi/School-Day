@@ -11,6 +11,12 @@ This research and activity is funded by the National Research Council of Thailan
 
 &emsp;ด้วยเหตุนี้ โครงงานนี้จึงถูกพัฒนาขึ้นเพื่อสร้างแอปพลิเคชันที่สามารถช่วยให้นักเรียนบริหารจัดการตารางเรียนและงานต่าง ๆ ได้อย่างเป็นระบบ ช่วยลดความสับสนในการจัดสรรเวลา พร้อมทั้งเพิ่มความคล่องตัวในการติดตามงานหรือกิจกรรมที่ต้องทำในแต่ละวัน โดยมุ่งเน้นให้การใช้งานเป็นไปอย่างสะดวก เข้าใจง่าย และสามารถตอบสนองต่อความต้องการของผู้เรียนในยุคดิจิทัลที่เทคโนโลยีเข้ามามีบทบาทในชีวิตประจำวันมากยิ่งขึ้น
 
+## ดาวน์โหลดแอปพลิเคชัน
+- [iOS](https://appdistribution.firebase.google.com/testerapps/1:648610348518:ios:5807e7f352eb30ec89aa27/releases/61h6nsmoafhpg?utm_source=firebase-console)
+- [Android](https://github.com/cybloxboi/School-Day/releases)
+- [Web](https://school-day-a1e87.web.app)
+
+[ตัวอย่างแอปพลิเคชัน](https://youtube.com/shorts/vVLk0XQS6Kc?feature=share)
 
 ## วัตถุประสงค์
 1.	เพื่อพัฒนาแอปพลิเคชันที่รวมการจัดการตารางเรียนและการติดตามงานเข้าไว้ในระบบเดียว
