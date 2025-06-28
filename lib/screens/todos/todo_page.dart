@@ -14,7 +14,12 @@ import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/styles/styles.dart';
 
 class TodoPage extends StatefulWidget {
-  const TodoPage({super.key});
+  const TodoPage({
+    super.key,
+    required this.isWideScreen,
+  });
+
+  final bool isWideScreen;
 
   @override
   State<TodoPage> createState() => _TodoPageState();
@@ -349,60 +354,63 @@ class _TodoPageState extends State<TodoPage> {
                           itemBuilder: (BuildContext context, int index) {
                             return Slidable(
                               key: ValueKey(todoData[index].id),
-                              endActionPane: ActionPane(
-                                motion: const DrawerMotion(),
-                                children: [
-                                  SlidableAction(
-                                    onPressed: (context) {
-                                      if (categoryID == null) return;
+                              endActionPane: widget.isWideScreen
+                                  ? null
+                                  : ActionPane(
+                                      motion: const DrawerMotion(),
+                                      children: [
+                                        SlidableAction(
+                                          onPressed: (context) {
+                                            if (categoryID == null) return;
 
-                                      TodoEntry todoEntry = TodoEntry(
-                                        email: currentUser.email!,
-                                        categoryID: categoryID!,
-                                      );
+                                            TodoEntry todoEntry = TodoEntry(
+                                              email: currentUser.email!,
+                                              categoryID: categoryID!,
+                                            );
 
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => AddNewTodoPage(
-                                            todoEntry: todoEntry,
-                                            isEdited: true,
-                                            todoData: todoData[index],
-                                          ),
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddNewTodoPage(
+                                                  todoEntry: todoEntry,
+                                                  isEdited: true,
+                                                  todoData: todoData[index],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          backgroundColor: backgroundColor,
+                                          foregroundColor: Colors.blue,
+                                          spacing: 8,
+                                          icon: Icons.edit,
+                                          label: 'แก้ไข',
                                         ),
-                                      );
-                                    },
-                                    backgroundColor: backgroundColor,
-                                    foregroundColor: Colors.blue,
-                                    spacing: 8,
-                                    icon: Icons.edit,
-                                    label: 'แก้ไข',
-                                  ),
-                                  SlidableAction(
-                                    onPressed: (context) async {
-                                      if (categoryID == null) return;
+                                        SlidableAction(
+                                          onPressed: (context) async {
+                                            if (categoryID == null) return;
 
-                                      TodoEntry todoEntry = TodoEntry(
-                                        email: currentUser.email!,
-                                        categoryID: categoryID!,
-                                      );
+                                            TodoEntry todoEntry = TodoEntry(
+                                              email: currentUser.email!,
+                                              categoryID: categoryID!,
+                                            );
 
-                                      await todoEntry.deleteTodo(
-                                        todo: todoData[index],
-                                      );
-                                    },
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
+                                            await todoEntry.deleteTodo(
+                                              todo: todoData[index],
+                                            );
+                                          },
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                          ),
+                                          icon: Icons.delete,
+                                          spacing: 8,
+                                          label: 'ลบ',
+                                        ),
+                                      ],
                                     ),
-                                    icon: Icons.delete,
-                                    spacing: 8,
-                                    label: 'ลบ',
-                                  ),
-                                ],
-                              ),
                               child: Card(
                                 key: ValueKey(todoData[index].id),
                                 shape: RoundedRectangleBorder(

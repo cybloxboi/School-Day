@@ -88,7 +88,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
                     dateIndex: widget.dateIndex,
                     userStream: _userStream,
                   ),
-                  const TodoPage(),
+                  TodoPage(
+                    isWideScreen: isWideScreen,
+                  ),
                   const ProfilePage(),
                 ][_selectedIndex],
               ),
