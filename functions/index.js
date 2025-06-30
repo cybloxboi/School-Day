@@ -26,194 +26,135 @@ const TODO_NOTIFICATION_TITLE = "📌 ถึงกำหนดการแล้
 const TODO_NOTIFICATION_BODY = (title) => `${title || "มีงานที่ต้องทำ"}`;
 const TODO_DATA_TYPE = "todo";
 
-exports.notifyTodo = onSchedule({ schedule: "* * * * *", timeZone: "Asia/Bangkok" }, async () => {
-  const now = DateTime.now().setZone("Asia/Bangkok");
-  console.log(`🕒 Running notifyTodo at: ${now.toISOTime()}`);
+exports.notifyTodo = onSchedule(
+  { schedule: "* * * * *", timeZone: "Asia/Bangkok" },
+  async () => {
+    const now = DateTime.now().setZone("Asia/Bangkok");
+    console.log(`🕒 Running notifyTodo at: ${now.toISOTime()}`);
 
-  const usersSnapshot = await admin.firestore().collection("Users")
-    .where("isNotifyTodos", "==", true)
-    .get();
+    const usersSnapshot = await admin.firestore().collection("Users")
+      .where("isNotifyTodos", "==", true)
+      .get();
 
-  console.log(`👥 Users to notify: ${usersSnapshot.size}`);
+    const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
+      const email = userDoc.id;
+      const userData = userDoc.data();
+      let tokens = userData.tokens || [];
 
-  const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
-    const email = userDoc.id;
-    const userData = userDoc.data();
-    const tokens = userData.tokens || [];
+      if (tokens.length === 0) return;
 
-    console.log(`📧 Processing user: ${email}, Tokens: ${tokens.length}`);
+      const todosSnapshot = await admin.firestore().collection("Users").doc(email).collection("Todos").get();
 
-    if (tokens.length === 0) {
-      console.log(`⚠️ No tokens for user: ${email}, skipping...`);
-      return;
-    }
+      const messages = [];
 
-    const todosSnapshot = await admin.firestore().collection("Users").doc(email).collection("Todos").get();
-    console.log(`📂 Fetched ${todosSnapshot.size} todo categories for ${email}`);
+      for (const categoryDoc of todosSnapshot.docs) {
+        const todos = categoryDoc.data().todos || [];
 
-    const notifications = [];
+        for (const todo of todos) {
+          if (!todo.selectedDate || todo.isDone) continue;
 
-    for (const categoryDoc of todosSnapshot.docs) {
-      const todos = categoryDoc.data().todos || [];
+          const selectedDate = DateTime.fromISO(todo.selectedDate, { zone: "Asia/Bangkok" });
+          const targetDateTime = todo.alarmTime
+            ? selectedDate.set({ hour: todo.alarmTime.hour, minute: todo.alarmTime.minute })
+            : selectedDate.set({ hour: 8, minute: 0 });
 
-      for (const todo of todos) {
-        if (!todo.selectedDate || todo.isDone) continue;
+          const diffInMinutes = now.diff(targetDateTime, "minutes").minutes;
+          const shouldNotify = diffInMinutes >= 0 && diffInMinutes < 2;
 
-        const selectedDate = DateTime.fromISO(todo.selectedDate, { zone: "Asia/Bangkok" });
-        let targetDateTime;
-
-        if (todo.alarmTime) {
-          targetDateTime = selectedDate.set({
-            hour: todo.alarmTime.hour,
-            minute: todo.alarmTime.minute,
-          });
-        } else {
-          targetDateTime = selectedDate.set({ hour: 8, minute: 0 });
-        }
-
-        const diffInMinutes = Math.abs(now.diff(targetDateTime, "minutes").minutes);
-        const shouldNotify = diffInMinutes < 1;
-
-        if (shouldNotify) {
-          console.log(`🔔 Sending notification for "${todo.title}" to ${email}`);
-
-          const message = {
-            notification: {
-              title: TODO_NOTIFICATION_TITLE,
-              body: TODO_NOTIFICATION_BODY(todo.title),
-            },
-            android: {
+          if (shouldNotify) {
+            messages.push({
               notification: {
-                channelId: "notify_task_channel",
-                priority: "high",
-                sound: "default",
+                title: TODO_NOTIFICATION_TITLE,
+                body: TODO_NOTIFICATION_BODY(todo.title),
               },
-            },
-            apns: {
-              payload: {
-                aps: {
-                  alert: {
-                    title: TODO_NOTIFICATION_TITLE,
-                    body: TODO_NOTIFICATION_BODY(todo.title),
-                  },
-                  sound: "default",
-                },
+              data: {
+                type: TODO_DATA_TYPE,
+                todoId: todo.id,
+                categoryId: categoryDoc.id,
               },
-            },
-            data: {
-              type: TODO_DATA_TYPE,
-              todoId: todo.id,
-              categoryId: categoryDoc.id,
-            },
-          };
-
-          notifications.push({ message, tokens });
+            });
+          }
         }
       }
-    }
 
-    const sendPromises = notifications.flatMap(({ message, tokens }) =>
-      tokens.map((token) =>
-        admin.messaging().send({ token, ...message })
-          .then(() => console.log(`✅ Notification sent to ${token}`))
-          .catch((err) => console.error(`❌ แจ้งเตือนงานล้มเหลว: ${token}`, err))
-      )
-    );
+      const failedTokens = [];
 
-    await Promise.all(sendPromises);
-  });
+      for (const msg of messages) {
+        for (const token of tokens) {
+          try {
+            await admin.messaging().send({ token, ...msg });
+            console.log(`✅ Sent todo to ${token}`);
+          } catch (err) {
+            console.error(`❌ Failed todo: ${token}`, err);
+            failedTokens.push(token);
+          }
+        }
+      }
 
-  await Promise.all(userProcessingPromises);
-  return null;
-});
+      if (failedTokens.length > 0) {
+        tokens = tokens.filter((t) => !failedTokens.includes(t));
+        await admin.firestore().collection("Users").doc(email).update({ tokens });
+      }
+    });
+
+    await Promise.all(userProcessingPromises);
+    return null;
+  }
+);
 
 exports.notifyCurrentTimetable = onSchedule(
-  {
-    schedule: "* * * * *",
-    timeZone: "Asia/Bangkok",
-  },
+  { schedule: "* * * * *", timeZone: "Asia/Bangkok" },
   async () => {
     const now = DateTime.now().setZone("Asia/Bangkok");
     const currentMinutes = now.hour * 60 + now.minute;
 
     const usersSnapshot = await admin.firestore().collection("Users")
       .where("isNotifyTimetable", "==", true)
-      .where("hasTodayNotification", "==", true)
-      .where("nextNotificationMinutes", "==", currentMinutes)
       .get();
 
     const userProcessingPromises = usersSnapshot.docs.map(async (userDoc) => {
       const email = userDoc.id;
       const userData = userDoc.data();
-
-      if (userData.isNotifyTimetable === false) return;
-
-      const tokens = userData.tokens || [];
+      let tokens = userData.tokens || [];
       const todaySlots = userData.todaySlots || [];
 
       if (tokens.length === 0 || todaySlots.length === 0) return;
 
-      const slotToNotify = todaySlots.find((slot) => {
+      // แจ้งเตือนทุก slot ที่ตรงเวลา
+      const slotsToNotify = todaySlots.filter((slot) => {
         if (!slot.isNotify) return false;
         const start = slot.startTime?.hour * 60 + slot.startTime?.minute;
         const before = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
         return start - before === currentMinutes;
       });
 
-      if (!slotToNotify) {
-        const nextNotifyMinutes = todaySlots
-          .map((slot) => {
-            if (!slot.isNotify) return null;
-            const start = slot.startTime?.hour * 60 + slot.startTime?.minute;
-            const before = (slot.notifyTime?.hour || 0) * 60 + (slot.notifyTime?.minute || 0);
-            const notifyAt = start - before;
-            return notifyAt > currentMinutes ? notifyAt : null;
-          })
-          .filter((m) => m !== null)
-          .sort()[0];
+      if (slotsToNotify.length === 0) return;
 
-        await admin.firestore().collection("Users").doc(email).update({
-          hasTodayNotification: !!nextNotifyMinutes,
-          nextNotificationMinutes: nextNotifyMinutes || admin.firestore.FieldValue.delete(),
-        });
-        return;
-      }
+      const failedTokens = [];
 
-      for (const token of tokens) {
-        const message = {
-          token,
+      for (const slot of slotsToNotify) {
+        const msg = {
           notification: {
             title: NOTIFICATION_TITLE,
-            body: NOTIFICATION_BODY(slotToNotify),
+            body: NOTIFICATION_BODY(slot),
           },
-          android: {
-            notification: {
-              channelId: "notify_class_time_channel",
-              priority: "high",
-              sound: "default",
-            },
-          },
-          apns: {
-            payload: {
-              aps: {
-                alert: {
-                  title: NOTIFICATION_TITLE,
-                  body: NOTIFICATION_BODY(slotToNotify),
-                },
-                sound: "default",
-              },
-            },
-          },
-          data: {
-            type: SCHEDULE_DATA_TYPE,
-          },
+          data: { type: SCHEDULE_DATA_TYPE },
         };
 
-        try {
-          await admin.messaging().send(message);
-        } catch (err) {
-          console.error(`❌ ส่งไม่สำเร็จ: ${token}`, err);
+        for (const token of tokens) {
+          try {
+            await admin.messaging().send({ token, ...msg });
+            console.log(`✅ Sent timetable to ${token}`);
+          } catch (err) {
+            console.error(`❌ Failed timetable: ${token}`, err);
+            failedTokens.push(token);
+          }
         }
+      }
+
+      if (failedTokens.length > 0) {
+        tokens = tokens.filter((t) => !failedTokens.includes(t));
+        await admin.firestore().collection("Users").doc(email).update({ tokens });
       }
 
       const nextNotifyMinutes = todaySlots
@@ -247,7 +188,7 @@ exports.updateTodayNotificationData = onSchedule(
     const db = admin.firestore();
     const usersSnapshot = await db.collection("Users").get();
     const now = DateTime.now().setZone("Asia/Bangkok");
-    const currentDayIndex = (now.weekday + 6) % 7;
+    const currentDayIndex = now.weekday - 1; // Luxon: Monday = 1 → index 0
 
     const updatePromises = usersSnapshot.docs.map(async (userDoc) => {
       const email = userDoc.id;
@@ -256,16 +197,20 @@ exports.updateTodayNotificationData = onSchedule(
 
       if (!timetableId) return;
 
-      const dayDoc = await db
+      const timetableDoc = await db
         .collection("Users")
         .doc(email)
         .collection("Timetables")
         .doc(timetableId)
-        .collection("Days")
-        .doc(currentDayIndex.toString())
         .get();
 
-      const lessons = dayDoc.exists ? dayDoc.data().lessons || [] : [];
+      if (!timetableDoc.exists) return;
+
+      const timetableData = timetableDoc.data();
+      const days = timetableData.days || [];
+
+      const dayData = days[currentDayIndex] || {};
+      const lessons = dayData.lessons || [];
       const notifySlots = lessons.filter((slot) => slot.isNotify === true);
 
       const nowMinutes = now.hour * 60 + now.minute;
