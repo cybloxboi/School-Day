@@ -188,30 +188,29 @@ exports.updateTodayNotificationData = onSchedule(
     const db = admin.firestore();
     const usersSnapshot = await db.collection("Users").get();
     const now = DateTime.now().setZone("Asia/Bangkok");
-    const currentDayIndex = now.weekday - 1; // Luxon: Monday = 1 → index 0
+    const currentDayIndex = now.weekday - 1; // 0 = Monday, 6 = Sunday
 
     const updatePromises = usersSnapshot.docs.map(async (userDoc) => {
       const email = userDoc.id;
-      const userData = userDoc.data();
-      const timetableId = userData.currentTimetableID;
 
-      if (!timetableId) return;
-
-      const timetableDoc = await db
+      // ดึงทุก timetable ของ user
+      const timetablesSnapshot = await db
         .collection("Users")
         .doc(email)
         .collection("Timetables")
-        .doc(timetableId)
         .get();
 
-      if (!timetableDoc.exists) return;
+      let allLessons = [];
 
-      const timetableData = timetableDoc.data();
-      const days = timetableData.days || [];
+      timetablesSnapshot.forEach((ttDoc) => {
+        const ttData = ttDoc.data();
+        const days = ttData.days || [];
+        const dayData = days[currentDayIndex] || {};
+        const lessons = dayData.lessons || [];
+        allLessons = allLessons.concat(lessons);
+      });
 
-      const dayData = days[currentDayIndex] || {};
-      const lessons = dayData.lessons || [];
-      const notifySlots = lessons.filter((slot) => slot.isNotify === true);
+      const notifySlots = allLessons.filter((slot) => slot.isNotify === true);
 
       const nowMinutes = now.hour * 60 + now.minute;
       const nextNotifyMinutes = notifySlots
@@ -225,7 +224,7 @@ exports.updateTodayNotificationData = onSchedule(
         .sort()[0];
 
       await db.collection("Users").doc(email).update({
-        todaySlots: lessons,
+        todaySlots: allLessons,
         hasTodayNotification: notifySlots.length > 0,
         nextNotificationMinutes: nextNotifyMinutes || admin.firestore.FieldValue.delete(),
       });
