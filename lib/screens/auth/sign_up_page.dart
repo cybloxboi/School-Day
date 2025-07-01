@@ -47,7 +47,11 @@ class _SignUpPageState extends State<SignUpPage> {
         username: _usernameController.text.trim(),
       );
 
-      if (context.mounted) Navigator.of(context).pop();
+      if (context.mounted) {
+        Navigator.of(context).popUntil(
+          (route) => route.isFirst,
+        );
+      }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) Navigator.of(context).pop();
 

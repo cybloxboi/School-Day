@@ -120,7 +120,6 @@ exports.notifyCurrentTimetable = onSchedule(
 
       if (tokens.length === 0 || todaySlots.length === 0) return;
 
-      // แจ้งเตือนทุก slot ที่ตรงเวลา
       const slotsToNotify = todaySlots.filter((slot) => {
         if (!slot.isNotify) return false;
         const start = slot.startTime?.hour * 60 + slot.startTime?.minute;
@@ -186,31 +185,30 @@ exports.updateTodayNotificationData = onSchedule(
   },
   async () => {
     const db = admin.firestore();
-    const usersSnapshot = await db.collection("Users").get();
     const now = DateTime.now().setZone("Asia/Bangkok");
-    const currentDayIndex = now.weekday - 1; // 0 = Monday, 6 = Sunday
+    const currentDayIndex = (now.weekday + 6) % 7;
+
+    const usersSnapshot = await db.collection("Users").get();
 
     const updatePromises = usersSnapshot.docs.map(async (userDoc) => {
       const email = userDoc.id;
 
-      // ดึงทุก timetable ของ user
       const timetablesSnapshot = await db
         .collection("Users")
         .doc(email)
         .collection("Timetables")
         .get();
 
-      let allLessons = [];
+      let todayLessons = [];
 
       timetablesSnapshot.forEach((ttDoc) => {
         const ttData = ttDoc.data();
-        const days = ttData.days || [];
-        const dayData = days[currentDayIndex] || {};
-        const lessons = dayData.lessons || [];
-        allLessons = allLessons.concat(lessons);
+        const days = ttData.days || {};
+        const dayData = days[currentDayIndex] || [];
+        todayLessons = todayLessons.concat(dayData);
       });
 
-      const notifySlots = allLessons.filter((slot) => slot.isNotify === true);
+      const notifySlots = todayLessons.filter((slot) => slot.isNotify === true);
 
       const nowMinutes = now.hour * 60 + now.minute;
       const nextNotifyMinutes = notifySlots
@@ -221,16 +219,18 @@ exports.updateTodayNotificationData = onSchedule(
           return notifyAt > nowMinutes ? notifyAt : null;
         })
         .filter((m) => m !== null)
-        .sort()[0];
+        .sort((a, b) => a - b)[0];
 
       await db.collection("Users").doc(email).update({
-        todaySlots: allLessons,
+        todaySlots: todayLessons,
         hasTodayNotification: notifySlots.length > 0,
         nextNotificationMinutes: nextNotifyMinutes || admin.firestore.FieldValue.delete(),
       });
     });
 
     await Promise.all(updatePromises);
+    console.log(`✅ Updated todaySlots for ${usersSnapshot.size} users on dayIndex=${currentDayIndex}`);
     return null;
   }
 );
+

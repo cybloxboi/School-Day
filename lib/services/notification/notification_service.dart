@@ -139,10 +139,6 @@ class NotificationService {
   }
 
   Future<void> ensurePermissionAndInit(String email) async {
-    if (kIsWeb) {
-      return;
-    }
-
     NotificationSettings settings =
         await _firebaseMessaging.getNotificationSettings();
 
