@@ -161,18 +161,29 @@ class NotificationService {
     try {
       debugPrint("📤 Saving token $token for $email");
 
-      await FirebaseFirestore.instance.collection('Users').doc(email).set(
-        {
-          'tokens': FieldValue.arrayUnion([token]),
-          'platforms': {
-            token: Platform.isIOS
-                ? 'ios'
-                : (Platform.isAndroid ? 'android' : 'web'),
+      if (!kIsWeb) {
+        await FirebaseFirestore.instance.collection('Users').doc(email).set(
+          {
+            'tokens': FieldValue.arrayUnion([token]),
+            'platforms': {
+              token: Platform.isIOS ? 'ios' : 'android',
+            },
+            'tokenUpdatedAt': FieldValue.serverTimestamp(),
           },
-          'tokenUpdatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+          SetOptions(merge: true),
+        );
+      } else {
+        await FirebaseFirestore.instance.collection('Users').doc(email).set(
+          {
+            'tokens': FieldValue.arrayUnion([token]),
+            'platforms': {
+              token: 'web',
+            },
+            'tokenUpdatedAt': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        );
+      }
 
       debugPrint("✅ Token saved successfully");
     } catch (e) {

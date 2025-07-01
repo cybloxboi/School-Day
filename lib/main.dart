@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,20 +25,25 @@ Future<void> main() async {
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
-  await AndroidAlarmManager.initialize();
 
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  if (!kIsWeb) {
+    if (Platform.isAndroid) {
+      await AndroidAlarmManager.initialize();
+    }
 
-  final notificationService = NotificationService();
-  await notificationService.initNotifications();
+    final notificationService = NotificationService();
+    await notificationService.initNotifications();
 
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(alert: true, badge: true, sound: true);
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
 
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   }
 
   await initializeDateFormatting('th_TH', null);
