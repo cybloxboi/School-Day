@@ -1,32 +1,33 @@
 # School Day
-ภายใต้โครงการ **"การพัฒนาแอปพลิเคชัน School Day สำหรับการจัดการตารางเรียน และงานโดยใช้เทคโนโลยีปัญญาประดิษฐ์ (Development of School Day Application for Class Schedule and Task Management Using Artificial Intelligence Technology)"** ในการแข่งขัน **"การแข่งขันพัฒนาโปรแกรมคอมพิวเตอร์แห่งประเทศไทยครั้งที่ 27 (NSC 2025)"**
+Under the project **“Development of the School Day Application for Class Schedule and Task Management Using Artificial Intelligence Technology”** as part of the **“27th National Software Contest (NSC 2025)”**
 
-**โครงการนี้ได้รับทุนอุดหนุนการทำกิจกรรมส่งเสริมและสนับสนุนการวิจัยและนวัตกรรมจากสำนักงานการวิจัยแห่งชาติ (วช.) และสำนักงานพัฒนาวิทยาศาสตร์และเทคโนโลยีแห่งชาติ (สวทช.)
-This research and activity is funded by the National Research Council of Thailand (NRCT) and National Science and Technology Development Agency (NSTDA)**
+**This research and activity is funded by the National Research Council of Thailand (NRCT) and National Science and Technology Development Agency (NSTDA)**
 
-## หลักการและเหตุผล
-&emsp;โทรศัพท์มือถือ และคอมพิวเตอร์ในปัจจุบันกลายเป็นเครื่องมือที่มีบทบาทสำคัญในชีวิตประจำวัน ไม่ได้จำกัดอยู่เพียงแค่การติดต่อสื่อสาร แต่ยังถูกนำมาใช้ในการจัดการข้อมูลและกิจกรรมต่าง ๆ โดยเฉพาะในกลุ่มนักเรียนที่ต้องรับมือกับตารางเรียน และภาระงานต่าง ๆ ที่มีความหลากหลายและซับซ้อนมากขึ้น การใช้แอปพลิเคชันที่สามารถช่วยจัดระเบียบและบริหารเวลาได้อย่างมีประสิทธิภาพ จึงเป็นทางเลือกที่ตอบโจทย์ผู้เรียนในยุคปัจจุบัน
+## Rationale
+&emsp;In the modern era, mobile phones and computers have become indispensable tools in everyday life. Their functions extend far beyond basic communication and now encompass information management and the organization of daily activities. For students in particular, managing increasingly complex class schedules and diverse academic tasks presents significant challenges. Therefore, an application that can systematically organize schedules and help manage time efficiently offers an effective solution for learners in today’s digital age.
 
-&emsp;เทคโนโลยีที่พัฒนาอย่างรวดเร็ว ล้วนมีส่วนช่วยให้แอปพลิเคชันสามารถรองรับการใช้งานได้อย่างสะดวกมากยิ่งขึ้น และยังสามารถช่วยให้ผู้ใช้ไม่พลาดต่อภารกิจสำคัญที่ต้องทำในแต่ละวัน นอกจากนี้ การประยุกต์ใช้เทคโนโลยีอย่างปัญญาประดิษฐ์ (AI) ในการช่วยหรือแก้ไขข้อมูลต่างๆเป็นส่วนเสริมที่ช่วยเพิ่มความสะดวกและทำให้การใช้งานมีประสิทธิภาพมากขึ้น
+&emsp;The rapid advancement of technology has enabled applications to provide increasingly convenient and accessible services. Moreover, the integration of artificial intelligence (AI) further enhances the user experience by facilitating data management, automating tasks, and minimizing the risk of missing important activities and deadlines.
 
-&emsp;ด้วยเหตุนี้ โครงงานนี้จึงถูกพัฒนาขึ้นเพื่อสร้างแอปพลิเคชันที่สามารถช่วยให้นักเรียนบริหารจัดการตารางเรียนและงานต่าง ๆ ได้อย่างเป็นระบบ ช่วยลดความสับสนในการจัดสรรเวลา พร้อมทั้งเพิ่มความคล่องตัวในการติดตามงานหรือกิจกรรมที่ต้องทำในแต่ละวัน โดยมุ่งเน้นให้การใช้งานเป็นไปอย่างสะดวก เข้าใจง่าย และสามารถตอบสนองต่อความต้องการของผู้เรียนในยุคดิจิทัลที่เทคโนโลยีเข้ามามีบทบาทในชีวิตประจำวันมากยิ่งขึ้น
+&emsp;In response to these needs, this project has been developed to create an application that empowers students to manage their class schedules and assignments in an organized and systematic manner. The system aims to reduce confusion in time management, streamline task tracking, and enhance flexibility in monitoring daily responsibilities. The primary goal is to deliver a user-friendly and intuitive tool that meets the demands of students living in a digital society where technology plays an integral role in daily life.
 
-## ดาวน์โหลดแอปพลิเคชัน
+## Objectives
+1.	To develop an application that integrates class scheduling and task tracking into a single, unified system.
+2.	To support students in prioritizing their coursework and assignments more effectively and efficiently.
+
+## Get the App
 - [iOS](https://appdistribution.firebase.google.com/testerapps/1:648610348518:ios:5807e7f352eb30ec89aa27/releases/61h6nsmoafhpg?utm_source=firebase-console)
 - [Android](https://github.com/cybloxboi/School-Day/releases)
 - [Web](https://school-day-a1e87.web.app)
 
-[ตัวอย่างแอปพลิเคชัน](https://youtube.com/shorts/vVLk0XQS6Kc?feature=share)
+[Application Preview](https://youtube.com/shorts/vVLk0XQS6Kc?feature=share)
 
-## วัตถุประสงค์
-1.	เพื่อพัฒนาแอปพลิเคชันที่รวมการจัดการตารางเรียนและการติดตามงานเข้าไว้ในระบบเดียว
-2.	เพื่อช่วยให้นักเรียนสามารถจัดลำดับความสำคัญของงานและวิชาเรียนได้อย่างมีประสิทธิภาพ
+## Developers Details
+- Mr.Sukonlanat Thawonfung [(@cybloxboi)](https://github.com/cybloxboi)
+- Ms.Suphisara Siriamnat [(@Thong-muan)](https://github.com/Thong-muan)
+- Mr.Wachirawit Buttakhot [(@viyawcrx)](https://github.com/viyawcrx)
 
-## รายละเอียดผู้พัฒนา
-- นายศุกลณัฏฐ์ ถาวรฟัง [(@cybloxboi)](https://github.com/cybloxboi)
-- นางสาวศุภิสรา ศิริอำนาจ [(@Thong-muan)](https://github.com/Thong-muan)
-- นายวชิรวิทย์ บุตตะโคตร [(@viyawcrx)](https://github.com/viyawcrx)
+Under the provision of Ms.Areerart Thani
+From Amnatcharoen School
 
-โดยมี นางสาวอารีรัตน์ ธานี เป็นอาจารย์ที่ปรึกษาโครงการ
-
-โรงเรียนอำนาจเจริญ
+## License Agreement
+&emsp;This software is a work developed by Mr.Sukonlanat Thawonfung, Ms.Suphisara Siriamnat and Mr.Wachirawit Buttakhot from Amnatcharoen School under the provision of Ms.Areerart Thani under Development of School Day Application for Class Schedule and Task Management Using Artificial Intelligence Technology, which has been supported by National Science and Technology Development Agency (NSTDA), in order to encourage pupils and students to learn and practice their skills in developing software. Therefore, the intellectual property of this software shall belong to the developer and the developer gives NSTDA a permission to distribute this software as an “as is” and non-modified software for a temporary and non-exclusive use without remuneration to anyone for his or her own purpose or academic purpose, which are not commercial purposes. In this connection, NSTDA shall not be liable for any error, software efficiency and damages in connection with or arising out of the use of the software.
