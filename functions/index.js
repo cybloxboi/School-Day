@@ -58,8 +58,10 @@ exports.notifyTodo = onSchedule(
             ? selectedDate.set({ hour: todo.alarmTime.hour, minute: todo.alarmTime.minute })
             : selectedDate.set({ hour: 8, minute: 0 });
 
-          const diffInMinutes = now.diff(targetDateTime, "minutes").minutes;
-          const shouldNotify = diffInMinutes >= 0 && diffInMinutes < 2;
+          const shouldNotify =
+            now.toFormat("yyyy-MM-dd") === targetDateTime.toFormat("yyyy-MM-dd") &&
+            now.hour === targetDateTime.hour &&
+            now.minute === targetDateTime.minute;
 
           if (shouldNotify) {
             messages.push({
@@ -82,7 +84,35 @@ exports.notifyTodo = onSchedule(
       for (const msg of messages) {
         for (const token of tokens) {
           try {
-            await admin.messaging().send({ token, ...msg });
+            await admin.messaging().send({
+              token,
+              ...msg,
+              android: {
+                priority: "high",
+                notification: {
+                  channelId: "notify_task_channel",
+                },
+              },
+              apns: {
+                payload: {
+                  aps: {
+                    contentAvailable: true,
+                    alert: {
+                      title: msg.notification.title,
+                      body: msg.notification.body,
+                    },
+                  },
+                },
+                headers: {
+                  "apns-priority": "10",
+                },
+              },
+              webpush: {
+                headers: {
+                  Urgency: "high",
+                },
+              },
+            });
             console.log(`✅ Sent todo to ${token}`);
           } catch (err) {
             console.error(`❌ Failed todo: ${token}`, err);
@@ -142,7 +172,35 @@ exports.notifyCurrentTimetable = onSchedule(
 
         for (const token of tokens) {
           try {
-            await admin.messaging().send({ token, ...msg });
+            await admin.messaging().send({
+              token,
+              ...msg,
+              android: {
+                priority: "high",
+                notification: {
+                  channelId: "notify_class_time_channel",
+                },
+              },
+              apns: {
+                payload: {
+                  aps: {
+                    contentAvailable: true,
+                    alert: {
+                      title: msg.notification.title,
+                      body: msg.notification.body,
+                    },
+                  },
+                },
+                headers: {
+                  "apns-priority": "10",
+                },
+              },
+              webpush: {
+                headers: {
+                  Urgency: "high",
+                },
+              },
+            });
             console.log(`✅ Sent timetable to ${token}`);
           } catch (err) {
             console.error(`❌ Failed timetable: ${token}`, err);
