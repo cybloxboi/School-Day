@@ -14,8 +14,6 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  bool emailSent = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,14 +32,9 @@ class _AuthPageState extends State<AuthPage> {
 
           if (snapshot.hasData) {
             final user = snapshot.data!;
-
+            
             if (!user.emailVerified) {
-              if (!emailSent) {
-                user.sendEmailVerification();
-                setState(() {
-                  emailSent = true;
-                });
-              }
+              user.sendEmailVerification();
               return const EmailVerificationPage();
             }
 

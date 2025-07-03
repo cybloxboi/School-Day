@@ -54,6 +54,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     await prefs.remove('fcm_token');
 
+    if (!mounted) return;
+
     await FirebaseAuth.instance.signOut();
 
     if (!context.mounted) return;

@@ -188,8 +188,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   height: 32,
                 ),
                 FilledButton.tonal(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+
+                    if (!context.mounted) return;
 
                     Navigator.pushAndRemoveUntil(
                       context,
