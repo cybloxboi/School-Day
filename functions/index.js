@@ -20,11 +20,11 @@ const NOTIFICATION_BODY = (slot) =>
     2,
     "0"
   )} ที่ ${slot.location} โดย ${slot.professor}`;
-const SCHEDULE_DATA_TYPE = "schedule";
+const SCHEDULE_DATA_TYPE = "class";
 
 const TODO_NOTIFICATION_TITLE = "📌 ถึงกำหนดการแล้ว!";
 const TODO_NOTIFICATION_BODY = (title) => `${title || "มีงานที่ต้องทำ"}`;
-const TODO_DATA_TYPE = "todo";
+const TODO_DATA_TYPE = "task";
 
 exports.notifyTodo = onSchedule(
   { schedule: "* * * * *", timeZone: "Asia/Bangkok" },

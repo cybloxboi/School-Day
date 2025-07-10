@@ -236,34 +236,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       const Divider(),
                       InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text(
-                                  'ไม่สามารถเปลี่ยนอีเมลได้',
-                                  style: textTheme.bodyMedium!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                content: Text(
-                                  'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
-                                  style: textTheme.bodySmall,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('ปิด'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
+                        onTap: null,
+                        // () {
+                        //   showDialog(
+                        //     context: context,
+                        //     barrierDismissible: false,
+                        //     builder: (context) {
+                        //       return AlertDialog(
+                        //         title: Text(
+                        //           'ไม่สามารถเปลี่ยนอีเมลได้',
+                        //           style: textTheme.bodyMedium!.copyWith(
+                        //             fontWeight: FontWeight.bold,
+                        //           ),
+                        //         ),
+                        //         content: Text(
+                        //           'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
+                        //           style: textTheme.bodySmall,
+                        //         ),
+                        //         actions: [
+                        //           TextButton(
+                        //             onPressed: () {
+                        //               Navigator.of(context).pop();
+                        //             },
+                        //             child: const Text('ปิด'),
+                        //           ),
+                        //         ],
+                        //       );
+                        //     },
+                        //   );
+                        // },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Row(
@@ -285,72 +286,73 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 style: textTheme.bodySmall,
                               ),
                               const SizedBox(width: 16),
-                              const Icon(Icons.chevron_right_rounded),
+                              // const Icon(Icons.chevron_right_rounded),
                             ],
                           ),
                         ),
                       ),
-                      InkWell(
-                        onTap: () {
-                          if (!kDebugMode) {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text(
-                                    'ไม่สามารถเปลี่ยนรหัสผ่านได้',
-                                    style: textTheme.bodyMedium!.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  content: Text(
-                                    'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
-                                    style: textTheme.bodySmall,
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('ปิด'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return const ChangePasswordPage();
-                                },
-                              ),
-                            );
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.password_rounded),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Text(
-                                'รหัสผ่าน',
-                                style: textTheme.bodySmall!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Spacer(),
-                              const Icon(Icons.chevron_right_rounded),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // InkWell(
+                      //   onTap: null,
+                      // () {
+                      //   if (!kDebugMode) {
+                      //     showDialog(
+                      //       context: context,
+                      //       barrierDismissible: false,
+                      //       builder: (context) {
+                      //         return AlertDialog(
+                      //           title: Text(
+                      //             'ไม่สามารถเปลี่ยนรหัสผ่านได้',
+                      //             style: textTheme.bodyMedium!.copyWith(
+                      //               fontWeight: FontWeight.bold,
+                      //             ),
+                      //           ),
+                      //           content: Text(
+                      //             'ทางผู้พัฒนายังไม่ได้เพิ่มฟีเจอร์นี้ ขออภัยในความไม่สะดวก',
+                      //             style: textTheme.bodySmall,
+                      //           ),
+                      //           actions: [
+                      //             TextButton(
+                      //               onPressed: () {
+                      //                 Navigator.of(context).pop();
+                      //               },
+                      //               child: const Text('ปิด'),
+                      //             ),
+                      //           ],
+                      //         );
+                      //       },
+                      //     );
+                      //   } else {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) {
+                      //           return const ChangePasswordPage();
+                      //         },
+                      //       ),
+                      //     );
+                      //   }
+                      // },
+                      //   child: Padding(
+                      //     padding: const EdgeInsets.symmetric(vertical: 16),
+                      //     child: Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       children: [
+                      //         const Icon(Icons.password_rounded),
+                      //         const SizedBox(
+                      //           width: 16,
+                      //         ),
+                      //         Text(
+                      //           'รหัสผ่าน',
+                      //           style: textTheme.bodySmall!.copyWith(
+                      //             fontWeight: FontWeight.bold,
+                      //           ),
+                      //         ),
+                      //         const Spacer(),
+                      //         // const Icon(Icons.chevron_right_rounded),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
