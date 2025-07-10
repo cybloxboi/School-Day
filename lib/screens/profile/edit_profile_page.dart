@@ -11,7 +11,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:school_day/components/others/check_latest_profile_image.dart';
 import 'package:school_day/screens/navigation_menu.dart';
-import 'package:school_day/screens/profile/change_password_page.dart';
 import 'package:school_day/services/database/user/user_document.dart';
 import 'package:school_day/services/image/image_helper.dart';
 import 'package:school_day/styles/styles.dart';
