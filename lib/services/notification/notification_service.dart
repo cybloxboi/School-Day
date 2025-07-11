@@ -37,6 +37,8 @@ class NotificationService {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initNotifications() async {
+    if (kIsWeb) return;
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iOSInit = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -141,6 +143,8 @@ class NotificationService {
   }
 
   Future<void> ensurePermissionAndInit(String email) async {
+    if (kIsWeb) return;
+
     NotificationSettings settings =
         await _firebaseMessaging.getNotificationSettings();
 
@@ -160,6 +164,8 @@ class NotificationService {
   }
 
   Future<void> _saveTokenToFirestore(String email, String token) async {
+    if (kIsWeb) return;
+
     try {
       debugPrint("📤 Saving token $token for $email");
 
@@ -194,6 +200,8 @@ class NotificationService {
   }
 
   Future<void> _deleteTokenFromFirestore(String email, String token) async {
+    if (kIsWeb) return;
+
     try {
       await FirebaseFirestore.instance.collection('Users').doc(email).update(
         {
