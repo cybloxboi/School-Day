@@ -209,6 +209,7 @@ class _TimetablePageState extends State<TimetablePage> {
             MaterialPageRoute(
               builder: (context) => AddNewTimetablePage(
                 timetableEntry: timetableEntry,
+                isEdited: false,
               ),
             ),
           );
@@ -464,6 +465,7 @@ class _TimetablePageState extends State<TimetablePage> {
               builder: (context) => AddNewTimetablePage(
                 timetableEntry: timetableEntry,
                 timetableData: details,
+                isEdited: true,
               ),
             ),
           );

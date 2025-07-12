@@ -5,6 +5,7 @@ import 'package:school_day/components/others/format_alarm_time.dart';
 import 'package:school_day/data/time.dart';
 import 'package:school_day/data/timetable.dart';
 import 'package:school_day/data/todo.dart';
+import 'package:school_day/screens/timetables/add_new_timetable_page.dart';
 import 'package:school_day/screens/todos/add_new_todo_page.dart';
 import 'package:school_day/services/database/timetable/timetable_entry.dart';
 import 'package:school_day/services/database/todo/todo_entry.dart';
@@ -528,16 +529,16 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                     );
                                                   },
                                                 ),
-                                              TextButton.icon(
-                                                icon: const Icon(
-                                                    Icons.cancel_rounded),
-                                                label: const Text("ปัดทิ้ง"),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    confirmed[index] = true;
-                                                  });
-                                                },
-                                              ),
+                                              // TextButton.icon(
+                                              //   icon: const Icon(
+                                              //       Icons.cancel_rounded),
+                                              //   label: const Text("ปัดทิ้ง"),
+                                              //   onPressed: () {
+                                              //     setState(() {
+                                              //       confirmed[index] = true;
+                                              //     });
+                                              //   },
+                                              // ),
                                             ],
                                     ),
                             ),
@@ -561,6 +562,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                 String location = newTimetable['location'] ?? 'ไม่มี';
                 String professor = newTimetable['professor'] ?? 'ไม่มี';
                 int dayIndex = newTimetable['dateIndex'] ?? 0;
+                String date = newTimetable['date'] ?? 'วันจันทร์';
 
                 TimetableEntry timetableEntry = TimetableEntry(
                   email: widget.userEmail,
@@ -633,6 +635,34 @@ class _AiProcessCardState extends State<AiProcessCard> {
                               style: Theme.of(context).textTheme.bodySmall,
                               children: [
                                 const WidgetSpan(
+                                  child:
+                                      Icon(Icons.date_range_rounded, size: 18),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                const TextSpan(text: " วันที่เรียน: "),
+                                if (oldTimetable != null &&
+                                    oldTimetable['date'] != date)
+                                  TextSpan(
+                                    text: oldTimetable['date'],
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text: date,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const WidgetSpan(
                                   child: Icon(Icons.access_alarm, size: 18),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
@@ -695,7 +725,7 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                   child: Icon(Icons.person_rounded, size: 18),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
-                                const TextSpan(text: " สถานที่: "),
+                                const TextSpan(text: " ผู้สอน: "),
                                 if (oldTimetable != null &&
                                     oldTimetable['professor'] != professor)
                                   TextSpan(
@@ -830,18 +860,49 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                   Icons.edit_rounded,
                                                 ),
                                                 label: const Text("แก้ไข"),
-                                                onPressed: () {},
-                                              ),
-                                              TextButton.icon(
-                                                icon: const Icon(
-                                                    Icons.cancel_rounded),
-                                                label: const Text("ปัดทิ้ง"),
                                                 onPressed: () {
-                                                  setState(() {
-                                                    confirmed[index] = true;
-                                                  });
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          AddNewTimetablePage(
+                                                        timetableEntry:
+                                                            timetableEntry,
+                                                        timetableData:
+                                                            timetable,
+                                                        isEdited:
+                                                            action == 'add'
+                                                                ? false
+                                                                : true,
+                                                        onDone: () {
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+
+                                                          setState(() {
+                                                            confirmed[index] =
+                                                                true;
+                                                            confirmationStatus[
+                                                                index] = true;
+                                                            loading[index] =
+                                                                false;
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
                                                 },
                                               ),
+                                              // TextButton.icon(
+                                              //   icon: const Icon(
+                                              //       Icons.cancel_rounded),
+                                              //   label: const Text("ปัดทิ้ง"),
+                                              //   onPressed: () {
+                                              //     setState(() {
+                                              //       confirmed[index] = true;
+                                              //     });
+                                              //   },
+                                              // ),
                                             ],
                                     ),
                             ),

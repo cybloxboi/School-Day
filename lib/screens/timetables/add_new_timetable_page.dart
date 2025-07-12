@@ -13,10 +13,14 @@ class AddNewTimetablePage extends StatefulWidget {
     super.key,
     required this.timetableEntry,
     this.timetableData,
+    required this.isEdited,
+    this.onDone,
   });
 
   final TimetableEntry timetableEntry;
   final Timetable? timetableData;
+  final bool isEdited;
+  final Function()? onDone;
 
   @override
   State<AddNewTimetablePage> createState() => _AddNewTimetablePageState();
@@ -120,7 +124,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                   content: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      widget.timetableData == null
+                      !widget.isEdited
                           ? 'ต้องการยกเลิกสร้างตารางเรียนนี้ใช่ไหม :<'
                           : 'ต้องการยกเลิกการเปลี่ยนแปลงตารางเรียนนี้ใช่ไหม :<',
                     ),
@@ -155,9 +159,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
         ),
         centerTitle: false,
         title: Text(
-          widget.timetableData == null
-              ? 'เพิ่มตารางเรียนใหม่'
-              : 'แก้ไขตารางเรียน',
+          !widget.isEdited ? 'เพิ่มตารางเรียนใหม่' : 'แก้ไขตารางเรียน',
           style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -207,7 +209,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
 
                   bool success;
 
-                  if (widget.timetableData != null) {
+                  if (widget.isEdited) {
                     success = await widget.timetableEntry.updateLesson(
                       newDayIndex: selectedDayIndex,
                       oldLesson: widget.timetableData!,
@@ -223,22 +225,26 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                   if (!context.mounted) return;
 
                   Navigator.pop(context);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NavigationMenu(
-                        dateIndex: selectedDayIndex,
-                        screenIndex: 1,
+
+                  if (widget.onDone == null) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NavigationMenu(
+                          screenIndex: 2,
+                        ),
                       ),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
+                      (Route<dynamic> route) => false,
+                    );
+                  } else {
+                    widget.onDone!();
+                  }
 
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.timetableData == null
+                          !widget.isEdited
                               ? 'เพิ่มตารางเรียนเรียบร้อยคับ!'
                               : 'แก้ไขตารางเรียนเรียบร้อย',
                         ),
@@ -249,7 +255,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          widget.timetableData == null
+                          !widget.isEdited
                               ? 'ดูเหมือนจะมีปัญหาการเพิ่มตารางเรียนนะ :('
                               : 'ดูเหมือนจะมีปัญหาการแก้ไขตารางเรียนนะ :(',
                         ),
@@ -635,7 +641,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                 ),
               ),
             ),
-            if (widget.timetableData != null)
+            if (widget.isEdited)
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 16),

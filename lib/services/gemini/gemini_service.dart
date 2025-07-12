@@ -96,6 +96,7 @@ class GeminiService {
   "newTimetable": { // หากเป็น add ให้เอามาจากคำสั่งผู้ใช้ แต่ถ้าเป็น delete ให้แนบมาได้เลย
     "id": String || null, // ให้แนบมาหากเป็น delete
     "dateIndex": // ให้ใส่เลข 0 - 6 หมายถึงวันจันทร์ ถึงวันอาทิตย์
+    "date": // ระบุวันที่เรียน fomat "วันจันทร์" ถึง "วันอาทิตย์"
     "title": String,
     "startTime": {
       "hour": int,
