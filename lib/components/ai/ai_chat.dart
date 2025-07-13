@@ -855,44 +855,45 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                   }
                                                 },
                                               ),
-                                              FilledButton.tonalIcon(
-                                                icon: const Icon(
-                                                  Icons.edit_rounded,
-                                                ),
-                                                label: const Text("แก้ไข"),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          AddNewTimetablePage(
-                                                        timetableEntry:
-                                                            timetableEntry,
-                                                        timetableData:
-                                                            timetable,
-                                                        isEdited:
-                                                            action == 'add'
-                                                                ? false
-                                                                : true,
-                                                        onDone: () {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
+                                              if (action != 'delete')
+                                                FilledButton.tonalIcon(
+                                                  icon: const Icon(
+                                                    Icons.edit_rounded,
+                                                  ),
+                                                  label: const Text("แก้ไข"),
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            AddNewTimetablePage(
+                                                          timetableEntry:
+                                                              timetableEntry,
+                                                          timetableData:
+                                                              timetable,
+                                                          isEdited:
+                                                              action == 'add'
+                                                                  ? false
+                                                                  : true,
+                                                          onDone: () {
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
 
-                                                          setState(() {
-                                                            confirmed[index] =
-                                                                true;
-                                                            confirmationStatus[
-                                                                index] = true;
-                                                            loading[index] =
-                                                                false;
-                                                          });
-                                                        },
+                                                            setState(() {
+                                                              confirmed[index] =
+                                                                  true;
+                                                              confirmationStatus[
+                                                                  index] = true;
+                                                              loading[index] =
+                                                                  false;
+                                                            });
+                                                          },
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
+                                                    );
+                                                  },
+                                                ),
                                               // TextButton.icon(
                                               //   icon: const Icon(
                                               //       Icons.cancel_rounded),
