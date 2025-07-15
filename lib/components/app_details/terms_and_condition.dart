@@ -31,7 +31,6 @@ class TermsAndCondition extends StatefulWidget {
 
 class _TermsAndConditionState extends State<TermsAndCondition> {
   String _licenseAgreementText = '';
-  String _licenseAgreementEnglishText = '';
 
   @override
   void initState() {
@@ -42,15 +41,6 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
       (text) => setState(
         () {
           _licenseAgreementText = text;
-        },
-      ),
-    );
-
-    loadTextFromFile(
-      'assets/texts/license_agreement_english.txt',
-      (text) => setState(
-        () {
-          _licenseAgreementEnglishText = text;
         },
       ),
     );
@@ -80,11 +70,13 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
           spacing: 16,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ปรับปรุงล่าสุด: 26 มิถุนายน 2568'),
+            Text('ปรับปรุงล่าสุด: 15 กรกฎาคม 2568'),
             Text(
-                'โปรดอ่านข้อตกลงและเงื่อนไขการใช้งานนี้อย่างละเอียดก่อนเริ่มใช้งานแอปพลิเคชัน "School Day" (ต่อไปนี้เรียกว่า "แอปฯ")'),
+              'โปรดอ่านข้อตกลงและเงื่อนไขการใช้งานนี้อย่างละเอียดก่อนเริ่มใช้งานแอปพลิเคชัน "School Day" (ต่อไปนี้เรียกว่า "แอปฯ")',
+            ),
             Text(
-                'เมื่อผู้ใช้งานให้ความยินยอมข้อตกลงและเงื่อนไขในการใช้งานในขั้นตอนการสมัครสมาชิกของแอปฯ จะถือว่าผู้ใช้งานได้อ่าน เข้าใจ และยอมรับข้อกำหนดต่าง ๆ ที่ระบุไว้ในข้อตกลงนี้แล้วโดยสมบูรณ์'),
+              'เมื่อผู้ใช้งานให้ความยินยอมข้อตกลงและเงื่อนไขในการใช้งานในขั้นตอนการสมัครสมาชิกของแอปฯ จะถือว่าผู้ใช้งานได้อ่าน เข้าใจ และยอมรับข้อกำหนดต่าง ๆ ที่ระบุไว้ในข้อตกลงนี้แล้วโดยสมบูรณ์',
+            ),
             Text(
               'ข้อตกลงในการใช้ซอฟต์แวร์',
               style: textTheme.bodySmall!.copyWith(
@@ -96,22 +88,6 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
                 children: [
                   const TextSpan(text: '     '),
                   TextSpan(text: _licenseAgreementText),
-                ],
-              ),
-              textAlign: TextAlign.start,
-              style: textTheme.bodySmall,
-            ),
-            Text(
-              'License Agreement',
-              style: textTheme.bodySmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: '     '),
-                  TextSpan(text: _licenseAgreementEnglishText),
                 ],
               ),
               textAlign: TextAlign.start,
@@ -235,37 +211,7 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
               ],
             ),
             Text(
-              '6. การยุติการให้บริการและการลบบัญชี',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• '),
-                Expanded(
-                  child: Text(
-                    'ผู้ใช้งานสามารถเลือกยุติการใช้บริการหรือลบบัญชีผู้ใช้งานของตนได้ทุกเมื่อ โดยข้อมูลที่เกี่ยวข้องจะถูกลบออกจากฐานข้อมูล',
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• '),
-                Expanded(
-                  child: Text(
-                    'ผู้พัฒนาขอสงวนสิทธิ์ในการระงับหรือยุติการให้บริการแอปฯ ชั่วคราวหรือถาวรโดยไม่จำเป็นต้องแจ้งให้ทราบล่วงหน้า',
-                  ),
-                ),
-              ],
-            ),
-            Text(
-                'หากต้องการดำเนินการดังกล่าว กรุณาติดต่อผู้พัฒนาตามข้อมูลในข้อ 7'),
-            Text(
-              '7. ติดต่อสอบถาม',
+              '6. ติดต่อสอบถาม',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
               ),
