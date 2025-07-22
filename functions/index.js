@@ -101,6 +101,7 @@ exports.notifyTodo = onSchedule(
                       title: msg.notification.title,
                       body: msg.notification.body,
                     },
+                    sound: "default",
                   },
                 },
                 headers: {
@@ -189,6 +190,7 @@ exports.notifyCurrentTimetable = onSchedule(
                       title: msg.notification.title,
                       body: msg.notification.body,
                     },
+                    sound: "default",
                   },
                 },
                 headers: {

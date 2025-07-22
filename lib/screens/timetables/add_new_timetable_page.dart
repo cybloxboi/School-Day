@@ -231,7 +231,7 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => NavigationMenu(
-                          screenIndex: 2,
+                          screenIndex: 1,
                         ),
                       ),
                       (Route<dynamic> route) => false,
