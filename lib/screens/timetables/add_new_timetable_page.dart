@@ -132,16 +132,8 @@ class _AddNewTimetablePageState extends State<AddNewTimetablePage> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NavigationMenu(
-                              dateIndex: widget.timetableEntry.dayIndex,
-                              screenIndex: 1,
-                            ),
-                          ),
-                          (Route<dynamic> route) => false,
-                        );
+                        Navigator.pop(context);
+                        Navigator.pop(context);
                       },
                       child: const Text('ยกเลิก'),
                     ),

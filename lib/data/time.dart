@@ -17,6 +17,17 @@ class Time {
     };
   }
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Time &&
+          runtimeType == other.runtimeType &&
+          hour == other.hour &&
+          minute == other.minute;
+
+  @override
+  int get hashCode => hour.hashCode ^ minute.hashCode;
+
   Duration timeDifference(Time other) {
     DateTime dateTime1 = DateTime(2025, 3, 2, hour, minute);
     DateTime dateTime2 = DateTime(2025, 3, 2, other.hour, other.minute);

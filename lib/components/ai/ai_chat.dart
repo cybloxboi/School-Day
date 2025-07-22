@@ -199,8 +199,8 @@ class _AiProcessCardState extends State<AiProcessCard> {
                 final oldTodo = task['oldTodo'];
 
                 String? id = newTodo['id'];
-                String title = newTodo['title'];
-                String priority = newTodo['priority'];
+                String title = newTodo['title'] ?? 'ไม่ระบุชื่อ';
+                String? priority = newTodo['priority'];
                 String? description = newTodo['description'];
                 DateTime? selectedDate = newTodo['selectedDate'] != null
                     ? DateTime.tryParse(newTodo['selectedDate'])
@@ -668,8 +668,9 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                 ),
                                 const TextSpan(text: " เวลาเริ่ม - สิ้นสุด: "),
                                 if (oldTimetable != null &&
-                                    Time.fromJson(oldTimetable['startTime']) !=
-                                        startTime &&
+                                        Time.fromJson(
+                                                oldTimetable['startTime']) !=
+                                            startTime ||
                                     Time.fromJson(oldTimetable['endTime']) !=
                                         endTime)
                                   TextSpan(
@@ -833,7 +834,8 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                                       newDayIndex: dayIndex,
                                                       oldLesson:
                                                           Timetable.fromJson(
-                                                              oldTimetable),
+                                                        oldTimetable,
+                                                      ),
                                                       updatedLesson: timetable,
                                                     );
                                                   } else if (action ==
