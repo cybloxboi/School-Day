@@ -64,6 +64,7 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
+      title: 'School Day',
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
