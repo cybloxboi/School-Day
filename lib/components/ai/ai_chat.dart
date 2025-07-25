@@ -668,11 +668,13 @@ class _AiProcessCardState extends State<AiProcessCard> {
                                 ),
                                 const TextSpan(text: " เวลาเริ่ม - สิ้นสุด: "),
                                 if (oldTimetable != null &&
-                                        Time.fromJson(
-                                                oldTimetable['startTime']) !=
+                                    oldTimetable['startTime'] != null &&
+                                    oldTimetable['endTime'] != null &&
+                                    (Time.fromJson(oldTimetable['startTime']) !=
                                             startTime ||
-                                    Time.fromJson(oldTimetable['endTime']) !=
-                                        endTime)
+                                        Time.fromJson(
+                                                oldTimetable['endTime']) !=
+                                            endTime))
                                   TextSpan(
                                     text:
                                         '${Time.fromJson(oldTimetable['startTime'])} - ${Time.fromJson(oldTimetable['endTime'])}',
