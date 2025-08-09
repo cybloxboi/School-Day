@@ -23,8 +23,9 @@ class GeminiService {
     required String categoryId,
     required String timetableId,
   }) async {
+    const geminiModel = 'gemini-2.5-flash';
     const url =
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$geminiKey';
+        'https://generativelanguage.googleapis.com/v1beta/models/$geminiModel:generateContent?key=$geminiKey';
 
     final firestore = FirebaseFirestore.instance;
     final todosSnapshot = await firestore
