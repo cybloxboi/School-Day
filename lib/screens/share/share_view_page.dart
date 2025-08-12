@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:school_day/screens/auth/auth_page.dart';
 import 'package:school_day/styles/styles.dart';
 
 class ShareViewPage extends StatefulWidget {
