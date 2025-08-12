@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "7W267JCMC5.io.cyblox.schoolDay",
+        "paths": [
+          "/share/*"
+        ]
+      }
+    ]
+  }
+}

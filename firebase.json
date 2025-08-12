@@ -29,8 +29,31 @@
     }
   },
   "hosting": {
-    "source": ".",
+    "public": "build/web",
+    "rewrites": [
+      {
+        "source": "/apple-app-site-association",
+        "destination": "/apple-app-site-association"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/share/**",
+        "function": "sharePage"
+      }
+    ],
     "headers": [
+      {
+        "source": "/apple-app-site-association",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
       {
         "source": "/favicon.png",
         "headers": [

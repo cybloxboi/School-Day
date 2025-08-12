@@ -3,6 +3,9 @@ const { setGlobalOptions } = require("firebase-functions/v2");
 const { DateTime } = require("luxon");
 const { initializeApp } = require("firebase-admin/app");
 const admin = require("firebase-admin");
+const { onCall } = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https")
+const { v4: uuidv4 } = require("uuid");
 
 initializeApp();
 
@@ -293,4 +296,43 @@ exports.updateTodayNotificationData = onSchedule(
     return null;
   }
 );
+
+exports.sharePage = onRequest(async (req, res) => {
+  const shareId = req.path.split("/").pop();
+
+  try {
+    const snap = await admin.firestore().collection("SharedLinks").doc(shareId).get();
+    if (!snap.exists) {
+      return res.status(404).send("Not Found");
+    }
+
+    const data = snap.data();
+    const title = data.type === "timetable" ? "แขร์ตารางเรียน" : "แชร์หมวดหมู่งาน";
+    const description = `แชร์ข้อมูลโดย ${data.owner}`;
+    const image = "https://raw.githubusercontent.com/cybloxboi/School-Day/refs/heads/main/assets/images/app_thumbnail.png"; // เปลี่ยนเป็นภาพจริง
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
+  <meta property="og:url" content="https://school-day-a1e87.web.app/share/${shareId}" />
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <script>
+    // redirect ไปแอป Flutter Web
+    window.location.href = "https://school-day-a1e87.web.app/app/share/${shareId}";
+  </script>
+</body>
+</html>
+`;
+    res.status(200).send(html);
+  } catch (err) {
+    res.status(500).send("Server Error");
+  }
+});
 

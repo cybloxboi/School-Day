@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:school_day/components/sharing/show_share_dialog.dart';
 import 'package:school_day/services/database/timetable/timetable_set.dart';
 import 'package:school_day/styles/styles.dart';
 
@@ -63,8 +64,18 @@ class _AddTimetablesetsPageState extends State<AddTimetablesetsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              spacing: 8,
               children: [
                 const Spacer(),
+                if (widget.isEdited)
+                  IconButton.filledTonal(
+                    onPressed: () => shareData(
+                      context,
+                      'timetable',
+                      widget.timetableID!,
+                    ),
+                    icon: const Icon(Icons.share_rounded),
+                  ),
                 IconButton.filledTonal(
                   onPressed: () {
                     Navigator.pop(context);
