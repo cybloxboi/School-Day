@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
@@ -9,15 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:school_day/screens/auth/auth_page.dart';
-import 'package:school_day/screens/share/share_view_page.dart';
 import 'package:school_day/services/notification/notification_service.dart';
-import 'package:uni_links/uni_links.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -64,78 +60,10 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late final GoRouter _router;
-  StreamSubscription? _sub;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _router = GoRouter(
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const AuthPage(),
-        ),
-        GoRoute(
-          path: '/share/:shareId',
-          builder: (context, state) {
-            final shareId = state.pathParameters['shareId']!;
-            return ShareViewPage(shareId: shareId);
-          },
-        ),
-      ],
-    );
-
-    _initUniLinks();
-  }
-
-  void _initUniLinks() async {
-    try {
-      final initialUri = await getInitialUri();
-      if (initialUri != null) {
-        _handleUri(initialUri);
-      }
-    } catch (e) {
-      // error handling
-    }
-
-    _sub = uriLinkStream.listen((uri) {
-      if (uri != null) {
-        _handleUri(uri);
-      }
-    }, onError: (err) {
-      // error handling
-    });
-  }
-
-  void _handleUri(Uri uri) {
-    debugPrint('Incoming URI: $uri');
-    debugPrint('Path segments: ${uri.pathSegments}');
-
-    final segments = uri.pathSegments;
-    if (segments.isNotEmpty) {
-      final shareIndex = segments.indexOf('share');
-      if (shareIndex != -1 && shareIndex + 1 < segments.length) {
-        final shareId = segments[shareIndex + 1];
-        _router.go('/share/$shareId');
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
-      routerDelegate: _router.routerDelegate,
-      routeInformationParser: _router.routeInformationParser,
-      routeInformationProvider: _router.routeInformationProvider,
       title: 'School Day',
       builder: (context, child) {
         return MediaQuery(
@@ -166,6 +94,7 @@ class _MainAppState extends State<MainApp> {
         ),
       ),
       debugShowCheckedModeBanner: false,
+      home: const AuthPage(),
     );
   }
 }
