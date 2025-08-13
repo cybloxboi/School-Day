@@ -29,7 +29,7 @@
     }
   },
   "hosting": {
-    "public": "build/web",
+    "source": ".",
     "rewrites": [
       {
         "source": "/apple-app-site-association",
