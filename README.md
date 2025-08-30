@@ -27,6 +27,9 @@ Under the project **"Development of the School Day Application for Class Schedul
 1.	To develop an application that integrates class scheduling and task managing into a single, unified system.
 2.	To support students in prioritizing their class schedule and assignments more effectively and efficiently.
 
+## App Introduction
+https://www.facebook.com/share/v/19QUTr3vLf/ (NSC 2025)
+
 ## Get the App
 - [iOS](https://appdistribution.firebase.google.com/testerapps/1:648610348518:ios:5807e7f352eb30ec89aa27/releases/61h6nsmoafhpg?utm_source=firebase-console)
 - [Android](https://github.com/cybloxboi/School-Day/releases)
