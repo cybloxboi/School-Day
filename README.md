@@ -6,6 +6,7 @@ Under the project **"Development of the School Day Application for Class Schedul
 ![App Thumbnail](assets/images/app_thumbnail.png)
 
 ## the 27th National Software Contest (NSC 2025) - Project Details
+- **Got into Finalists**
 - Project Code : 27p23i0096
 - Project Name (Thai) : การพัฒนาแอปพลิเคชัน School Day สำหรับการจัดการตารางเรียน และงานโดยใช้เทคโนโลยีปัญญาประดิษฐ์
 - Project Name (English) : Development of School Day Application for Class Schedule and Task Management Using Artificial Intelligence Technology
