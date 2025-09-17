@@ -37,9 +37,9 @@ https://www.facebook.com/share/v/19QUTr3vLf/ (NSC 2025)
 - [Web](https://school-day-a1e87.web.app)
 
 ## Developers Details
-- Mr.Sukonlanat Thawonfung [(@cybloxboi)](https://github.com/cybloxboi)
-- Ms.Suphisara Siriamnat [(@Thong-muan)](https://github.com/Thong-muan)
-- Mr.Wachirawit Buttakhot [(@viyawcrx)](https://github.com/viyawcrx)
+- Mr.Sukonlanat Thawonfung [(@cybloxboi)](https://github.com/cybloxboi) - Gifted Mathematics Program (GMP)
+- Ms.Suphisara Siriamnat [(@Thong-muan)](https://github.com/Thong-muan) - Information and Communication Technology Program (ICTP)
+- Mr.Wachirawit Buttakhot [(@viyawcrx)](https://github.com/viyawcrx) - Information and Communication Technology Program (ICTP)
 
 Under the provision of Ms.Areerat Thanee
 From Amnatcharoen School
